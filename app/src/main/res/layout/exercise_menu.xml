@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/transparentBlack">
+
+    <LinearLayout
+        android:id="@+id/exercise_menuSpaceTop"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/transparentBlack"
+        android:layout_weight="3"/>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/hardDark"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/exercise_menuDayTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Day"
+                android:textAlignment="center"
+                app:layout_constraintHorizontal_weight="1"
+                android:textSize="18sp"
+                android:textStyle="bold|italic"
+                android:background="@drawable/back_line_right"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/exercise_menuMyExercisesTextView"/>
+
+            <TextView
+                android:id="@+id/exercise_menuMyExercisesTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="My Exercises"
+                android:textAlignment="center"
+                app:layout_constraintHorizontal_weight="1"
+                android:textSize="18sp"
+                android:textStyle="bold|italic"
+                android:background="@color/mediumDark"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/exercise_menuDayTextView"
+                app:layout_constraintEnd_toStartOf="@id/exercise_menuExerciseTextView"/>
+
+            <TextView
+                android:id="@+id/exercise_menuExerciseTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Exercises"
+                android:textAlignment="center"
+                app:layout_constraintHorizontal_weight="1"
+                android:textSize="18sp"
+                android:textStyle="bold|italic"
+                android:background="@drawable/back_line_left"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/exercise_menuMyExercisesTextView"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/exercise_menuExerciseRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/exercise_menuMyExercisesTextView" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:id="@+id/exercise_menuSpaceBottom"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/transparentBlack"
+        android:layout_weight="3"/>
+
+</LinearLayout>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

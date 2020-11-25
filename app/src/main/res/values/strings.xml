@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Workout</string>
+    <string name="day">Day</string>
+    <string name="history">History</string>
+    <string name="quantity">Quantity</string>
+    <string name="time">Time</string>
+    <string name="negative">Negative</string>
+    <string name="can_more">Can more</string>
+    <string name="exercise">Exercise</string>
+    <string name="hour">Hour</string>
+</resources>
