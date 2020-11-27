@@ -32,7 +32,6 @@ public class MuscleImageAllocation {
     }
 
     public void allocateImages() {
-
         for(int i = 0; i < muscleList.size(); i++) {
             Muscle muscle = muscleList.get(i);
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);

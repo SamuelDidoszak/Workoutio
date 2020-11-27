@@ -2,26 +2,32 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@color/hardDark">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:weightSum="3">
+        android:weightSum="3"
+        android:background="@color/mediumDark">
 
         <TextView
             android:id="@+id/edit_exercise_menu_exerciseNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:layout_weight="1"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:gravity="center"/>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:orientation="horizontal"
             android:weightSum="10"
             android:layout_marginBottom="8dp"
@@ -71,13 +77,14 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:orientation="horizontal"
             android:weightSum="10"
             android:layout_marginBottom="16dp"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_weight="1">
 
-            <TextView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/edit_exercise_menu_daysRecyclerView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -87,7 +94,21 @@
                 android:layout_marginRight="8dp"
                 android:layout_marginLeft="8dp"
                 android:gravity="center"/>
-            <TextView
+
+
+                <LinearLayout
+                    android:id="@+id/edit_exercise_menu_musclesLinearLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center|top"
+                    android:layout_weight="3"
+                    android:weightSum="3"/>
+
+
+
+            <!--
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/edit_exercise_menu_musclesRecyclerView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -96,6 +117,7 @@
                 android:textSize="18sp"
                 android:layout_marginRight="8dp"
                 android:gravity="center"/>
+            -->
 
             <com.example.workout.model.helper.CheckableImageView
                 android:id="@+id/edit_exercise_menu_timeAsCountCheckbox"
@@ -108,7 +130,7 @@
                 android:gravity="center"/>
 
             <com.example.workout.model.helper.CheckableImageView
-                android:id="@+id/edit_exercise_menu_daysCheckbox"
+                android:id="@+id/edit_exercise_menu_defaultNegativeCheckbox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -120,7 +142,5 @@
         </LinearLayout>
 
     </LinearLayout>
-
-
 
 </androidx.cardview.widget.CardView>

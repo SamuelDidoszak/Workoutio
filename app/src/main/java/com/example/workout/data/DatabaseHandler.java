@@ -328,6 +328,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return day;
     }
 
+    /**
+     * Returns all of the days in which an exercise is performed
+     * @param exerciseId identifier of an exercise for which days should be returned
+     * @return list of days
+     */
+        public List<Day> getDaysByExerciseId(int exerciseId) {
+            SQLiteDatabase DB = this.getWritableDatabase();
+            List<DayExerciseConnector> dayExerciseConnectorList = getDayExerciseConnectorByExercise(exerciseId);
+            List<Day> dayList = new ArrayList<>();
+            for(DayExerciseConnector dayExerciseConnector : dayExerciseConnectorList) {
+                dayList.add(getDay(dayExerciseConnector.getDayId()));
+            }
+
+            return dayList;
+        }
+
     public Done getDone(int doneId) {
         SQLiteDatabase db = this.getReadableDatabase();
 

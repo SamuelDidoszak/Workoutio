@@ -1,5 +1,7 @@
-package com.example.workout;
+package com.example.workout.fragment;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,11 +14,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.workout.R;
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.Day;
 import com.example.workout.model.Exercise;
@@ -26,29 +28,55 @@ import com.example.workout.model.helper.MuscleImageAllocation;
 
 import java.util.List;
 
-public class EditExerciseMenuActivity extends Fragment {
+public class EditExerciseMenuDialogFragment extends DialogFragment {
 
     private TextView exerciseNameTextView;
     private RecyclerView daysRecyclerView;
     private LinearLayout musclesLinearLayout;
     private CheckableImageView timeAsCountCheckbox, defaultNegativeCheckbox;
 
+    private int exerciseId;
+
     private Context context;
     private DatabaseHandler DB;
 
-    public EditExerciseMenuActivity() {
-        super(R.layout.edit_exercise_menu);
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        exerciseId = getArguments().getInt("exerciseId");
+
+        Log.d("TAG", "onCreateView: breh3");
+        return new AlertDialog.Builder(requireContext(), R.style.emptyPopupFullScreen).create();
+    }
+
+    /**
+     * Method to pass arguments into the fragment. Call when creating the object.
+     * @param exerciseId exercise which to show
+     * @return a new fragment with exerciseId passed in a bundle
+     */
+    public static EditExerciseMenuDialogFragment newInstance(int exerciseId) {
+        EditExerciseMenuDialogFragment fragment = new EditExerciseMenuDialogFragment();
+
+        Log.d("TAG", "onCreateView: breh 1");
+
+        Bundle bundle = new Bundle();
+        bundle.putInt("exerciseId", exerciseId);
+
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        //View view = inflater.inflate(R.layout.edit_exercise_menu, null, false);
+
         ContextThemeWrapper contextThemeWrapper = new ContextThemeWrapper(getActivity(), R.style.emptyPopupFullScreen);
         LayoutInflater tempInflater = inflater.cloneInContext(contextThemeWrapper);
 
         Log.d("TAG", "onCreateView: breh2");
 
-        View view = tempInflater.inflate(R.layout.edit_exercise_menu, null, true);
+        View view = inflater.inflate(R.layout.edit_exercise_menu, null, true);
         return view;
     }
 
@@ -56,10 +84,11 @@ public class EditExerciseMenuActivity extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Log.d("TAG", "onViewCreated: created view?");
+
         this.context = getActivity();
         DB = new DatabaseHandler(context);
 
-        int exerciseId = requireArguments().getInt("exerciseId");
         setViews();
         fillViews(exerciseId);
     }
@@ -89,15 +118,13 @@ public class EditExerciseMenuActivity extends Fragment {
             musclesLinearLayout.getChildAt(i).setLayoutParams(params);
         }
 
-
-
         DaysRecyclerViewAdapter daysRecyclerViewAdapter = new DaysRecyclerViewAdapter(dayList);
 
         daysRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         daysRecyclerView.setAdapter(daysRecyclerViewAdapter);
     }
 
-    private class DaysRecyclerViewAdapter extends RecyclerView.Adapter<DaysRecyclerViewAdapter.ViewHolder> {
+    private class DaysRecyclerViewAdapter extends RecyclerView.Adapter<EditExerciseMenuDialogFragment.DaysRecyclerViewAdapter.ViewHolder> {
 
         List<Day> dayList;
 
@@ -115,7 +142,7 @@ public class EditExerciseMenuActivity extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull DaysRecyclerViewAdapter.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Day day = dayList.get(position);
 
             holder.dayNameTextView.setText(day.getDayName());
@@ -137,8 +164,8 @@ public class EditExerciseMenuActivity extends Fragment {
             }
         }
     }
-
-    private class MusclesRecyclerViewAdapter extends RecyclerView.Adapter<MusclesRecyclerViewAdapter.ViewHolder> {
+/*
+    private class MusclesRecyclerViewAdapter extends RecyclerView.Adapter<com.example.workout.EditExerciseMenuDialogFragment.MusclesRecyclerViewAdapter.ViewHolder> {
 
         List<Muscle> muscleList;
 
@@ -148,15 +175,15 @@ public class EditExerciseMenuActivity extends Fragment {
 
         @NonNull
         @Override
-        public MusclesRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public com.example.workout.EditExerciseMenuDialogFragment.MusclesRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.edit_exercise_menu_muscle_row, parent, false);
 
-            return new ViewHolder(view);
+            return new com.example.workout.EditExerciseMenuDialogFragment.MusclesRecyclerViewAdapter.ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull MusclesRecyclerViewAdapter.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull com.example.workout.EditExerciseMenuDialogFragment.MusclesRecyclerViewAdapter.ViewHolder holder, int position) {
             Muscle muscle = muscleList.get(position);
 
             holder.muscleCardView.removeAllViews();
@@ -180,34 +207,7 @@ public class EditExerciseMenuActivity extends Fragment {
             }
         }
     }
+    */
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

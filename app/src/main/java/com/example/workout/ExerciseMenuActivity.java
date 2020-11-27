@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,6 +43,8 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
 
     private int currentRecyclerViewType = MY_EXERCISE_RECYCLER_VIEW;
     private MutableLiveData<Integer> chosenExercise;
+
+    private FragmentContainerView fragmentContainerView;
 
     Context context;
 
@@ -179,6 +183,8 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
         exerciseTextView = findViewById(R.id.exercise_menuExerciseTextView);
             // RecyclerView
         exerciseRecyclerView = findViewById(R.id.exercise_menuExerciseRecyclerView);
+
+        fragmentContainerView = findViewById(R.id.exercise_menu_fragmentContainerView);
     }
 
     /**
@@ -214,6 +220,28 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
         };
         public View.OnClickListener exerciseTextViewClick = v -> {
             setUpRecyclerView(AVAILABLE_EXERCISE_RECYCLER_VIEW);
+
+            Bundle bundle = new Bundle();
+            bundle.putInt("exerciseId", 1);
+
+            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    1.0f
+            );
+
+            fragmentContainerView.setLayoutParams(param);
+
+            getSupportFragmentManager().beginTransaction()
+                    .setReorderingAllowed(true)
+                    .add(EditExerciseMenuActivity.class, bundle, null)
+                    .commit();
+
+
+
+//            EditExerciseMenuDialogFragment editFragment = EditExerciseMenuDialogFragment.newInstance(3);
+//
+//            editFragment.show(getSupportFragmentManager(), "editExercise");
         };
     }
 }
