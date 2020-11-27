@@ -2,6 +2,7 @@ package com.example.workout;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,18 +22,23 @@ import com.example.workout.model.Muscle;
 import com.example.workout.model.helper.CheckableImageView;
 import com.example.workout.model.helper.MuscleImageAllocation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EditExerciseMenuActivity extends AppCompatActivity {
 
     private TextView exerciseNameTextView;
-    private RecyclerView daysRecyclerView;
-    private LinearLayout musclesLinearLayout;
+    private RecyclerView daysRecyclerView, musclesRecyclerView;
     private CheckableImageView timeAsCountCheckbox, defaultNegativeCheckbox;
+
+    private List<Day> allDaysList, dayList;
+    private List<Muscle> allMusclesList, muscleList;
+    private List<Boolean> inDayInclusionList, inMuscleInclusionList;
 
     int exerciseId;
     private Context context;
     private DatabaseHandler DB;
+    private Boolean madeChanges = Boolean.FALSE;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,15 +56,14 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
     private void setViews() {
         exerciseNameTextView = findViewById(R.id.edit_exercise_menu_exerciseNameTextView);
         daysRecyclerView = findViewById(R.id.edit_exercise_menu_daysRecyclerView);
-        musclesLinearLayout = findViewById(R.id.edit_exercise_menu_musclesLinearLayout);
+        musclesRecyclerView = findViewById(R.id.edit_exercise_menu_musclesRecyclerView);
         timeAsCountCheckbox = findViewById(R.id.edit_exercise_menu_timeAsCountCheckbox);
         defaultNegativeCheckbox = findViewById(R.id.edit_exercise_menu_defaultNegativeCheckbox);
     }
 
     private void fillViews(int exerciseId) {
+        assignItems();
         Exercise exercise = DB.getExercise(exerciseId);
-        List<Day> dayList = DB.getDaysByExerciseId(exerciseId);
-        List<Muscle> muscleList = DB.getMusclesByExerciseId(exerciseId);
 
         exerciseNameTextView.setText(exercise.getExerciseName());
 
@@ -67,26 +71,60 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 0, 1);
 
-        new MuscleImageAllocation(muscleList, musclesLinearLayout, context).allocateImages();
-
-        for(int i = 0; i < musclesLinearLayout.getChildCount(); i ++) {
-            musclesLinearLayout.getChildAt(i).setLayoutParams(params);
-        }
-
-
-
-        DaysRecyclerViewAdapter daysRecyclerViewAdapter = new DaysRecyclerViewAdapter(dayList);
+        DaysRecyclerViewAdapter daysRecyclerViewAdapter = new DaysRecyclerViewAdapter();
 
         daysRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         daysRecyclerView.setAdapter(daysRecyclerViewAdapter);
+
+        MusclesRecyclerViewAdapter musclesRecyclerViewAdapter = new MusclesRecyclerViewAdapter();
+
+        musclesRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        musclesRecyclerView.setAdapter(musclesRecyclerViewAdapter);
+
+    }
+
+    private void assignItems() {
+        allDaysList = DB.getAllDays();
+        allMusclesList = DB.getAllMuscles();
+
+        dayList = DB.getDaysByExerciseId(exerciseId);
+        muscleList = DB.getMusclesByExerciseId(exerciseId);
+
+        inMuscleInclusionList = new ArrayList<>();
+        inDayInclusionList = new ArrayList<>();
+
+            //  Creates a list of booleans which are necessary to show which elements are related to this exercise and which are not
+        Boolean added;
+        for(Day day : allDaysList) {
+            added = Boolean.FALSE;
+            for(Day inDay : dayList) {
+                if(day.getDayId() == inDay.getDayId()) {
+                    inDayInclusionList.add(Boolean.TRUE);
+                    added = Boolean.TRUE;
+                    break;
+                }
+            }
+            if(!added)
+                inDayInclusionList.add(Boolean.FALSE);
+        }
+
+        for(Muscle muscle : allMusclesList) {
+            added = Boolean.FALSE;
+            for(Muscle inMuscle : muscleList) {
+                if(muscle.getMuscleId() == inMuscle.getMuscleId()) {
+                    inMuscleInclusionList.add(Boolean.TRUE);
+                    added = Boolean.TRUE;
+                    break;
+                }
+            }
+            if(!added)
+                inMuscleInclusionList.add(Boolean.FALSE);
+        }
     }
 
     private class DaysRecyclerViewAdapter extends RecyclerView.Adapter<DaysRecyclerViewAdapter.ViewHolder> {
 
-        List<Day> dayList;
-
-        public DaysRecyclerViewAdapter(List<Day> dayList) {
-            this.dayList = dayList;
+        public DaysRecyclerViewAdapter() {
         }
 
         @NonNull
@@ -100,34 +138,51 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull DaysRecyclerViewAdapter.ViewHolder holder, int position) {
-            Day day = dayList.get(position);
+            Day day = allDaysList.get(position);
 
             holder.dayNameTextView.setText(day.getDayName());
+            holder.changeDayBackground(inDayInclusionList.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return dayList.size();
+            return allDaysList.size();
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder{
 
             TextView dayNameTextView;
+            
+            public void changeDayBackground(Boolean inDayInclusion) {
+                dayNameTextView.setBackgroundColor(getResources().getColor(R.color.hardDark));
+                if(inDayInclusion) {
+                    dayNameTextView.setBackgroundColor(getResources().getColor(R.color.mediumDark));
+                }
+            }
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
 
                 dayNameTextView = itemView.findViewById(R.id.edit_exercise_menu_day_row_dayNameTextView);
+                
+                dayNameTextView.setOnClickListener(onDayClick);
             }
+
+            private View.OnClickListener onDayClick = v -> {
+                int position = getAdapterPosition();
+                inDayInclusionList.set(getAdapterPosition(), !inDayInclusionList.get(position));
+                changeDayBackground(inDayInclusionList.get(position));
+                madeChanges = Boolean.TRUE;
+            };
         }
     }
 
     private class MusclesRecyclerViewAdapter extends RecyclerView.Adapter<MusclesRecyclerViewAdapter.ViewHolder> {
 
-        List<Muscle> muscleList;
+        private int currentMuscleId = 0;
 
-        public MusclesRecyclerViewAdapter(List<Muscle> muscleList) {
-            this.muscleList = muscleList;
+        public MusclesRecyclerViewAdapter() {
+
         }
 
         @NonNull
@@ -141,27 +196,36 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull MusclesRecyclerViewAdapter.ViewHolder holder, int position) {
-            Muscle muscle = muscleList.get(position);
 
-            holder.muscleCardView.removeAllViews();
+            for(int i = 0; i < 3; i++) {
+                new MuscleImageAllocation(holder.muscleContainer, context)
+                        .allocateSingleImage(allMusclesList.get(currentMuscleId));
 
+                holder.muscleContainer.getChildAt(i).setOnClickListener(holder.onMuscleClickListener);
 
+                currentMuscleId++;
+            }
         }
 
         @Override
         public int getItemCount() {
-            return muscleList.size();
+            return (int)Math.ceil(allMusclesList.size() / 3);
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder{
 
-            CardView muscleCardView;
+            LinearLayout muscleContainer;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
-
-                muscleCardView = itemView.findViewById(R.id.edit_exercise_menu_muscle_row_muscleCardView);
+                muscleContainer = itemView.findViewById(R.id.edit_exercise_menu_muscle_row_muscleContainer);
             }
+                //  I don't see a way to find which child of 3 was clicked
+            public View.OnClickListener onMuscleClickListener = (v) -> {
+                int id = getAdapterPosition() + muscleContainer.getChildCount();
+                Log.d("TAG", "Clicked " + v.getId());
+            };
+
         }
     }
 }

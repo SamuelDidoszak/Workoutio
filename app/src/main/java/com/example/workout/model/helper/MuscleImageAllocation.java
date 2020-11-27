@@ -40,4 +40,11 @@ public class MuscleImageAllocation {
             container.addView(muscleIcon);
         }
     }
+
+    public void allocateSingleImage(Muscle muscle) {
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
+        View muscleIcon = inflater.inflate(R.layout.dynamic_muscle, container, false);
+        ((ImageView)muscleIcon).setImageDrawable(context.getResources().getDrawable(muscle.getMuscleIcon()));
+        container.addView(muscleIcon);
+    }
 }

@@ -96,28 +96,22 @@
                 android:gravity="center"/>
 
 
-                <LinearLayout
-                    android:id="@+id/edit_exercise_menu_musclesLinearLayout"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center|top"
-                    android:layout_weight="3"
-                    android:weightSum="3"/>
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/edit_exercise_menu_musclesLinearLayout"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:orientation="vertical"-->
+<!--                    android:gravity="center|top"-->
+<!--                    android:layout_weight="3"-->
+<!--                    android:weightSum="3"/>-->
 
-
-
-            <!--
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/edit_exercise_menu_musclesRecyclerView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
-                android:text="Muscles"
-                android:textSize="18sp"
                 android:layout_marginRight="8dp"
                 android:gravity="center"/>
-            -->
 
             <com.example.workout.model.helper.CheckableImageView
                 android:id="@+id/edit_exercise_menu_timeAsCountCheckbox"
