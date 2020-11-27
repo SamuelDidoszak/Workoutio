@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -43,6 +42,7 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
 
     private int currentRecyclerViewType = MY_EXERCISE_RECYCLER_VIEW;
     private MutableLiveData<Integer> chosenExercise;
+    private MutableLiveData<Integer> editExercise;
 
     private FragmentContainerView fragmentContainerView;
 
@@ -79,6 +79,7 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                 exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
                 chosenExercise = exerciseMenuDayAdapter.getChosenExercise();
+                editExercise = exerciseMenuDayAdapter.getExerciseToEdit();
                 break;
             case MY_EXERCISE_RECYCLER_VIEW:
                 if(myExercisesRecyclerViewAdapter == null)
@@ -86,6 +87,7 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                 exerciseRecyclerView.setAdapter(myExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
                 chosenExercise = myExercisesRecyclerViewAdapter.getChosenExercise();
+                editExercise = myExercisesRecyclerViewAdapter.getExerciseToEdit();
                 break;
             case AVAILABLE_EXERCISE_RECYCLER_VIEW:
                 if(availableExercisesRecyclerViewAdapter == null)
@@ -93,6 +95,7 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                 exerciseRecyclerView.setAdapter(availableExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
                 chosenExercise = availableExercisesRecyclerViewAdapter.getChosenExercise();
+                editExercise = availableExercisesRecyclerViewAdapter.getExerciseToEdit();
                 break;
         }
         changeTypeVisually(recyclerViewType);
@@ -102,6 +105,10 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
             setResult(RESULT_FIRST_USER,
                     new Intent().putExtra("ExerciseId", exerciseId));
             finish();
+        });
+            //  start ExerciseMenuDayAdapter if edit imageButton is clicked
+        editExercise.observe(this, exerciseId -> {
+            startActivityForResult(new Intent(context, EditExerciseMenuActivity.class).putExtra("exerciseId", exerciseId), RESULT_FIRST_USER);
         });
     }
     /** changes the color of the recyclerView titles*/
@@ -220,28 +227,6 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
         };
         public View.OnClickListener exerciseTextViewClick = v -> {
             setUpRecyclerView(AVAILABLE_EXERCISE_RECYCLER_VIEW);
-
-            Bundle bundle = new Bundle();
-            bundle.putInt("exerciseId", 1);
-
-            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    1.0f
-            );
-
-            fragmentContainerView.setLayoutParams(param);
-
-            getSupportFragmentManager().beginTransaction()
-                    .setReorderingAllowed(true)
-                    .add(EditExerciseMenuActivity.class, bundle, null)
-                    .commit();
-
-
-
-//            EditExerciseMenuDialogFragment editFragment = EditExerciseMenuDialogFragment.newInstance(3);
-//
-//            editFragment.show(getSupportFragmentManager(), "editExercise");
         };
     }
 }

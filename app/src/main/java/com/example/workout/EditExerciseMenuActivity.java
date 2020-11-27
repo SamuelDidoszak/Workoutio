@@ -2,8 +2,6 @@ package com.example.workout;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +10,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,50 +24,36 @@ import com.example.workout.model.helper.MuscleImageAllocation;
 
 import java.util.List;
 
-public class EditExerciseMenuActivity extends Fragment {
+public class EditExerciseMenuActivity extends AppCompatActivity {
 
     private TextView exerciseNameTextView;
     private RecyclerView daysRecyclerView;
     private LinearLayout musclesLinearLayout;
     private CheckableImageView timeAsCountCheckbox, defaultNegativeCheckbox;
 
+    int exerciseId;
     private Context context;
     private DatabaseHandler DB;
 
-    public EditExerciseMenuActivity() {
-        super(R.layout.edit_exercise_menu);
-    }
-
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ContextThemeWrapper contextThemeWrapper = new ContextThemeWrapper(getActivity(), R.style.emptyPopupFullScreen);
-        LayoutInflater tempInflater = inflater.cloneInContext(contextThemeWrapper);
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.edit_exercise_menu);
 
-        Log.d("TAG", "onCreateView: breh2");
-
-        View view = tempInflater.inflate(R.layout.edit_exercise_menu, null, true);
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        this.context = getActivity();
+        exerciseId = getIntent().getIntExtra("exerciseId", -1);
+        this.context = getApplicationContext();
         DB = new DatabaseHandler(context);
 
-        int exerciseId = requireArguments().getInt("exerciseId");
         setViews();
         fillViews(exerciseId);
     }
 
     private void setViews() {
-        exerciseNameTextView = getView().findViewById(R.id.edit_exercise_menu_exerciseNameTextView);
-        daysRecyclerView = getView().findViewById(R.id.edit_exercise_menu_daysRecyclerView);
-        musclesLinearLayout = getView().findViewById(R.id.edit_exercise_menu_musclesLinearLayout);
-        timeAsCountCheckbox = getView().findViewById(R.id.edit_exercise_menu_timeAsCountCheckbox);
-        defaultNegativeCheckbox = getView().findViewById(R.id.edit_exercise_menu_defaultNegativeCheckbox);
+        exerciseNameTextView = findViewById(R.id.edit_exercise_menu_exerciseNameTextView);
+        daysRecyclerView = findViewById(R.id.edit_exercise_menu_daysRecyclerView);
+        musclesLinearLayout = findViewById(R.id.edit_exercise_menu_musclesLinearLayout);
+        timeAsCountCheckbox = findViewById(R.id.edit_exercise_menu_timeAsCountCheckbox);
+        defaultNegativeCheckbox = findViewById(R.id.edit_exercise_menu_defaultNegativeCheckbox);
     }
 
     private void fillViews(int exerciseId) {

@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
@@ -28,6 +27,7 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
     private Context context;
     private List<Exercise> exercisesList;
     private MutableLiveData<Integer> chosenExercise;
+    private MutableLiveData<Integer> exerciseToEdit;
     private List<List<Muscle>> listOfMuscleLists;
 
     private DatabaseHandler DB;
@@ -35,11 +35,15 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
     public MutableLiveData<Integer> getChosenExercise() {
         return chosenExercise;
     }
+    public MutableLiveData<Integer> getExerciseToEdit() {
+        return exerciseToEdit;
+    }
 
     public ExerciseMenuExercisesRecyclerViewAdapter(Context context, List<Exercise> exercisesList) {
         this.context = context;
         this.exercisesList = exercisesList;
         chosenExercise = new MutableLiveData<>();
+        exerciseToEdit = new MutableLiveData<>();
 
         DB = new DatabaseHandler(context);
 
@@ -115,7 +119,8 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
 
             };
             View.OnClickListener onEditImageButtonClick = v -> {
-                Toast.makeText(context, "Edit " + exercisesList.get(getAdapterPosition()).getExerciseName(), Toast.LENGTH_SHORT).show();
+                int id = exercisesList.get(getAdapterPosition()).getExerciseId();
+                exerciseToEdit.setValue(id);
             };
         }
 

@@ -2,7 +2,6 @@ package com.example.workout.ui.adapter;
 
 import android.app.ActionBar;
 import android.content.Context;
-import android.content.Intent;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +17,6 @@ import androidx.core.widget.TextViewCompat;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.workout.EditExerciseMenuActivity;
 import com.example.workout.R;
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.Muscle;
@@ -35,6 +33,7 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private Context context;
     private List<DayExercise> dayExerciseList;
     private MutableLiveData<Integer> chosenExercise;
+    private MutableLiveData<Integer> exerciseToEdit;
     private List<Boolean> exerciseVisibilityList;
     private List<List<Muscle>> muscleListForImages;
 
@@ -47,11 +46,15 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public MutableLiveData<Integer> getChosenExercise() {
         return chosenExercise;
     }
+    public MutableLiveData<Integer> getExerciseToEdit() {
+        return exerciseToEdit;
+    }
 
     public ExerciseMenuDayAdapter(Context context, List<DayExercise> dayExerciseList) {
         this.context = context;
         this.dayExerciseList = dayExerciseList;
         chosenExercise = new MutableLiveData<>();
+        exerciseToEdit = new MutableLiveData<>();
         exerciseVisibilityList = new ArrayList<>();
         muscleListForImages = new ArrayList<>();
 
@@ -223,15 +226,10 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
             };
             View.OnClickListener onEditImageButtonViewClick = v -> {
-                Toast.makeText(context, "Edit " + dayExercise.getName(), Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(context, EditExerciseMenuActivity.class);
-
+                int id = dayExerciseList.get(getAdapterPosition()).getTypeId();
+                exerciseToEdit.setValue(id);
             };
         }
-    }
-
-    public static class DialogFragment extends androidx.fragment.app.DialogFragment {
-
     }
 }
 
