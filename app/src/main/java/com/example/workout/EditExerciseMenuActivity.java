@@ -2,16 +2,17 @@ package com.example.workout;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,7 +21,6 @@ import com.example.workout.model.Day;
 import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
 import com.example.workout.model.helper.CheckableImageView;
-import com.example.workout.model.helper.MuscleImageAllocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
         MusclesRecyclerViewAdapter musclesRecyclerViewAdapter = new MusclesRecyclerViewAdapter();
 
-        musclesRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        musclesRecyclerView.setLayoutManager(new GridLayoutManager(context, 3, RecyclerView.VERTICAL, Boolean.FALSE));
         musclesRecyclerView.setAdapter(musclesRecyclerViewAdapter);
 
     }
@@ -124,9 +124,6 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
     private class DaysRecyclerViewAdapter extends RecyclerView.Adapter<DaysRecyclerViewAdapter.ViewHolder> {
 
-        public DaysRecyclerViewAdapter() {
-        }
-
         @NonNull
         @Override
         public DaysRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -141,7 +138,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
             Day day = allDaysList.get(position);
 
             holder.dayNameTextView.setText(day.getDayName());
-            holder.changeDayBackground(inDayInclusionList.get(position));
+            holder.changeBackground(inDayInclusionList.get(position));
         }
 
         @Override
@@ -153,7 +150,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
             TextView dayNameTextView;
             
-            public void changeDayBackground(Boolean inDayInclusion) {
+            public void changeBackground(Boolean inDayInclusion) {
                 dayNameTextView.setBackgroundColor(getResources().getColor(R.color.hardDark));
                 if(inDayInclusion) {
                     dayNameTextView.setBackgroundColor(getResources().getColor(R.color.mediumDark));
@@ -171,19 +168,13 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
             private View.OnClickListener onDayClick = v -> {
                 int position = getAdapterPosition();
                 inDayInclusionList.set(getAdapterPosition(), !inDayInclusionList.get(position));
-                changeDayBackground(inDayInclusionList.get(position));
+                changeBackground(inDayInclusionList.get(position));
                 madeChanges = Boolean.TRUE;
             };
         }
     }
 
     private class MusclesRecyclerViewAdapter extends RecyclerView.Adapter<MusclesRecyclerViewAdapter.ViewHolder> {
-
-        private int currentMuscleId = 0;
-
-        public MusclesRecyclerViewAdapter() {
-
-        }
 
         @NonNull
         @Override
@@ -196,34 +187,39 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull MusclesRecyclerViewAdapter.ViewHolder holder, int position) {
+            Muscle muscle = allMusclesList.get(position);
 
-            for(int i = 0; i < 3; i++) {
-                new MuscleImageAllocation(holder.muscleContainer, context)
-                        .allocateSingleImage(allMusclesList.get(currentMuscleId));
-
-                holder.muscleContainer.getChildAt(i).setOnClickListener(holder.onMuscleClickListener);
-
-                currentMuscleId++;
-            }
+            holder.dynamicMuscle.setImageDrawable(context.getResources().getDrawable(muscle.getMuscleIcon()));
+            holder.dynamicMuscle.setOnClickListener(holder.onMuscleClickListener);
+            holder.changeBackground(inMuscleInclusionList.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return (int)Math.ceil(allMusclesList.size() / 3);
+            return allMusclesList.size();
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder{
 
-            LinearLayout muscleContainer;
+            ImageView dynamicMuscle;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
-                muscleContainer = itemView.findViewById(R.id.edit_exercise_menu_muscle_row_muscleContainer);
+                dynamicMuscle = itemView.findViewById(R.id.edit_exercise_menu_muscle_row);
             }
-                //  I don't see a way to find which child of 3 was clicked
+
+            public void changeBackground(Boolean inMuscleInclusion) {
+                dynamicMuscle.setBackgroundColor(getResources().getColor(R.color.hardDark));
+                if(inMuscleInclusion) {
+                    dynamicMuscle.setBackgroundColor(getResources().getColor(R.color.mediumDark));
+                }
+            }
+
             public View.OnClickListener onMuscleClickListener = (v) -> {
-                int id = getAdapterPosition() + muscleContainer.getChildCount();
-                Log.d("TAG", "Clicked " + v.getId());
+                int position = getAdapterPosition();
+                inMuscleInclusionList.set(position, !inMuscleInclusionList.get(position));
+                changeBackground(inMuscleInclusionList.get(position));
+                madeChanges = Boolean.TRUE;
             };
 
         }

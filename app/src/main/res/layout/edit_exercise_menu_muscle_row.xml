@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    android:id="@+id/edit_exercise_menu_muscle_row_muscleCardView"
+<ImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp">
-
-    <LinearLayout
-        android:id="@+id/edit_exercise_menu_muscle_row_muscleContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="left"
-        android:weightSum="3"/>
-
-
-</androidx.cardview.widget.CardView>
+    android:id="@+id/edit_exercise_menu_muscle_row"
+    android:layout_width="wrap_content"
+    android:layout_height="24dp"/>

@@ -3,8 +3,7 @@
     android:id="@+id/edit_exercise_menu_day_row_dayCardView"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp">
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/edit_exercise_menu_day_row_dayNameTextView"
