@@ -243,7 +243,6 @@ public class DatabaseTesting {
 
         DB.addMuscleExerciseConnector(new MuscleExerciseConnector(7, 16));
         DB.addMuscleExerciseConnector(new MuscleExerciseConnector(7, 17));
-        DB.addMuscleExerciseConnector(new MuscleExerciseConnector(7, 17));
         DB.addMuscleExerciseConnector(new MuscleExerciseConnector(8, 18));
         DB.addMuscleExerciseConnector(new MuscleExerciseConnector(7, 18));
         DB.addMuscleExerciseConnector(new MuscleExerciseConnector(7, 19));

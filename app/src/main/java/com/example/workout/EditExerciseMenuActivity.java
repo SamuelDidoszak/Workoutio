@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,11 +18,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.Day;
+import com.example.workout.model.DayExerciseConnector;
 import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
+import com.example.workout.model.MuscleExerciseConnector;
 import com.example.workout.model.helper.CheckableImageView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EditExerciseMenuActivity extends AppCompatActivity {
@@ -30,10 +31,14 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
     private TextView exerciseNameTextView;
     private RecyclerView daysRecyclerView, musclesRecyclerView;
     private CheckableImageView timeAsCountCheckbox, defaultNegativeCheckbox;
+    private Button saveButton;
 
-    private List<Day> allDaysList, dayList;
-    private List<Muscle> allMusclesList, muscleList;
-    private List<Boolean> inDayInclusionList, inMuscleInclusionList;
+    private List<Day> allDaysList;
+    private List<Muscle> allMusclesList;
+    /**
+     * Two dimensional array of booleans set true if there is a day/muscle for corresponding position in all days/muscles
+     */
+    private Boolean[][] inDayInclusionList, inMuscleInclusionList;
 
     int exerciseId;
     private Context context;
@@ -51,14 +56,68 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
         setViews();
         fillViews(exerciseId);
+
+        ClickHandler clickHandler = new ClickHandler();
+        timeAsCountCheckbox.setOnClickListener(clickHandler.onTimeAsCountClick);
+        defaultNegativeCheckbox.setOnClickListener(clickHandler.onDefaultNegativeClick);
+        saveButton.setOnClickListener(clickHandler.onSaveButtonClick);
     }
 
     private void setViews() {
+            //  TextView
         exerciseNameTextView = findViewById(R.id.edit_exercise_menu_exerciseNameTextView);
+            //  RecyclerViews
         daysRecyclerView = findViewById(R.id.edit_exercise_menu_daysRecyclerView);
         musclesRecyclerView = findViewById(R.id.edit_exercise_menu_musclesRecyclerView);
+            //  CheckBoxes
         timeAsCountCheckbox = findViewById(R.id.edit_exercise_menu_timeAsCountCheckbox);
         defaultNegativeCheckbox = findViewById(R.id.edit_exercise_menu_defaultNegativeCheckbox);
+            //  Button
+        saveButton = findViewById(R.id.edit_exercise_menu_saveButton);
+    }
+
+    /**
+     * Checks if starting values are the same as the new ones
+     */
+    private void saveChanges() {
+        for(int i = 0; i < inDayInclusionList.length; i++) {
+            if(inDayInclusionList[i][0] != inDayInclusionList[i][1]) {
+                    //  connector was deleted
+                if(inDayInclusionList[i][0])
+                    DB.removeDayExerciseConnectorById(DB.getDayExerciseConnector(allDaysList.get(i).getDayId(), exerciseId).getDayExerciseConnectorId());
+                    //  connector was added
+                else
+                    DB.addDayExerciseConnector(new DayExerciseConnector(allDaysList.get(i).getDayId(), exerciseId));
+            }
+        }
+
+        for(int i = 0; i < inMuscleInclusionList.length; i++) {
+            if(inMuscleInclusionList[i][0] != inMuscleInclusionList[i][1]) {
+                    //  connector was deleted
+                if(inMuscleInclusionList[i][0])
+                    DB.removeMuscleExerciseConnectorById(DB.getMuscleExerciseConnector(allMusclesList.get(i).getMuscleId(), exerciseId).getMuscleExerciseConnectorId());
+                    //  connector was added
+                else
+                    DB.addMuscleExerciseConnector(new MuscleExerciseConnector(allMusclesList.get(i).getMuscleId(), exerciseId));
+            }
+        }
+
+        Boolean defaultNegative = defaultNegativeCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
+        Boolean timeAsAmount = timeAsCountCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
+
+
+        finish();
+    }
+
+    private class ClickHandler {
+        View.OnClickListener onTimeAsCountClick = v -> {
+        };
+        View.OnClickListener onDefaultNegativeClick = v -> {
+        };
+        View.OnClickListener onSaveButtonClick = v -> {
+            if(madeChanges)
+                saveChanges();
+        };
     }
 
     private void fillViews(int exerciseId) {
@@ -67,17 +126,11 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
         exerciseNameTextView.setText(exercise.getExerciseName());
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                0, 1);
-
         DaysRecyclerViewAdapter daysRecyclerViewAdapter = new DaysRecyclerViewAdapter();
-
         daysRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         daysRecyclerView.setAdapter(daysRecyclerViewAdapter);
 
         MusclesRecyclerViewAdapter musclesRecyclerViewAdapter = new MusclesRecyclerViewAdapter();
-
         musclesRecyclerView.setLayoutManager(new GridLayoutManager(context, 3, RecyclerView.VERTICAL, Boolean.FALSE));
         musclesRecyclerView.setAdapter(musclesRecyclerViewAdapter);
 
@@ -87,38 +140,45 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         allDaysList = DB.getAllDays();
         allMusclesList = DB.getAllMuscles();
 
-        dayList = DB.getDaysByExerciseId(exerciseId);
-        muscleList = DB.getMusclesByExerciseId(exerciseId);
+        List<Day> dayList = DB.getDaysByExerciseId(exerciseId);
+        List<Muscle> muscleList = DB.getMusclesByExerciseId(exerciseId);
 
-        inMuscleInclusionList = new ArrayList<>();
-        inDayInclusionList = new ArrayList<>();
+        inDayInclusionList = new Boolean[allDaysList.size()][2];
+        inMuscleInclusionList = new Boolean[allMusclesList.size()][2];
 
             //  Creates a list of booleans which are necessary to show which elements are related to this exercise and which are not
         Boolean added;
-        for(Day day : allDaysList) {
+        for(int i = 0; i < allDaysList.size(); i++) {
             added = Boolean.FALSE;
             for(Day inDay : dayList) {
-                if(day.getDayId() == inDay.getDayId()) {
-                    inDayInclusionList.add(Boolean.TRUE);
+                if(allDaysList.get(i).getDayId() == inDay.getDayId()) {
+                    inDayInclusionList[i][0] = Boolean.TRUE;
+                    inDayInclusionList[i][1] = Boolean.TRUE;
                     added = Boolean.TRUE;
                     break;
                 }
             }
-            if(!added)
-                inDayInclusionList.add(Boolean.FALSE);
+            if(!added) {
+                inDayInclusionList[i][0] = Boolean.FALSE;
+                inDayInclusionList[i][1] = Boolean.FALSE;
+            }
         }
 
-        for(Muscle muscle : allMusclesList) {
+        for(int i = 0; i < allMusclesList.size(); i++) {
+            Muscle muscle = allMusclesList.get(i);
             added = Boolean.FALSE;
             for(Muscle inMuscle : muscleList) {
                 if(muscle.getMuscleId() == inMuscle.getMuscleId()) {
-                    inMuscleInclusionList.add(Boolean.TRUE);
+                    inMuscleInclusionList[i][0] = Boolean.TRUE;
+                    inMuscleInclusionList[i][1] = Boolean.TRUE;
                     added = Boolean.TRUE;
                     break;
                 }
             }
-            if(!added)
-                inMuscleInclusionList.add(Boolean.FALSE);
+            if(!added) {
+                inMuscleInclusionList[i][0] = Boolean.FALSE;
+                inMuscleInclusionList[i][1] = Boolean.FALSE;
+            }
         }
     }
 
@@ -138,7 +198,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
             Day day = allDaysList.get(position);
 
             holder.dayNameTextView.setText(day.getDayName());
-            holder.changeBackground(inDayInclusionList.get(position));
+            holder.changeBackground(inDayInclusionList[position][1]);
         }
 
         @Override
@@ -167,8 +227,8 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
             private View.OnClickListener onDayClick = v -> {
                 int position = getAdapterPosition();
-                inDayInclusionList.set(getAdapterPosition(), !inDayInclusionList.get(position));
-                changeBackground(inDayInclusionList.get(position));
+                inDayInclusionList[position][1] = !inDayInclusionList[position][1];
+                changeBackground(inDayInclusionList[position][1]);
                 madeChanges = Boolean.TRUE;
             };
         }
@@ -191,7 +251,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
             holder.dynamicMuscle.setImageDrawable(context.getResources().getDrawable(muscle.getMuscleIcon()));
             holder.dynamicMuscle.setOnClickListener(holder.onMuscleClickListener);
-            holder.changeBackground(inMuscleInclusionList.get(position));
+            holder.changeBackground(inMuscleInclusionList[position][1]);
         }
 
         @Override
@@ -217,8 +277,8 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
             public View.OnClickListener onMuscleClickListener = (v) -> {
                 int position = getAdapterPosition();
-                inMuscleInclusionList.set(position, !inMuscleInclusionList.get(position));
-                changeBackground(inMuscleInclusionList.get(position));
+                inMuscleInclusionList[position][1] = !inMuscleInclusionList[position][1];
+                changeBackground(inMuscleInclusionList[position][1]);
                 madeChanges = Boolean.TRUE;
             };
 

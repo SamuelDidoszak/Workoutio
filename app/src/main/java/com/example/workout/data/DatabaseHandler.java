@@ -659,6 +659,36 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return muscleExerciseConnectorList;
     }
 
+        /**
+         * Fetches the muscleExerciseConnector that has muscleId and exerciseId provided
+         * @param muscleId
+         * @param exerciseId
+         * @return if connector exists, returns muscleExerciseConnector. Else, returns an empty muscleExerciseConnector
+         */
+        public MuscleExerciseConnector getMuscleExerciseConnector(int muscleId, int exerciseId) {
+            SQLiteDatabase DB = this.getReadableDatabase();
+
+            List<MuscleExerciseConnector> muscleExerciseConnectorList = new ArrayList<>();
+            Cursor cursor = DB.rawQuery("SELECT " + Constants.COLUMN_MUSCLE_EXERCISE_CONNECTOR_ID + ", " + Constants.COLUMN_MUSCLE_ID + ", " + Constants.COLUMN_EXERCISE_ID +
+                    " FROM " + Constants.TABLE_MUSCLE_EXERCISE_CONNECTOR + " WHERE " + Constants.COLUMN_EXERCISE_ID + " = " + exerciseId, null);
+
+            if(cursor.getCount() != 0) {
+                cursor.moveToFirst();
+                do {
+                    muscleExerciseConnectorList.add(new MuscleExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2)));
+                }
+                while(cursor.moveToNext());
+            }
+
+            for(MuscleExerciseConnector muscleExerciseConnector : muscleExerciseConnectorList) {
+                if(muscleExerciseConnector.getMuscleId() == muscleId) {
+                    DB.close();
+                    return muscleExerciseConnector;
+                }
+            }
+            return new MuscleExerciseConnector();
+        }
+
     public List<DayExerciseConnector> getDayExerciseConnectorByDay(int dayId) {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -696,6 +726,36 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
         return dayExerciseConnectorList;
     }
+
+        /**
+         * Fetches the dayExerciseConnector that has muscleId and exerciseId provided
+         * @param dayId
+         * @param exerciseId
+         * @return if connector exists, returns dayExerciseConnector. Else, returns an empty dayExerciseConnector
+         */
+        public DayExerciseConnector getDayExerciseConnector(int dayId, int exerciseId) {
+            SQLiteDatabase DB = this.getReadableDatabase();
+
+            List<DayExerciseConnector> dayExerciseConnectorList = new ArrayList<>();
+            Cursor cursor = DB.rawQuery("SELECT " + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID + ", " + Constants.COLUMN_DAY_ID + ", " + Constants.COLUMN_EXERCISE_ID +
+                    " FROM " + Constants.TABLE_DAY_EXERCISE_CONNECTOR + " WHERE " + Constants.COLUMN_DAY_ID + " = " + dayId, null);
+
+            if(cursor.getCount() != 0) {
+                cursor.moveToFirst();
+                do {
+                    dayExerciseConnectorList.add(new DayExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2)));
+                }
+                while(cursor.moveToNext());
+            }
+
+            for(DayExerciseConnector dayExerciseConnector : dayExerciseConnectorList) {
+                if(dayExerciseConnector.getExerciseId() == exerciseId) {
+                    DB.close();
+                    return dayExerciseConnector;
+                }
+            }
+            return new DayExerciseConnector();
+        }
 
     public Note getNote(int noteId) {
         SQLiteDatabase db = this.getReadableDatabase();

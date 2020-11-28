@@ -111,6 +111,8 @@
                 android:layout_marginRight="8dp"
                 android:src="@drawable/toggle_button_checkbox_style"
                 android:layout_weight="2"
+                android:focusable="true"
+                android:clickable="true"
                 android:gravity="center"/>
 
             <com.example.workout.model.helper.CheckableImageView

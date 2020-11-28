@@ -79,14 +79,20 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                 exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
                 chosenExercise = exerciseMenuDayAdapter.getChosenExercise();
+
+                exerciseMenuDayAdapter.resetExerciseToEdit();
                 editExercise = exerciseMenuDayAdapter.getExerciseToEdit();
                 break;
             case MY_EXERCISE_RECYCLER_VIEW:
-                if(myExercisesRecyclerViewAdapter == null)
+                if(myExercisesRecyclerViewAdapter == null) {
                     myExercisesRecyclerViewAdapter = new ExerciseMenuExercisesRecyclerViewAdapter(context, myExercisesList);
+                    editExercise = myExercisesRecyclerViewAdapter.getExerciseToEdit();
+                }
                 exerciseRecyclerView.setAdapter(myExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
                 chosenExercise = myExercisesRecyclerViewAdapter.getChosenExercise();
+
+                myExercisesRecyclerViewAdapter.resetExerciseToEdit();
                 editExercise = myExercisesRecyclerViewAdapter.getExerciseToEdit();
                 break;
             case AVAILABLE_EXERCISE_RECYCLER_VIEW:
@@ -95,10 +101,13 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                 exerciseRecyclerView.setAdapter(availableExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
                 chosenExercise = availableExercisesRecyclerViewAdapter.getChosenExercise();
+
+                availableExercisesRecyclerViewAdapter.resetExerciseToEdit();
                 editExercise = availableExercisesRecyclerViewAdapter.getExerciseToEdit();
                 break;
         }
         changeTypeVisually(recyclerViewType);
+
 
             //  wait for user to chose exercise in RecyclerViewAdapter and finish the activity passing exerciseId
         chosenExercise.observe(this, exerciseId -> {
@@ -111,6 +120,7 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
             startActivityForResult(new Intent(context, EditExerciseMenuActivity.class).putExtra("exerciseId", exerciseId), RESULT_FIRST_USER);
         });
     }
+
     /** changes the color of the recyclerView titles*/
     public void changeTypeVisually(int recyclerViewType) {
         /** Resets the background */
