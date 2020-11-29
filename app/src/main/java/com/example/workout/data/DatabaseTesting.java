@@ -19,22 +19,22 @@ import java.util.List;
  * Class made for testing if Database works as intended
  */
 public class DatabaseTesting {
-    List<Day> dayList;
-    List<Done> doneList;
-    List<Exercise> exerciseList;
-    List<Muscle> muscleList;
-    List<MuscleExerciseConnector> muscleExerciseConnectorList;
-    List<DayExerciseConnector> dayExerciseConnectorList;
-    List<Note> noteList;
+    private List<Day> dayList;
+    private List<Done> doneList;
+    private List<Exercise> exerciseList;
+    private List<Muscle> muscleList;
+    private List<MuscleExerciseConnector> muscleExerciseConnectorList;
+    private List<DayExerciseConnector> dayExerciseConnectorList;
+    private List<Note> noteList;
 
-    DatabaseHandler DB;
+    private DatabaseHandler DB;
 
-    DatabaseTesting(Context context) {
+    public DatabaseTesting(Context context) {
         DB = new DatabaseHandler(context);
     }
 
     @SuppressLint("LongLogTag")
-    void testAll() {
+    public void testAll() {
         //Day testing
         addDays();
         dayList = DB.getAllDays();
@@ -157,7 +157,7 @@ public class DatabaseTesting {
 
     }
 
-    void addDays() {
+    private void addDays() {
         DB.addDay(new Day("Monday"));
         DB.addDay(new Day("Tuesday"));
         DB.addDay(new Day("Wednesday"));
@@ -167,7 +167,7 @@ public class DatabaseTesting {
         DB.addDay(new Day("Sunday"));
     }
 
-    void addExercises() {
+    private void addExercises() {
         DB.addExercise(new Exercise("Pompki bicepsowe"));
         DB.addExercise(new Exercise("Podciagniecia"));
         DB.addExercise(new Exercise("Pompki podwyzszone"));
@@ -190,7 +190,7 @@ public class DatabaseTesting {
         DB.addExercise(new Exercise("Krzeselko"));  //  20
     }
 
-    void addMuscles() {
+    private void addMuscles() {
         DB.addMuscle(new Muscle("biceps", R.drawable.muscle_white_ic_biceps1));
         DB.addMuscle(new Muscle("triceps", R.drawable.muscle_white_ic_arms));
         DB.addMuscle(new Muscle("chest", R.drawable.muscle_white_ic_chest));
@@ -203,7 +203,7 @@ public class DatabaseTesting {
         DB.addMuscle(new Muscle("shoulders", R.drawable.muscle_white_ic_shoulders));    //  10
     }
 
-    void addDones() {
+    private void addDones() {
         DB.addCustomDone(new Done("12.07.2020 10:15", 1, 0, 0, Boolean.FALSE, Boolean.FALSE));
         DB.addCustomDone(new Done("12.07.2020 10:16", 2, 10, 105000, Boolean.TRUE, Boolean.FALSE));
         DB.addCustomDone(new Done("12.07.2020 10:18", 3, 8, 60000, Boolean.FALSE, Boolean.FALSE));
@@ -216,7 +216,7 @@ public class DatabaseTesting {
         DB.addCustomDone(new Done("12.07.2020 10:31", 5, 8, 35000, Boolean.FALSE, Boolean.FALSE));
     }
 
-    void addMuscleExerciseConnectors() {
+    private void addMuscleExerciseConnectors() {
         DB.addMuscleExerciseConnector(new MuscleExerciseConnector(1, 1));
         DB.addMuscleExerciseConnector(new MuscleExerciseConnector(2, 1));
         DB.addMuscleExerciseConnector(new MuscleExerciseConnector(1, 2));
@@ -249,7 +249,7 @@ public class DatabaseTesting {
         DB.addMuscleExerciseConnector(new MuscleExerciseConnector(7, 20));
     }
 
-    void addDayExerciseConnectors() {
+    private void addDayExerciseConnectors() {
         DB.addDayExerciseConnector(new DayExerciseConnector(1, 2));
         DB.addDayExerciseConnector(new DayExerciseConnector(1, 6));
         DB.addDayExerciseConnector(new DayExerciseConnector(1, 7));
@@ -297,14 +297,14 @@ public class DatabaseTesting {
         DB.addDayExerciseConnector(new DayExerciseConnector(6, 10));
     }
 
-    void addNotes() {
+    private void addNotes() {
         DB.addNote(new Note("12.07.2020", "Pierwsze cwiczenie"));
     }
 
     /**
      * Adds all of the fields
      */
-    void addAll() {
+    public void addAll() {
         addDays();
         addDones();
         addExercises();
@@ -324,7 +324,7 @@ public class DatabaseTesting {
     /**
      * Removes the database and instantiates it as new
      */
-    void recreateDatabase() {
+    public void recreateDatabase() {
         DB.deleteDatabase();
         addAll();
     }

@@ -38,7 +38,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String CREATE_TABLE_MUSCLE = "CREATE TABLE " + Constants.TABLE_MUSCLE + "(" + Constants.COLUMN_MUSCLE_ID + " INTEGER PRIMARY KEY, " +
                 Constants.COLUMN_MUSCLE_NAME + " TEXT, " + Constants.COLUMN_MUSCLE_ICON + " INTEGER)";
         String CREATE_TABLE_EXERCISE = "CREATE TABLE " + Constants.TABLE_EXERCISE + "(" + Constants.COLUMN_EXERCISE_ID + " INTEGER PRIMARY KEY, " +
-                Constants.COLUMN_EXERCISE_NAME + " TEXT, " + Constants.COLUMN_CUSTOM_EXERCISE + " INTEGER)";
+                Constants.COLUMN_EXERCISE_NAME + " TEXT, " + Constants.COLUMN_CUSTOM_EXERCISE + " INTEGER, " + Constants.COLUMN_TIME_AS_AMOUNT + " INTEGER, " + Constants.COLUMN_DEFAULT_NEGATIVE + " INTEGER)";
         String CREATE_TABLE_DONE = "CREATE TABLE " + Constants.TABLE_DONE + "(" + Constants.COLUMN_DONE_ID + " INTEGER PRIMARY KEY, " +
                 Constants.COLUMN_DATE + " TEXT, " + Constants.COLUMN_EXERCISE_ID + " INTEGER, " + Constants.COLUMN_QUANTITY + " INTEGER, " +
                 Constants.COLUMN_TIME + " INTEGER, " + Constants.COLUMN_NEGATIVE + " INTEGER, " + Constants.COLUMN_CAN_MORE + " INTEGER)";
@@ -140,7 +140,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(Constants.COLUMN_EXERCISE_NAME, exercise.getExerciseName());
         int custom = exercise.isCustomExercise() ? 1 : 0;
+        int timeAsAmount = exercise.isTimeAsAmount() ? 1 : 0;
+        int defaultNegative = exercise.isDefaultNegative() ? 1 : 0;
         values.put(Constants.COLUMN_CUSTOM_EXERCISE, custom);
+        values.put(Constants.COLUMN_TIME_AS_AMOUNT, timeAsAmount);
+        values.put(Constants.COLUMN_DEFAULT_NEGATIVE, defaultNegative);
 
         long id = db.insert(Constants.TABLE_EXERCISE, null, values);
         exercise.setExerciseId((int)id);
@@ -417,21 +421,26 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public Exercise getExercise(int exerciseId) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT " + Constants.COLUMN_EXERCISE_ID + ", " +
-                Constants.COLUMN_EXERCISE_NAME + ", " + Constants.COLUMN_CUSTOM_EXERCISE + " FROM " + Constants.TABLE_EXERCISE + " WHERE " + Constants.COLUMN_EXERCISE_ID +
+        Cursor cursor = db.rawQuery("SELECT " + Constants.COLUMN_EXERCISE_ID + ", " + Constants.COLUMN_EXERCISE_NAME + ", " +
+                Constants.COLUMN_CUSTOM_EXERCISE + ", " + Constants.COLUMN_TIME_AS_AMOUNT + ", " + Constants.COLUMN_DEFAULT_NEGATIVE +
+                " FROM " + Constants.TABLE_EXERCISE + " WHERE " + Constants.COLUMN_EXERCISE_ID +
                 "=" + exerciseId, null);
 
         if(cursor.getCount() != 0)
             cursor.moveToFirst();
 
         Exercise exercise = new Exercise();
-        Boolean custom;
+        Boolean custom, timeAsAmount, defaultNegative;
 
         if(cursor.getCount() != 0) {
             exercise.setExerciseId(cursor.getInt(0));
             exercise.setExerciseName(cursor.getString(1));
             custom = cursor.getInt(2) == 1;
+            timeAsAmount = cursor.getInt(3) == 1;
+            defaultNegative = cursor.getInt(4) == 1;
             exercise.setCustomExercise(custom);
+            exercise.setTimeAsAmount(timeAsAmount);
+            exercise.setDefaultNegative(defaultNegative);
         }
 
         db.close();
@@ -823,10 +832,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + Constants.TABLE_EXERCISE, null);
 
         if(cursor.moveToFirst()) {
-            Boolean custom;
+            Boolean customExercise, timeAsAmount, defaultNegative;
             do {
-                custom = cursor.getInt(2) == 1;
-                exerciseList.add(new Exercise(cursor.getInt(0), cursor.getString(1), custom));
+                customExercise = cursor.getInt(2) == 1;
+                timeAsAmount = cursor.getInt(3) == 1;
+                defaultNegative = cursor.getInt(4) == 1;
+                exerciseList.add(new Exercise(cursor.getInt(0), cursor.getString(1), customExercise, timeAsAmount, defaultNegative));
             }
             while (cursor.moveToNext());
         }
@@ -900,6 +911,21 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     }
 
+        //  edit items
+
+    public void editExercise(Exercise exercise) {
+        SQLiteDatabase DB = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(Constants.COLUMN_EXERCISE_NAME, exercise.getExerciseName());
+        values.put(Constants.COLUMN_CUSTOM_EXERCISE, exercise.isCustomExercise());
+        values.put(Constants.COLUMN_TIME_AS_AMOUNT, exercise.isTimeAsAmount());
+        values.put(Constants.COLUMN_DEFAULT_NEGATIVE, exercise.isDefaultNegative());
+
+        DB.update(Constants.TABLE_EXERCISE, values, Constants.COLUMN_EXERCISE_ID + "=" + exercise.getExerciseId(), null);
+        DB.close();
+    }
+
 
 
 
@@ -907,7 +933,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String CREATE_TABLE_MUSCLE = "CREATE TABLE " + Constants.TABLE_MUSCLE + "(" + Constants.COLUMN_MUSCLE_ID + " INTEGER PRIMARY KEY, " +
                 Constants.COLUMN_MUSCLE_NAME + " TEXT, " + Constants.COLUMN_MUSCLE_ICON + " INTEGER)";
         String CREATE_TABLE_EXERCISE = "CREATE TABLE " + Constants.TABLE_EXERCISE + "(" + Constants.COLUMN_EXERCISE_ID + " INTEGER PRIMARY KEY, " +
-                Constants.COLUMN_EXERCISE_NAME + " TEXT, " + Constants.COLUMN_CUSTOM_EXERCISE + " INTEGER)";
+                Constants.COLUMN_EXERCISE_NAME + " TEXT, " + Constants.COLUMN_CUSTOM_EXERCISE + " INTEGER, " + Constants.COLUMN_TIME_AS_AMOUNT + " INTEGER, " + Constants.COLUMN_DEFAULT_NEGATIVE + " INTEGER)";
         String CREATE_TABLE_DONE = "CREATE TABLE " + Constants.TABLE_DONE + "(" + Constants.COLUMN_DONE_ID + " INTEGER PRIMARY KEY, " +
                 Constants.COLUMN_DATE + " TEXT, " + Constants.COLUMN_EXERCISE_ID + " INTEGER, " + Constants.COLUMN_QUANTITY + " INTEGER, " +
                 Constants.COLUMN_TIME + " INTEGER, " + Constants.COLUMN_NEGATIVE + " INTEGER, " + Constants.COLUMN_CAN_MORE + " INTEGER)";

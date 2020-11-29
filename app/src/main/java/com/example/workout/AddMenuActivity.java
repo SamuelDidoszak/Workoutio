@@ -8,8 +8,11 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -99,10 +102,59 @@ public class AddMenuActivity extends AppCompatActivity {
         return validData;
     }
 
-    //  have to work on it =============================================================================================================
     public void fillViewsBasedOnExercise() {
         Exercise exercise = DB.getExercise(chosenExerciseId);
         exerciseTextView.setText(exercise.getExerciseName());
+        negativeCheckBox.setChecked(exercise.isDefaultNegative());
+        if(exercise.isTimeAsAmount())
+            timeIsAmount();
+    }
+
+    /**
+     * Method copies the content of timeEditText and copies it into quantityEditText and vice versa
+     */
+    private void timeIsAmount() {
+        timeEditText.addTextChangedListener(new TextWatcher() {
+                //  Prevents the method from looping
+            Boolean ignore = Boolean.FALSE;
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(ignore)
+                    return;
+
+                ignore = Boolean.TRUE;
+                quantityEditText.setText(s);
+                    //  Sets the cursor position at the end of text
+                timeEditText.setSelection(timeEditText.getText().toString().length());
+                ignore = Boolean.FALSE;
+            }
+        });
+        quantityEditText.addTextChangedListener(new TextWatcher() {
+                //  Prevents the method from looping
+            Boolean ignore = Boolean.FALSE;
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(ignore)
+                    return;
+
+                ignore = Boolean.TRUE;
+                timeEditText.setText(s);
+                    //  Sets the cursor position at the end of text
+                quantityEditText.setSelection(quantityEditText.getText().toString().length());
+                ignore = Boolean.FALSE;
+            }
+        });
     }
 
     /** Adds a new Done */

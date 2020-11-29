@@ -105,14 +105,20 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         Boolean defaultNegative = defaultNegativeCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
         Boolean timeAsAmount = timeAsCountCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
 
+        Exercise exercise = DB.getExercise(exerciseId);
+        exercise.setDefaultNegative(defaultNegative);
+        exercise.setTimeAsAmount(timeAsAmount);
+        DB.editExercise(exercise);
 
         finish();
     }
 
     private class ClickHandler {
         View.OnClickListener onTimeAsCountClick = v -> {
+            madeChanges = Boolean.TRUE;
         };
         View.OnClickListener onDefaultNegativeClick = v -> {
+            madeChanges = Boolean.TRUE;
         };
         View.OnClickListener onSaveButtonClick = v -> {
             if(madeChanges)
@@ -125,6 +131,9 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         Exercise exercise = DB.getExercise(exerciseId);
 
         exerciseNameTextView.setText(exercise.getExerciseName());
+
+        timeAsCountCheckbox.setChecked(exercise.isTimeAsAmount());
+        defaultNegativeCheckbox.setChecked(exercise.isDefaultNegative());
 
         DaysRecyclerViewAdapter daysRecyclerViewAdapter = new DaysRecyclerViewAdapter();
         daysRecyclerView.setLayoutManager(new LinearLayoutManager(context));

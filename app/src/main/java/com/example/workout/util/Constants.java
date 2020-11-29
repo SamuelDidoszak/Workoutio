@@ -18,6 +18,8 @@ public class Constants {
     public static final String COLUMN_EXERCISE_ID = "exerciseID";
     public static final String COLUMN_EXERCISE_NAME = "exerciseName";
     public static final String COLUMN_CUSTOM_EXERCISE = "customExercise";
+    public static final String COLUMN_TIME_AS_AMOUNT = "timeAsAmount";
+    public static final String COLUMN_DEFAULT_NEGATIVE = "defaultNegative";
             //  Muscle
     public static final String COLUMN_MUSCLE_ID = "muscleID";
     public static final String COLUMN_MUSCLE_NAME = "muscleName";

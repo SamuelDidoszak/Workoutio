@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         context = this;
         DB = new DatabaseHandler(this);
 
+
         doneList = DB.getAllDones();
         new SetUp().setAll();
 
