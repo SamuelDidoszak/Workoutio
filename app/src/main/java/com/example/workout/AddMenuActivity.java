@@ -12,7 +12,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -47,6 +46,7 @@ public class AddMenuActivity extends AppCompatActivity {
     private CardView cardView;
     private int chosenExerciseId;
     private String chosenDate;
+    CopyTextWatcher timeEditTextWatcher = null, quantityEditTextWatcher = null;
 
     private Context context;
     private DatabaseHandler DB;
@@ -102,59 +102,58 @@ public class AddMenuActivity extends AppCompatActivity {
         return validData;
     }
 
+    /**
+     * Fills adequate EditTexts and CheckBoxes based on chosen exercise
+     */
     public void fillViewsBasedOnExercise() {
         Exercise exercise = DB.getExercise(chosenExerciseId);
         exerciseTextView.setText(exercise.getExerciseName());
         negativeCheckBox.setChecked(exercise.isDefaultNegative());
-        if(exercise.isTimeAsAmount())
-            timeIsAmount();
+
+        /**
+         * Sets or removes auto filling text listeners based on timeIsQuantity Boolean variable of provided exercise
+         */
+        if(exercise.isTimeAsAmount()) {
+            timeEditTextWatcher = new CopyTextWatcher(timeEditText, quantityEditText);
+            quantityEditTextWatcher = new CopyTextWatcher(quantityEditText, timeEditText);
+            timeEditText.addTextChangedListener(timeEditTextWatcher);
+            quantityEditText.addTextChangedListener(quantityEditTextWatcher);
+        }
+        else {
+            timeEditText.removeTextChangedListener(timeEditTextWatcher);
+            quantityEditText.removeTextChangedListener(quantityEditTextWatcher);
+        }
     }
 
     /**
-     * Method copies the content of timeEditText and copies it into quantityEditText and vice versa
+     * Watcher copies the content of copyFrom EditText and copies it into copyTo EditText
      */
-    private void timeIsAmount() {
-        timeEditText.addTextChangedListener(new TextWatcher() {
-                //  Prevents the method from looping
-            Boolean ignore = Boolean.FALSE;
+    private class CopyTextWatcher implements TextWatcher {
+        EditText copyFrom, copyTo;
 
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+        public CopyTextWatcher(EditText copyFrom, EditText copyTo) {
+            this.copyFrom = copyFrom;
+            this.copyTo = copyTo;
+        }
 
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+        //  Prevents the method from looping
+        Boolean ignore = Boolean.FALSE;
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                if(ignore)
-                    return;
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
-                ignore = Boolean.TRUE;
-                quantityEditText.setText(s);
-                    //  Sets the cursor position at the end of text
-                timeEditText.setSelection(timeEditText.getText().toString().length());
-                ignore = Boolean.FALSE;
-            }
-        });
-        quantityEditText.addTextChangedListener(new TextWatcher() {
-                //  Prevents the method from looping
-            Boolean ignore = Boolean.FALSE;
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+        public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+        @Override
+        public void afterTextChanged(Editable s) {
+            if(ignore)
+                return;
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                if(ignore)
-                    return;
-
-                ignore = Boolean.TRUE;
-                timeEditText.setText(s);
-                    //  Sets the cursor position at the end of text
-                quantityEditText.setSelection(quantityEditText.getText().toString().length());
-                ignore = Boolean.FALSE;
-            }
-        });
+            ignore = Boolean.TRUE;
+            copyTo.setText(s);
+            //  Sets the cursor position at the end of text
+            copyFrom.setSelection(copyFrom.getText().toString().length());
+            ignore = Boolean.FALSE;
+        }
     }
 
     /** Adds a new Done */
