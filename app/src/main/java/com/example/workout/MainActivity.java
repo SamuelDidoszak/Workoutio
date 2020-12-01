@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TouchDelegate;
 import android.view.View;
@@ -373,6 +374,9 @@ public class MainActivity extends AppCompatActivity {
                             tempDoneList.get(0).getTrimmedDate(),
                             tempDoneList.get(0).getTrimmedDateTime(),
                             tempDoneList.get(tempDoneList.size() - 1).getTrimmedDateTime()));
+                        //  Fills the time of exercise sum if there is only one exercise
+                    if(tempDoneList.size() == 1)
+                        muscleDateTimeList.get(muscleDateTimeList.size() - 1).setDateTimeFirstDone(tempDoneList.get(0).getTime());
                     tempDoneList.clear();
                     tempDoneList.add(doneList.get(i));
                     listOfIndexes.add(numberOfIndexes);
@@ -386,6 +390,9 @@ public class MainActivity extends AppCompatActivity {
                     tempDoneList.get(0).getTrimmedDate(),
                     tempDoneList.get(0).getTrimmedDateTime(),
                     tempDoneList.get(tempDoneList.size() - 1).getTrimmedDateTime()));
+                //  Fills the time of exercise sum if there is only one exercise
+            if(tempDoneList.size() == 1)
+                muscleDateTimeList.get(muscleDateTimeList.size() - 1).setDateTimeFirstDone(tempDoneList.get(0).getTime());
             listOfIndexes.add(numberOfIndexes);
 
             /** Calculates the end index of a Done allocated to the particular MuscleDateTime */
@@ -446,12 +453,15 @@ public class MainActivity extends AppCompatActivity {
                     muscleDateTimeList.add(new MuscleDateTime(DB.getMusclesByExerciseDate(newDone.getTrimmedDate()),
                             newDone.getTrimmedDate(),
                             newDone.getTrimmedDateTime(),
-                            newDoneIndex));
-                    moveSortedDoneListEndIndexesByOne(muscleDateTimeList.size() - 1);
+                            newDoneIndex + 1));
                     historyRecyclerViewFullAdapter.addToSubListVisibleList(muscleDateTimeList.size() - 1);
+                    historyRecyclerViewFullAdapter.notifyDataSetChanged();
                 }
-                else
+                else {
+                    changeOverallExerciseTime(newDoneIndex, muscleDateTimeList.size() - 1);
                     moveSortedDoneListEndIndexesByOne(muscleDateTimeList.size() - 1);
+                    historyRecyclerViewFullAdapter.notifyItemChanged(muscleDateTimeList.size() - 1);
+                }
                 return;
             }
 
@@ -479,10 +489,14 @@ public class MainActivity extends AppCompatActivity {
                                 newDone.getTrimmedDateTime(),
                                 newDoneIndex));
                         moveSortedDoneListEndIndexesByOne(i);
+                            //  Fills the time of exercise sum because there is only one exercise
+                        muscleDateTimeList.get(i).setDateTimeFirstDone(sortedDoneList.get(newDoneIndex).getTime());
                         historyRecyclerViewFullAdapter.addToSubListVisibleList(i);
+                        historyRecyclerViewFullAdapter.notifyDataSetChanged();
                         return;
                     }
                     if((newDone.getTrimmedDate()).equals(muscleDateTimeList.get(i).getDate())) {
+                        changeOverallExerciseTime(newDoneIndex, i);
                         moveSortedDoneListEndIndexesByOne(i);
                         historyRecyclerViewFullAdapter.notifyItemChanged(i);
                         historyRecyclerViewFullAdapter.notifyItemRangeChanged(i, muscleDateTimeList.size() - i - 1);
@@ -603,6 +617,39 @@ public class MainActivity extends AppCompatActivity {
 //            return 0;
         }
 
+        void changeOverallExerciseTime(int newDoneIndex, int muscleDateTimeIndex) {
+            long newDoneDate = dateIntoMillis(sortedDoneList.get(newDoneIndex).getTrimmedDate());
+            Log.d(TAG, "changeOverallExerciseTime: " + newDoneDate);
+            Log.d(TAG, newDoneIndex + "");
+            Log.d(TAG, sortedDoneList.size() + "");
+                //  change time newD, lastD
+            if(newDoneIndex == 0 || dateIntoMillis(sortedDoneList.get(newDoneIndex - 1).getTrimmedDate()) > newDoneDate) {
+                Log.d(TAG, "changeOverallExerciseTime: smoler");
+                int i = newDoneIndex;
+                for(; i < sortedDoneList.size() - 1; i++) {
+                    Log.d(TAG, sortedDoneList.get(i + 1).getTrimmedDate());
+                    if(newDoneDate > dateIntoMillis(sortedDoneList.get(i + 1).getTrimmedDate())) {
+                        Log.d(TAG, "changeOverallExerciseTime: breaking at " + i);
+                        break;
+                    }
+                }
+                muscleDateTimeList.get(muscleDateTimeIndex).setTime(sortedDoneList.get(newDoneIndex).getTrimmedDateTime(), sortedDoneList.get(i).getTrimmedDateTime());
+                Log.d(TAG, "changeOverallExerciseTime: " + muscleDateTimeList.get(muscleDateTimeIndex).getTime());
+            }
+            //  change time lastD, newD
+            else if(newDoneIndex == sortedDoneList.size() - 1 || dateIntoMillis(sortedDoneList.get(newDoneIndex + 1).getTrimmedDate()) < newDoneDate) {
+                int i = newDoneIndex;
+                Log.d(TAG, "changeOverallExerciseTime: biger");
+                for(; i > 0; i--) {
+                    if(newDoneDate < dateIntoMillis(sortedDoneList.get(i - 1).getTrimmedDate())) {
+                        break;
+                    }
+                }
+                muscleDateTimeList.get(muscleDateTimeIndex).setTime(sortedDoneList.get(i).getTrimmedDateTime(), sortedDoneList.get(newDoneIndex).getTrimmedDateTime());
+                Log.d(TAG, "changeOverallExerciseTime: " + muscleDateTimeList.get(muscleDateTimeIndex).getTime());
+            }
+        }
+
         /** Changes formatted date string into the time in milliseconds */
         long dateIntoMillis(String date) {
             SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
@@ -632,8 +679,8 @@ public class MainActivity extends AppCompatActivity {
          *  If the typical data turn out to be mostly sorted, may change it to Bubble sort or Insertion sort */
         void sortDoneList() {
             doneList.sort((o1, o2) -> {
-                long o1Time = dateIntoMillis(o1.getDate());
-                long o2Time = dateIntoMillis(o2.getDate());
+                long o1Time = hourIntoMillis(o1.getDate());
+                long o2Time = hourIntoMillis(o2.getDate());
 
                 if(o1Time < o2Time)
                     return -1;

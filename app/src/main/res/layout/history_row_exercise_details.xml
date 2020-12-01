@@ -58,7 +58,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:id="@+id/history_row_exercise_details_timeTextView"
-                android:layout_weight="1"
+                android:layout_weight="1.5"
                 android:text="1:04"
                 android:textColor="@android:color/white"
                 android:textAlignment="center"

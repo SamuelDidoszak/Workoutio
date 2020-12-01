@@ -74,6 +74,9 @@ public class AddMenuActivity extends AppCompatActivity {
             dateEditText.setText(chosenDate);
             new SetUp().setEditTextTint(dateEditText, getResources().getColorStateList(R.color.white));
         }
+            //  user can edit an exercise and then click out of ExerciseMenuActivity. Then, local exercise from this activity won't be updated. Call to DB is necessary
+        else if(exerciseTextView.getText().length() != 0)
+            fillViewsBasedOnExercise();
     }
 
     /** Checkes if there is enough data to form a new Done. <br/>
@@ -122,6 +125,8 @@ public class AddMenuActivity extends AppCompatActivity {
         else {
             timeEditText.removeTextChangedListener(timeEditTextWatcher);
             quantityEditText.removeTextChangedListener(quantityEditTextWatcher);
+            timeEditTextWatcher = null;
+            quantityEditTextWatcher = null;
         }
     }
 

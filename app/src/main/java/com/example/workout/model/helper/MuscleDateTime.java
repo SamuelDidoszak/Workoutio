@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MuscleDateTime {
     List<Muscle> muscleList;
@@ -71,6 +72,10 @@ public class MuscleDateTime {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
         String currentYear = dateFormat.format(Calendar.getInstance().getTime());
         return year.equals(currentYear) ? "" : "." + year;
+    }
+
+    public void setDateTimeFirstDone(int time) {
+        this.time = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toHours(time), TimeUnit.MILLISECONDS.toMinutes(time) % 60);
     }
 
     public MuscleDateTime(List<Muscle> muscleList, String date, String time, int sortedDoneListEndIndex) {

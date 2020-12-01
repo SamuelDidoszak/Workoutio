@@ -25,16 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/* In a current state, when rows in HistoryRecyclerViewFullAdapter have nested RecyclerViews,
-    adapter needs to be fully refreshed after adding a new Done via AddMenu.
-    Otherwise, nested RecyclerViews cannot be notified that their data needs to be updated.
-    They try to show the same bounds of a different dataset and it throws ConcurrentModificationException
-
-    Depending on the execution time of creating those nested RecyclerViews and the frequency of adding new Dones via AddMenu,
-    I can make a new subList of Dones and recreate RecyclerViews every time that a muscleDateTime row is clicked.
-
-    Redesign of the HistoryRecyclerViewFullAdapter may be necessary
-*/
 public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<HistoryRecyclerViewFullAdapter.ViewHolder> implements HistoryRowTypeInterface {
     private Context context;
     private List<Done> doneList;
@@ -113,10 +103,18 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
          * Method is necessary for correct behavior, otherwise content is recycled and shows in multiple rows <br/>
          * Somehow, this method takes 0-2ms on a lower end device */
         public void showOrHideExerciseDetails(int position) {
+//            if(exerciseDetailsRecyclerView.getAdapter() != null)
+//                exerciseDetailsRecyclerView.getAdapter().notifyDataSetChanged();
+//            exerciseDetailsRecyclerView.removeAllViews();
+//            exerciseDetailsRecyclerView.removeAllViewsInLayout();
+//            exerciseDetailsRecyclerView.swapAdapter(null, Boolean.TRUE);
+//            exerciseDetailsRecyclerView.setAdapter(null);
             exerciseDetailsRecyclerView.setVisibility(View.GONE);
 
             if(subListVisibleList.get(position))
                 createAndSetExerciseDetailsRVA(position);
+//            else
+//                exerciseDetailsRecyclerView.setAdapter(null);
         }
 
         /** Resets the exerciseDetailsRecyclerViewAdapter and its content */
@@ -135,7 +133,7 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
             else
                 subDoneList = doneList.subList(0, muscleDateTimeList.get(0).getSortedDoneListEndIndex());
 
-            ExerciseDetailsRecyclerViewAdapter exerciseDetailsRecyclerViewAdapter = new ExerciseDetailsRecyclerViewAdapter(subDoneList);
+            ExerciseDetailsRecyclerViewAdapter exerciseDetailsRecyclerViewAdapter = new ExerciseDetailsRecyclerViewAdapter(subDoneList, position);
 
             exerciseDetailsRecyclerView.setAdapter(exerciseDetailsRecyclerViewAdapter);
 
@@ -159,9 +157,11 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
 
     public class ExerciseDetailsRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseDetailsRecyclerViewAdapter.ViewHolder> {
         List<Done> subDoneList;
+        int positiono;
 
-        public ExerciseDetailsRecyclerViewAdapter(List<Done> subDoneList) {
+        public ExerciseDetailsRecyclerViewAdapter(List<Done> subDoneList, int positiono) {
             this.subDoneList = subDoneList;
+            this.positiono = positiono;
         }
 
         @NonNull
