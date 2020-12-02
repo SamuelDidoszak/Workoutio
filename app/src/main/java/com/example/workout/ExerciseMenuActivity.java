@@ -3,7 +3,6 @@ package com.example.workout;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,9 +17,9 @@ import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.Day;
 import com.example.workout.model.DayExerciseConnector;
 import com.example.workout.model.Exercise;
-import com.example.workout.model.helper.ExerciseMenuRecyclerViewData;
 import com.example.workout.model.helper.DayExercise;
 import com.example.workout.model.helper.ExerciseMenuDayExerciseTypes;
+import com.example.workout.model.helper.ExerciseMenuRecyclerViewData;
 import com.example.workout.model.helper.ExerciseMenuRecyclerViewTypes;
 import com.example.workout.ui.adapter.ExerciseMenuDayAdapter;
 import com.example.workout.ui.adapter.ExerciseMenuExercisesRecyclerViewAdapter;
@@ -41,11 +40,13 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
     private List<DayExercise> dayExerciseList;
     private DatabaseHandler DB;
 
-    private List<ExerciseMenuRecyclerViewData> recyclerViewList;
+    private ExerciseMenuRecyclerViewData[] recyclerViewList = {null, null, null};
     private int currentRecyclerViewType = MY_EXERCISE_RECYCLER_VIEW;
     private MutableLiveData<Integer> chosenExercise;
     private MutableLiveData<Integer> editExercise;
     private int editPosition;
+
+    private Boolean resetDayAdapter = Boolean.TRUE;
 
     private Context context;
 
@@ -73,45 +74,46 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
     public void setUpRecyclerView(int recyclerViewType) {
         switch(recyclerViewType) {
             case DAY_RECYCLER_VIEW:
-                if(exerciseMenuDayAdapter == null) {
+                if(resetDayAdapter) {
                     dayExerciseDivision();
                     exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseList);
-                    recyclerViewList.add(exerciseMenuDayAdapter);
+                    recyclerViewList[0] = exerciseMenuDayAdapter;
+                    resetDayAdapter = Boolean.FALSE;
                 }
                 exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-                chosenExercise = exerciseMenuDayAdapter.getChosenExercise();
-
-                exerciseMenuDayAdapter.resetExerciseToEdit();
-                editExercise = exerciseMenuDayAdapter.getExerciseToEdit();
                 break;
             case MY_EXERCISE_RECYCLER_VIEW:
+                    //  Called if it's the first creation of this class
                 if(myExercisesRecyclerViewAdapter == null) {
                     myExercisesRecyclerViewAdapter = new ExerciseMenuExercisesRecyclerViewAdapter(context, myExercisesList);
                     editExercise = myExercisesRecyclerViewAdapter.getExerciseToEdit();
-                    recyclerViewList.add(myExercisesRecyclerViewAdapter);
+                    recyclerViewList[1] = myExercisesRecyclerViewAdapter;
                 }
                 exerciseRecyclerView.setAdapter(myExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-                chosenExercise = myExercisesRecyclerViewAdapter.getChosenExercise();
-
-                myExercisesRecyclerViewAdapter.resetExerciseToEdit();
-                editExercise = myExercisesRecyclerViewAdapter.getExerciseToEdit();
                 break;
             case AVAILABLE_EXERCISE_RECYCLER_VIEW:
                 if(availableExercisesRecyclerViewAdapter == null) {
                     availableExercisesRecyclerViewAdapter = new ExerciseMenuExercisesRecyclerViewAdapter(context, availableExercisesList);
-                    recyclerViewList.add(availableExercisesRecyclerViewAdapter);
+                    recyclerViewList[2] = availableExercisesRecyclerViewAdapter;
                 }
                 exerciseRecyclerView.setAdapter(availableExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-                chosenExercise = availableExercisesRecyclerViewAdapter.getChosenExercise();
-
-                availableExercisesRecyclerViewAdapter.resetExerciseToEdit();
-                editExercise = availableExercisesRecyclerViewAdapter.getExerciseToEdit();
                 break;
         }
         changeTypeVisually(recyclerViewType);
+        setUpObservers();
+    }
+
+    /**
+     * Sets up observers for the current RecyclerView
+     */
+    private void setUpObservers() {
+        ExerciseMenuRecyclerViewData recyclerView = recyclerViewList[currentRecyclerViewType - 1];
+        chosenExercise = recyclerView.getChosenExercise();
+        recyclerView.resetExerciseToEdit();
+        editExercise = recyclerView.getExerciseToEdit();
 
             //  wait for user to chose exercise in RecyclerViewAdapter and finish the activity passing exerciseId
         chosenExercise.observe(this, exerciseId -> {
@@ -121,25 +123,15 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
         });
             //  start ExerciseMenuDayAdapter if edit imageButton is clicked
         editExercise.observe(this, exerciseId -> {
+            editPosition = recyclerView.getChosenPosition();
             startActivityForResult(new Intent(context, EditExerciseMenuActivity.class).putExtra("exerciseId", exerciseId), RESULT_FIRST_USER);
         });
-    }
-
-    private void setUpObservers() {
-        ExerciseMenuRecyclerViewData recyclerView = recyclerViewList.get(currentRecyclerViewType - 1);
-        chosenExercise = recyclerView.getChosenExercise();
-
-
-
-        int jeff = ((ExerciseMenuRecyclerViewData) myExercisesRecyclerViewAdapter).getChosenPosition();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult: ");
         if(resultCode == RESULT_FIRST_USER) {
-            Log.d(TAG, "onActivityResult: resultFirstUser");
             int exerciseId = data.getIntExtra("exerciseId", -1);
             boolean[] changeList = data.getBooleanArrayExtra("changeList");
             if(exerciseId == -1)
@@ -147,37 +139,35 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
             if(!changeList[0] && !changeList[1])
                 return;
 
+            if(changeList[0] && exerciseMenuDayAdapter != null)
+                resetDayAdapter = Boolean.TRUE;
+
             switch (currentRecyclerViewType) {
                 case ExerciseMenuRecyclerViewTypes.DAY_RECYCLER_VIEW:
-                    Log.d(TAG, "onActivityResult: day");
-                    if(changeList[0])
-                        exerciseMenuDayAdapter.notifyDataSetChanged();
-                    else
-                        exerciseMenuDayAdapter.notifyDataSetChanged();
+                    if(changeList[0]) {
+                        dayExerciseDivision();
+                        exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseList);
+                        exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
+                        recyclerViewList[0] = exerciseMenuDayAdapter;
+                        resetDayAdapter = Boolean.FALSE;
+                    }
+                    else {
+                        exerciseMenuDayAdapter.reSetMuscleListForImagesAtPosition(editPosition);
+                        exerciseMenuDayAdapter.notifyItemChanged(editPosition);
+                    }
                     break;
                 case ExerciseMenuRecyclerViewTypes.MY_EXERCISE_RECYCLER_VIEW:
-                    Log.d(TAG, "onActivityResult: myExercises");
-                    if(!changeList[1])
-                        return;
-
-                    for(int position = 0; position < myExercisesList.size(); position++) {
-                        if(myExercisesList.get(position).getExerciseId() == exerciseId) {
-                            Log.d(TAG, "onActivityResult: notifying");
-                            myExercisesRecyclerViewAdapter.notifyItemChanged(position);
-                            return;
-                        }
+                    if(changeList[1]) {
+                        myExercisesList.set(editPosition, DB.getExercise(exerciseId));
+                        myExercisesRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(editPosition);
+                        myExercisesRecyclerViewAdapter.notifyItemChanged(editPosition);
                     }
                     break;
                 case ExerciseMenuRecyclerViewTypes.AVAILABLE_EXERCISE_RECYCLER_VIEW:
-                    Log.d(TAG, "onActivityResult: availableExercises");
-                    if(!changeList[1])
-                        return;
-
-                    for(int position = 0; position < availableExercisesList.size(); position++) {
-                        if(availableExercisesList.get(position).getExerciseId() == exerciseId) {
-                            availableExercisesRecyclerViewAdapter.notifyItemChanged(position);
-                            return;
-                        }
+                    if(changeList[1]) {
+                        availableExercisesList.set(editPosition, DB.getExercise(exerciseId));
+                        availableExercisesRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(editPosition);
+                        availableExercisesRecyclerViewAdapter.notifyItemChanged(editPosition);
                     }
                     break;
             }
@@ -263,8 +253,6 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
         exerciseTextView = findViewById(R.id.exercise_menuExerciseTextView);
             // RecyclerView
         exerciseRecyclerView = findViewById(R.id.exercise_menuExerciseRecyclerView);
-
-        fragmentContainerView = findViewById(R.id.exercise_menu_fragmentContainerView);
     }
 
     /**

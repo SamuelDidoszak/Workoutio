@@ -63,6 +63,10 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
         return chosenPosition;
     }
 
+    public void reSetListOfMuscleListsAtPosition(int position) {
+        listOfMuscleLists.set(position, DB.getMusclesByExerciseId(exercisesList.get(position).getExerciseId()));
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
