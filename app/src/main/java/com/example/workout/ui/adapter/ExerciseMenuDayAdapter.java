@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.workout.R;
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.Muscle;
+import com.example.workout.model.helper.ExerciseMenuRecyclerViewData;
 import com.example.workout.model.helper.DayExercise;
 import com.example.workout.model.helper.ExerciseMenuDayExerciseTypes;
 import com.example.workout.model.helper.ExerciseMenuRecyclerViewTypes;
@@ -28,7 +29,7 @@ import com.example.workout.model.helper.MuscleImageAllocation;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ExerciseMenuRecyclerViewTypes {
+public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ExerciseMenuRecyclerViewTypes, ExerciseMenuRecyclerViewData {
 
     private Context context;
     private List<DayExercise> dayExerciseList;
@@ -38,6 +39,7 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private List<List<Muscle>> muscleListForImages;
 
     private String TAG = "DayAdapter";
+    private int chosenPosition;
 
     /** If true, shows all exercises at the start. <br/>
      * If false, recyclerView shows only days until clicked */
@@ -106,6 +108,11 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public int getItemCount() {
         return dayExerciseList.size();
+    }
+
+    @Override
+    public int getChosenPosition() {
+        return chosenPosition;
     }
 
     public class DayViewHolder extends RecyclerView.ViewHolder {

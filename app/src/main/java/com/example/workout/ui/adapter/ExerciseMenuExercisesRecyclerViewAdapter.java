@@ -18,12 +18,13 @@ import com.example.workout.R;
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
+import com.example.workout.model.helper.ExerciseMenuRecyclerViewData;
 import com.example.workout.model.helper.MuscleImageAllocation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseMenuExercisesRecyclerViewAdapter.ViewHolder> {
+public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapter<ExerciseMenuExercisesRecyclerViewAdapter.ViewHolder> implements ExerciseMenuRecyclerViewData {
     private Context context;
     private List<Exercise> exercisesList;
     private MutableLiveData<Integer> chosenExercise;
@@ -32,6 +33,7 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
 
     private DatabaseHandler DB;
 
+    private int chosenPosition;
     public MutableLiveData<Integer> getChosenExercise() {
         return chosenExercise;
     }
@@ -55,6 +57,10 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
         for(Exercise exercise : exercisesList) {
             listOfMuscleLists.add(DB.getMusclesByExerciseId(exercise.getExerciseId()));
         }
+    }
+
+    public int getChosenPosition() {
+        return chosenPosition;
     }
 
     @NonNull
@@ -121,8 +127,12 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
             View.OnClickListener onMuscleIconContainerClick = v -> {
 
             };
+            /**
+             *  Returns the exercise to edit to the parent activity
+             */
             View.OnClickListener onEditImageButtonClick = v -> {
                 int id = exercisesList.get(getAdapterPosition()).getExerciseId();
+                chosenPosition = getAdapterPosition();
                 exerciseToEdit.setValue(id);
             };
         }

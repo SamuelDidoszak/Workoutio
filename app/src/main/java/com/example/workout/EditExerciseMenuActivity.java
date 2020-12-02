@@ -1,6 +1,7 @@
 package com.example.workout;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import com.example.workout.model.Muscle;
 import com.example.workout.model.MuscleExerciseConnector;
 import com.example.workout.model.helper.CheckableImageView;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class EditExerciseMenuActivity extends AppCompatActivity {
@@ -36,6 +38,12 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
     private List<Day> allDaysList;
     private List<Muscle> allMusclesList;
     /**
+     * 0: Change in Days <br/>
+     * 1: Change in Muscles <br/>
+     * 2: Change in CheckBoxes <br/>
+     */
+    private boolean[] changeList;
+    /**
      * Two dimensional array of booleans set true if there is a day/muscle for corresponding position in all days/muscles
      */
     private Boolean[][] inDayInclusionList, inMuscleInclusionList;
@@ -43,7 +51,6 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
     int exerciseId;
     private Context context;
     private DatabaseHandler DB;
-    private Boolean madeChanges = Boolean.FALSE;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,49 +87,60 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
      * Checks if starting values are the same as the new ones
      */
     private void saveChanges() {
-        for(int i = 0; i < inDayInclusionList.length; i++) {
-            if(inDayInclusionList[i][0] != inDayInclusionList[i][1]) {
+        if(changeList[0]) {
+            for (int i = 0; i < inDayInclusionList.length; i++) {
+                if (inDayInclusionList[i][0] != inDayInclusionList[i][1]) {
                     //  connector was deleted
-                if(inDayInclusionList[i][0])
-                    DB.removeDayExerciseConnectorById(DB.getDayExerciseConnector(allDaysList.get(i).getDayId(), exerciseId).getDayExerciseConnectorId());
-                    //  connector was added
-                else
-                    DB.addDayExerciseConnector(new DayExerciseConnector(allDaysList.get(i).getDayId(), exerciseId));
+                    if (inDayInclusionList[i][0])
+                        DB.removeDayExerciseConnectorById(DB.getDayExerciseConnector(allDaysList.get(i).getDayId(), exerciseId).getDayExerciseConnectorId());
+                        //  connector was added
+                    else
+                        DB.addDayExerciseConnector(new DayExerciseConnector(allDaysList.get(i).getDayId(), exerciseId));
+                }
             }
         }
-
-        for(int i = 0; i < inMuscleInclusionList.length; i++) {
-            if(inMuscleInclusionList[i][0] != inMuscleInclusionList[i][1]) {
+        if(changeList[1]) {
+            for(int i = 0; i < inMuscleInclusionList.length; i++) {
+                if(inMuscleInclusionList[i][0] != inMuscleInclusionList[i][1]) {
                     //  connector was deleted
-                if(inMuscleInclusionList[i][0])
-                    DB.removeMuscleExerciseConnectorById(DB.getMuscleExerciseConnector(allMusclesList.get(i).getMuscleId(), exerciseId).getMuscleExerciseConnectorId());
-                    //  connector was added
-                else
-                    DB.addMuscleExerciseConnector(new MuscleExerciseConnector(allMusclesList.get(i).getMuscleId(), exerciseId));
+                    if(inMuscleInclusionList[i][0])
+                        DB.removeMuscleExerciseConnectorById(DB.getMuscleExerciseConnector(allMusclesList.get(i).getMuscleId(), exerciseId).getMuscleExerciseConnectorId());
+                        //  connector was added
+                    else
+                        DB.addMuscleExerciseConnector(new MuscleExerciseConnector(allMusclesList.get(i).getMuscleId(), exerciseId));
+                }
             }
         }
+        if(changeList[2]) {
+            Boolean defaultNegative = defaultNegativeCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
+            Boolean timeAsAmount = timeAsCountCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
 
-        Boolean defaultNegative = defaultNegativeCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
-        Boolean timeAsAmount = timeAsCountCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
+            Exercise exercise = DB.getExercise(exerciseId);
+            exercise.setDefaultNegative(defaultNegative);
+            exercise.setTimeAsAmount(timeAsAmount);
+            DB.editExercise(exercise);
 
-        Exercise exercise = DB.getExercise(exerciseId);
-        exercise.setDefaultNegative(defaultNegative);
-        exercise.setTimeAsAmount(timeAsAmount);
-        DB.editExercise(exercise);
-
+        }
+        Intent intent = new Intent();
+        intent.putExtra("exerciseId", exerciseId);
+        intent.putExtra("changeList", changeList);
+        setResult(RESULT_FIRST_USER, intent);
         finish();
     }
 
     private class ClickHandler {
         View.OnClickListener onTimeAsCountClick = v -> {
-            madeChanges = Boolean.TRUE;
+            changeList[2] = Boolean.TRUE;
         };
         View.OnClickListener onDefaultNegativeClick = v -> {
-            madeChanges = Boolean.TRUE;
+            changeList[2] = Boolean.TRUE;
         };
         View.OnClickListener onSaveButtonClick = v -> {
-            if(madeChanges)
-                saveChanges();
+            for(int i = 0; i < changeList.length; i++) {
+                if(changeList[i]) {
+                    saveChanges();
+                }
+            }
         };
     }
 
@@ -151,6 +169,9 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
         List<Day> dayList = DB.getDaysByExerciseId(exerciseId);
         List<Muscle> muscleList = DB.getMusclesByExerciseId(exerciseId);
+
+        changeList = new boolean[3];
+        Arrays.fill(changeList, Boolean.FALSE);
 
         inDayInclusionList = new Boolean[allDaysList.size()][2];
         inMuscleInclusionList = new Boolean[allMusclesList.size()][2];
@@ -238,7 +259,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
                 int position = getAdapterPosition();
                 inDayInclusionList[position][1] = !inDayInclusionList[position][1];
                 changeBackground(inDayInclusionList[position][1]);
-                madeChanges = Boolean.TRUE;
+                changeList[0] = Boolean.TRUE;
             };
         }
     }
@@ -288,7 +309,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
                 int position = getAdapterPosition();
                 inMuscleInclusionList[position][1] = !inMuscleInclusionList[position][1];
                 changeBackground(inMuscleInclusionList[position][1]);
-                madeChanges = Boolean.TRUE;
+                changeList[1] = Boolean.TRUE;
             };
 
         }

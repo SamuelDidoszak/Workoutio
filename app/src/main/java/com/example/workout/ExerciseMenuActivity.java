@@ -3,13 +3,13 @@ package com.example.workout;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,6 +18,7 @@ import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.Day;
 import com.example.workout.model.DayExerciseConnector;
 import com.example.workout.model.Exercise;
+import com.example.workout.model.helper.ExerciseMenuRecyclerViewData;
 import com.example.workout.model.helper.DayExercise;
 import com.example.workout.model.helper.ExerciseMenuDayExerciseTypes;
 import com.example.workout.model.helper.ExerciseMenuRecyclerViewTypes;
@@ -40,13 +41,13 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
     private List<DayExercise> dayExerciseList;
     private DatabaseHandler DB;
 
+    private List<ExerciseMenuRecyclerViewData> recyclerViewList;
     private int currentRecyclerViewType = MY_EXERCISE_RECYCLER_VIEW;
     private MutableLiveData<Integer> chosenExercise;
     private MutableLiveData<Integer> editExercise;
+    private int editPosition;
 
-    private FragmentContainerView fragmentContainerView;
-
-    Context context;
+    private Context context;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,6 +76,7 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                 if(exerciseMenuDayAdapter == null) {
                     dayExerciseDivision();
                     exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseList);
+                    recyclerViewList.add(exerciseMenuDayAdapter);
                 }
                 exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -87,6 +89,7 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                 if(myExercisesRecyclerViewAdapter == null) {
                     myExercisesRecyclerViewAdapter = new ExerciseMenuExercisesRecyclerViewAdapter(context, myExercisesList);
                     editExercise = myExercisesRecyclerViewAdapter.getExerciseToEdit();
+                    recyclerViewList.add(myExercisesRecyclerViewAdapter);
                 }
                 exerciseRecyclerView.setAdapter(myExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -96,8 +99,10 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                 editExercise = myExercisesRecyclerViewAdapter.getExerciseToEdit();
                 break;
             case AVAILABLE_EXERCISE_RECYCLER_VIEW:
-                if(availableExercisesRecyclerViewAdapter == null)
+                if(availableExercisesRecyclerViewAdapter == null) {
                     availableExercisesRecyclerViewAdapter = new ExerciseMenuExercisesRecyclerViewAdapter(context, availableExercisesList);
+                    recyclerViewList.add(availableExercisesRecyclerViewAdapter);
+                }
                 exerciseRecyclerView.setAdapter(availableExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
                 chosenExercise = availableExercisesRecyclerViewAdapter.getChosenExercise();
@@ -107,7 +112,6 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                 break;
         }
         changeTypeVisually(recyclerViewType);
-
 
             //  wait for user to chose exercise in RecyclerViewAdapter and finish the activity passing exerciseId
         chosenExercise.observe(this, exerciseId -> {
@@ -119,6 +123,65 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
         editExercise.observe(this, exerciseId -> {
             startActivityForResult(new Intent(context, EditExerciseMenuActivity.class).putExtra("exerciseId", exerciseId), RESULT_FIRST_USER);
         });
+    }
+
+    private void setUpObservers() {
+        ExerciseMenuRecyclerViewData recyclerView = recyclerViewList.get(currentRecyclerViewType - 1);
+        chosenExercise = recyclerView.getChosenExercise();
+
+
+
+        int jeff = ((ExerciseMenuRecyclerViewData) myExercisesRecyclerViewAdapter).getChosenPosition();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: ");
+        if(resultCode == RESULT_FIRST_USER) {
+            Log.d(TAG, "onActivityResult: resultFirstUser");
+            int exerciseId = data.getIntExtra("exerciseId", -1);
+            boolean[] changeList = data.getBooleanArrayExtra("changeList");
+            if(exerciseId == -1)
+                return;
+            if(!changeList[0] && !changeList[1])
+                return;
+
+            switch (currentRecyclerViewType) {
+                case ExerciseMenuRecyclerViewTypes.DAY_RECYCLER_VIEW:
+                    Log.d(TAG, "onActivityResult: day");
+                    if(changeList[0])
+                        exerciseMenuDayAdapter.notifyDataSetChanged();
+                    else
+                        exerciseMenuDayAdapter.notifyDataSetChanged();
+                    break;
+                case ExerciseMenuRecyclerViewTypes.MY_EXERCISE_RECYCLER_VIEW:
+                    Log.d(TAG, "onActivityResult: myExercises");
+                    if(!changeList[1])
+                        return;
+
+                    for(int position = 0; position < myExercisesList.size(); position++) {
+                        if(myExercisesList.get(position).getExerciseId() == exerciseId) {
+                            Log.d(TAG, "onActivityResult: notifying");
+                            myExercisesRecyclerViewAdapter.notifyItemChanged(position);
+                            return;
+                        }
+                    }
+                    break;
+                case ExerciseMenuRecyclerViewTypes.AVAILABLE_EXERCISE_RECYCLER_VIEW:
+                    Log.d(TAG, "onActivityResult: availableExercises");
+                    if(!changeList[1])
+                        return;
+
+                    for(int position = 0; position < availableExercisesList.size(); position++) {
+                        if(availableExercisesList.get(position).getExerciseId() == exerciseId) {
+                            availableExercisesRecyclerViewAdapter.notifyItemChanged(position);
+                            return;
+                        }
+                    }
+                    break;
+            }
+        }
     }
 
     /** changes the color of the recyclerView titles*/
