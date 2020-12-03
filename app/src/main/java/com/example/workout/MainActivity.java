@@ -30,6 +30,7 @@ import com.example.workout.ui.adapter.DayExerciseRecyclerViewAdapter;
 import com.example.workout.ui.adapter.DayMuscleRecyclerViewAdapter;
 import com.example.workout.ui.adapter.HistoryRecyclerViewFullAdapter;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -89,8 +90,12 @@ public class MainActivity extends AppCompatActivity {
 
             //  CHANGE INTO MORE SOPHISTICATED HANDLER, PROBABLY SIMPLEGESTUREHANDLER   ==========================================================================================
         dayRecyclerView.setOnTouchListener((v, event) -> {
-            if(event.getAction() == MotionEvent.ACTION_DOWN)
+            if(event.getAction() == MotionEvent.ACTION_DOWN) {
                 dayRecyclerViewSetAdapter();
+                Intent intent = new Intent();
+                intent.putExtra("quantityAndReps", (Serializable) quantityAndRepsList);
+                startActivity(new Intent(context, WorkoutActivity.class));
+            }
             return true;
         });
     }

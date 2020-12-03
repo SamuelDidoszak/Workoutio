@@ -34,8 +34,13 @@
             android:launchMode="standard">
         </activity>
         <activity
-            android:name="EditExerciseMenuActivity"
+            android:name=".EditExerciseMenuActivity"
             android:theme="@style/emptyPopup"
+            android:banner="@style/Theme.AppCompat.NoActionBar"
+            android:launchMode="standard">
+        </activity>
+        <activity
+            android:name=".WorkoutActivity"
             android:banner="@style/Theme.AppCompat.NoActionBar"
             android:launchMode="standard">
         </activity>

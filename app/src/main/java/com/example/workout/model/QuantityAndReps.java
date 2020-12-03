@@ -1,6 +1,8 @@
 package com.example.workout.model;
 
-public class QuantityAndReps {
+import java.io.Serializable;
+
+public class QuantityAndReps implements Serializable {
     int exerciseId;
     String exerciseName;
     int quantity;
