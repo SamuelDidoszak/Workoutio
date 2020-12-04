@@ -6,25 +6,29 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="32dp"
         android:orientation="horizontal"
-        android:weightSum="5">
+        android:weightSum="5"
+        android:background="@color/hardDark">
 
         <LinearLayout
             android:id="@+id/workout_row_muscleContainer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1.5"
-            android:orientation="horizontal"/>
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            android:gravity="center"/>
 
         <TextView
             android:id="@+id/workout_row_exerciseName"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2.5"
+            android:layout_weight="3"
             android:text="@string/exercise"
             android:textStyle="bold"
-            android:textSize="24sp"/>
+            android:textSize="20sp"
+            android:gravity="center"/>
 
         <TextView
             android:id="@+id/workout_row_exerciseAmount"
@@ -32,7 +36,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="8"
-            android:textSize="24sp"
+            android:textSize="20sp"
             android:gravity="center"/>
 
     </LinearLayout>

@@ -84,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
         context = this;
         DB = new DatabaseHandler(this);
 
-
         doneList = DB.getAllDones();
         new SetUp().setAll();
 
@@ -92,9 +91,9 @@ public class MainActivity extends AppCompatActivity {
         dayRecyclerView.setOnTouchListener((v, event) -> {
             if(event.getAction() == MotionEvent.ACTION_DOWN) {
                 dayRecyclerViewSetAdapter();
-                Intent intent = new Intent();
+                Intent intent = new Intent(context, WorkoutActivity.class);
                 intent.putExtra("quantityAndReps", (Serializable) quantityAndRepsList);
-                startActivity(new Intent(context, WorkoutActivity.class));
+                startActivity(intent);
             }
             return true;
         });

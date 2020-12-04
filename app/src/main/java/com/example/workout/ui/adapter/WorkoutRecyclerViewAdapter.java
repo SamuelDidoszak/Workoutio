@@ -4,48 +4,133 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.R;
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.QuantityAndReps;
+import com.example.workout.model.helper.MuscleImageAllocation;
 
 import java.util.List;
 
-public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
+public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapter.ViewHolder>  {
 
     private List<QuantityAndReps> quantityAndRepsList;
-    Context context;
+    public Context context;
     private DatabaseHandler DB;
+    private MutableLiveData<Integer> chosenExercise;
+    private WorkoutRecyclerViewAdapter thisAdapter;
+
+    private int previousExerciseIndex;
+    private QuantityAndReps previousExercise;
 
     public WorkoutRecyclerViewAdapter(Context context, List<QuantityAndReps> quantityAndRepsList) {
         this.quantityAndRepsList = quantityAndRepsList;
         this.context = context;
         DB = new DatabaseHandler(context);
+        this.quantityAndRepsList.addAll(quantityAndRepsList);
+        chosenExercise = new MutableLiveData<>();
+        thisAdapter = this;
+
+        previousExercise = this.quantityAndRepsList.get(0);
+        previousExerciseIndex = 0;
+        this.quantityAndRepsList.remove(0);
+    }
+
+    public MutableLiveData<Integer> getChosenExercise() {
+        return chosenExercise;
     }
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.workout_row, parent, Boolean.FALSE);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        QuantityAndReps quantityAndReps = quantityAndRepsList.get(position);
 
+        holder.exerciseName.setText(quantityAndReps.getExerciseName());
+
+        String quantity = Integer.toString(quantityAndReps.getQuantity());
+        if(!quantity.equals("-1")) {
+            if(quantityAndReps.isCanMore())
+                quantity += "+";
+            holder.exerciseAmount.setText(quantity);
+        }
+        else
+            holder.exerciseAmount.setText("");
+
+            //  Removing allocated images is necessary, otherwise images are recycled and show at inappropriate, multiple positions. It takes 0 ms on a lower end device to clear views.
+        holder.muscleContainer.removeAllViews();
+        new MuscleImageAllocation(DB.getMusclesByExerciseId(quantityAndReps.getExerciseId()),
+                holder.muscleContainer, context)
+                .allocateImages();
+
+        holder.exerciseName.setOnClickListener(holder.onExerciseClick);
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return quantityAndRepsList.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
+
+        LinearLayout muscleContainer;
+        TextView exerciseName, exerciseAmount;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            muscleContainer = itemView.findViewById(R.id.workout_row_muscleContainer);
+            exerciseName = itemView.findViewById(R.id.workout_row_exerciseName);
+            exerciseAmount = itemView.findViewById(R.id.workout_row_exerciseAmount);
         }
+
+        View.OnClickListener onExerciseClick = v -> {
+            int position = getAdapterPosition();
+            QuantityAndReps quantityAndReps = quantityAndRepsList.get(position);
+            chosenExercise.setValue(quantityAndReps.getExerciseId());
+            quantityAndRepsList.remove(position);
+            thisAdapter.notifyItemRemoved(position);
+
+            quantityAndRepsList.add(previousExerciseIndex, previousExercise);
+            thisAdapter.notifyItemInserted(previousExerciseIndex);
+            previousExerciseIndex = position;
+            previousExercise = quantityAndReps;
+        };
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

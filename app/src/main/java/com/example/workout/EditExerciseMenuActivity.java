@@ -62,6 +62,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         DB = new DatabaseHandler(context);
 
         setViews();
+        assignItems();
         fillViews(exerciseId);
 
         ClickHandler clickHandler = new ClickHandler();
@@ -145,7 +146,6 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
     }
 
     private void fillViews(int exerciseId) {
-        assignItems();
         Exercise exercise = DB.getExercise(exerciseId);
 
         exerciseNameTextView.setText(exercise.getExerciseName());
@@ -307,6 +307,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
             public View.OnClickListener onMuscleClickListener = (v) -> {
                 int position = getAdapterPosition();
+                Muscle muscle = DB.getMuscle(allMusclesList.get(position).getMuscleId());
                 inMuscleInclusionList[position][1] = !inMuscleInclusionList[position][1];
                 changeBackground(inMuscleInclusionList[position][1]);
                 changeList[1] = Boolean.TRUE;
