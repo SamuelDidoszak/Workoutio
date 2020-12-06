@@ -73,7 +73,7 @@
                 android:gravity="center"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/workout_activity_timePickerSlider"
+                app:layout_constraintEnd_toStartOf="@id/workout_activity_pickerSlider"
                 app:layout_constraintBottom_toTopOf="@id/workout_activity_negativeCheckBox"
                 app:layout_constraintVertical_weight="1"
                 app:layout_constraintHorizontal_weight="1"/>
@@ -86,21 +86,23 @@
                 android:src="@drawable/toggle_button_checkbox_style"
                 app:layout_constraintTop_toBottomOf="@id/workout_activity_negativeTextView"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/workout_activity_timePickerSlider"
+                app:layout_constraintEnd_toStartOf="@id/workout_activity_pickerSlider"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintVertical_weight="1"/>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/workout_activity_timePickerSlider"
+                android:id="@+id/workout_activity_pickerSlider"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="3"
+                android:clipToPadding="false"
                 android:orientation="horizontal"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@id/workout_activity_negativeTextView"
-                app:layout_constraintEnd_toStartOf="@id/workout_activity_canMoreTextView"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_weight="3"/>
+                app:layout_constraintEnd_toStartOf="@id/workout_activity_canMoreTextView"
+                app:layout_constraintHorizontal_weight="3"
+                app:layout_constraintStart_toEndOf="@id/workout_activity_negativeTextView"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
 
             <TextView
                 android:id="@+id/workout_activity_canMoreTextView"
@@ -110,7 +112,7 @@
                 android:text="@string/can_more"
                 android:gravity="center"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@id/workout_activity_timePickerSlider"
+                app:layout_constraintStart_toEndOf="@id/workout_activity_pickerSlider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/workout_activity_canMoreCheckBox"
                 app:layout_constraintVertical_weight="1"
@@ -123,7 +125,7 @@
                 android:layout_weight="1"
                 android:src="@drawable/toggle_button_checkbox_style"
                 app:layout_constraintTop_toBottomOf="@id/workout_activity_canMoreTextView"
-                app:layout_constraintStart_toEndOf="@id/workout_activity_timePickerSlider"
+                app:layout_constraintStart_toEndOf="@id/workout_activity_pickerSlider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintVertical_weight="1"/>

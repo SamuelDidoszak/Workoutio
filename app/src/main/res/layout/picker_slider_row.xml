@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    android:id="@+id/picker_slider_row_cardView"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="4dp"
+    android:backgroundTint="@color/hardDark">
+
+    <TextView
+        android:id="@+id/picker_slider_row_numberTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5"
+        android:textSize="32sp"
+        android:textStyle="bold|italic"
+        android:background="@color/hardDark"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"/>
+
+</androidx.cardview.widget.CardView>

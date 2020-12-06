@@ -1,7 +1,12 @@
 package com.example.workout;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -10,12 +15,17 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 
 import com.example.workout.data.DatabaseHandler;
+import com.example.workout.model.Exercise;
 import com.example.workout.model.QuantityAndReps;
 import com.example.workout.model.helper.CheckableImageView;
+import com.example.workout.ui.adapter.PickerSliderAdapter;
 import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
 
 import java.util.List;
@@ -27,9 +37,12 @@ public class WorkoutActivity extends AppCompatActivity {
     private ImageView circleImageView;
     private TextView currentWorkoutTextView;
     private com.example.workout.model.helper.Chronometer chronometer;
-    private RecyclerView timePickerSlider, workoutRecyclerView;
+    private RecyclerView pickerSlider, workoutRecyclerView;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
+    private PickerSliderAdapter pickerSliderAdapter;
     private CheckableImageView negativeCheckbox, canMoreCheckbox;
+
+    private int exerciseAmount;
 
     private DatabaseHandler DB;
     private Context context;
@@ -55,14 +68,60 @@ public class WorkoutActivity extends AppCompatActivity {
         setUpRecyclerViews();
     }
 
+        //  add time is amount =======================================
     private void setUpRecyclerViews() {
         workoutRecyclerViewAdapter = new WorkoutRecyclerViewAdapter(context, quantityAndRepsList);
         workoutRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         workoutRecyclerView.setAdapter(workoutRecyclerViewAdapter);
 
         MutableLiveData<Integer> chosenExercise = workoutRecyclerViewAdapter.getChosenExercise();
+            //  add time is amount =======================================
         chosenExercise.observe(this, integer -> {
-            currentWorkoutTextView.setText(DB.getExercise(integer).getExerciseName());
+            Exercise exercise = DB.getExercise(integer);
+            currentWorkoutTextView.setText(exercise.getExerciseName());
+            negativeCheckbox.setChecked(exercise.isDefaultNegative());
+                //  add time is amount =======================================
+            if(exercise.isTimeAsAmount())
+                Log.d(TAG, "Time is the amount");
+        });
+
+            //  pickerSlider
+        pickerSliderAdapter = new PickerSliderAdapter(context);
+        RecyclerView.LayoutManager pickerLayoutManager = new LinearLayoutManager(context, RecyclerView.HORIZONTAL, Boolean.FALSE);
+        pickerSlider.setLayoutManager(pickerLayoutManager);
+        pickerSlider.setAdapter(pickerSliderAdapter);
+        SnapHelper snapHelper = new LinearSnapHelper();
+        snapHelper.attachToRecyclerView(pickerSlider);
+
+            //  Gives the recyclerView paddings that able first and last items to be centered
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 17, getResources().getDisplayMetrics());
+        int screenWidth = displayMetrics.widthPixels;
+        int padding = (screenWidth / 5 ) * 3 / 2 - (int)px;
+        pickerSlider.setPadding(padding, 0, padding, 0);
+
+        MutableLiveData<Integer> clickedNumber = pickerSliderAdapter.getClickedNumber();
+
+        pickerSlider.setOnFlingListener(new RecyclerView.OnFlingListener() {
+            @Override
+            public boolean onFling(int velocityX, int velocityY) {
+
+                new Handler().postDelayed(() -> {
+                    View view = snapHelper.findSnapView(pickerLayoutManager);
+                    int number = pickerSlider.getChildAdapterPosition(view);
+                    pickerSliderAdapter.setExerciseAmount(number);
+                }, 1000);
+
+                return false;
+            }
+        });
+
+        clickedNumber.observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                pickerSlider.smoothScrollToPosition(integer);
+            }
         });
 
     }
@@ -72,7 +131,7 @@ public class WorkoutActivity extends AppCompatActivity {
         circleImageView = findViewById(R.id.workout_activity_circleImageView);
         chronometer = findViewById(R.id.workout_activity_Chronometer);
         currentWorkoutTextView = findViewById(R.id.workout_activity_currentWorkoutTextView);
-        timePickerSlider = findViewById(R.id.workout_activity_timePickerSlider);
+        pickerSlider = findViewById(R.id.workout_activity_pickerSlider);
         workoutRecyclerView = findViewById(R.id.workout_activity_workoutRecyclerView);
             //  CheckBoxes
         negativeCheckbox = findViewById(R.id.workout_activity_negativeCheckBox);
@@ -86,6 +145,7 @@ public class WorkoutActivity extends AppCompatActivity {
 
         negativeCheckbox.setOnClickListener(clickHandler.onNegativeCheckboxClick);
         canMoreCheckbox.setOnClickListener(clickHandler.onCanMoreCheckboxClick);
+
     }
 
     private void countTime() {
