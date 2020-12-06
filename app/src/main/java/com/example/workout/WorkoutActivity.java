@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.QuantityAndReps;
+import com.example.workout.model.helper.CheckableImageView;
 import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class WorkoutActivity extends AppCompatActivity {
     private com.example.workout.model.helper.Chronometer chronometer;
     private RecyclerView timePickerSlider, workoutRecyclerView;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
+    private CheckableImageView negativeCheckbox, canMoreCheckbox;
 
     private DatabaseHandler DB;
     private Context context;
@@ -48,7 +50,8 @@ public class WorkoutActivity extends AppCompatActivity {
         setUpViews();
         setOnClickListeners();
 
-        currentWorkoutTextView.setText(quantityAndRepsList.get(0).getExerciseName());
+        if(quantityAndRepsList.size() != 0)
+            currentWorkoutTextView.setText(quantityAndRepsList.get(0).getExerciseName());
         setUpRecyclerViews();
     }
 
@@ -71,12 +74,18 @@ public class WorkoutActivity extends AppCompatActivity {
         currentWorkoutTextView = findViewById(R.id.workout_activity_currentWorkoutTextView);
         timePickerSlider = findViewById(R.id.workout_activity_timePickerSlider);
         workoutRecyclerView = findViewById(R.id.workout_activity_workoutRecyclerView);
+            //  CheckBoxes
+        negativeCheckbox = findViewById(R.id.workout_activity_negativeCheckBox);
+        canMoreCheckbox = findViewById(R.id.workout_activity_canMoreCheckBox);
     }
 
     private void setOnClickListeners() {
         ClickHandler clickHandler = new ClickHandler();
         circleImageView.setOnClickListener(clickHandler.onCircleClick);
         currentWorkoutTextView.setOnClickListener(clickHandler.onCurrentWorkoutClick);
+
+        negativeCheckbox.setOnClickListener(clickHandler.onNegativeCheckboxClick);
+        canMoreCheckbox.setOnClickListener(clickHandler.onCanMoreCheckboxClick);
     }
 
     private void countTime() {
@@ -94,6 +103,11 @@ public class WorkoutActivity extends AppCompatActivity {
         };
         View.OnClickListener onCurrentWorkoutClick = v -> {
 
+        };
+            //  Checkboxes
+        View.OnClickListener onNegativeCheckboxClick = v -> {
+        };
+        View.OnClickListener onCanMoreCheckboxClick = v -> {
         };
     }
 }

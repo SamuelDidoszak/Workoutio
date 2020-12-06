@@ -20,6 +20,7 @@ import java.util.List;
 
 public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapter.ViewHolder>  {
 
+    private String TAG = "WorkoutRVA";
     private List<QuantityAndReps> quantityAndRepsList;
     public Context context;
     private DatabaseHandler DB;
@@ -37,9 +38,11 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
         chosenExercise = new MutableLiveData<>();
         thisAdapter = this;
 
-        previousExercise = this.quantityAndRepsList.get(0);
-        previousExerciseIndex = 0;
-        this.quantityAndRepsList.remove(0);
+        if(quantityAndRepsList.size() != 0) {
+            previousExercise = this.quantityAndRepsList.get(0);
+            previousExerciseIndex = 0;
+            this.quantityAndRepsList.remove(0);
+        }
     }
 
     public MutableLiveData<Integer> getChosenExercise() {
@@ -95,15 +98,24 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
             exerciseAmount = itemView.findViewById(R.id.workout_row_exerciseAmount);
         }
 
+            /**
+             * Exchanges the exercise from the recyclerview for the current one and vice versa
+             */
         View.OnClickListener onExerciseClick = v -> {
             int position = getAdapterPosition();
+                //  Handles the situation, in which user clicked an item while the recyclerview wasn't updated
+            if(position == RecyclerView.NO_POSITION)
+                return;
+            quantityAndRepsList.add(previousExerciseIndex, previousExercise);
+            thisAdapter.notifyItemInserted(previousExerciseIndex);
+
+            if(position >= previousExerciseIndex)
+                position ++;
             QuantityAndReps quantityAndReps = quantityAndRepsList.get(position);
             chosenExercise.setValue(quantityAndReps.getExerciseId());
             quantityAndRepsList.remove(position);
             thisAdapter.notifyItemRemoved(position);
 
-            quantityAndRepsList.add(previousExerciseIndex, previousExercise);
-            thisAdapter.notifyItemInserted(previousExerciseIndex);
             previousExerciseIndex = position;
             previousExercise = quantityAndReps;
         };
