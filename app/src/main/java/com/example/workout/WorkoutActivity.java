@@ -8,9 +8,11 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,17 +40,19 @@ public class WorkoutActivity extends AppCompatActivity {
     private static final String TAG = "WorkoutActivity";
     private CardView containerCardView;
     private ImageView circleImageView;
-    private TextView currentWorkoutTextView;
+    private TextView currentWorkoutTextView, finishTextView;
     private com.example.workout.model.helper.Chronometer chronometer, workoutTimeChronometer;
     private RecyclerView pickerSlider, workoutRecyclerView;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
     private PickerSliderAdapter pickerSliderAdapter;
     private CheckableImageView negativeCheckbox, canMoreCheckbox;
     private LinearLayout workoutTimeContainer;
+    private Button finishButton;
 
-    private boolean firstExercise = Boolean.TRUE;
+    private boolean firstExercise;
+    private Boolean saved;
+    private Boolean lastOfStartExerciseAfterRest = Boolean.FALSE;
 
-    private Boolean saved = Boolean.FALSE;
     private int currentExerciseId;
     private int exerciseAmount;
     private long exerciseTime;
@@ -57,8 +61,8 @@ public class WorkoutActivity extends AppCompatActivity {
     /**
      * Rest time in seconds
      */
-    private final int REST_TIME = 5;
-    private final Boolean startExerciseAfterRest = Boolean.FALSE;
+    private int REST_TIME = 1;
+    private Boolean startExerciseAfterRest = Boolean.TRUE;
 
     Boolean canSaveInExerciseClick = Boolean.FALSE;
 
@@ -76,6 +80,8 @@ public class WorkoutActivity extends AppCompatActivity {
         context = this;
         DB = new DatabaseHandler(context);
 
+        saved = Boolean.FALSE;
+        firstExercise = Boolean.TRUE;
         quantityAndRepsList = (List<QuantityAndReps>) getIntent().getSerializableExtra("quantityAndReps");
 
         setUpViews();
@@ -113,7 +119,6 @@ public class WorkoutActivity extends AppCompatActivity {
                 chronometer.stop();
                 chronometer.init();
             }
-                //  maybe assign it in a few places or some shit
             currentExerciseId = quantityAndReps.getExerciseId();
             setExerciseData(quantityAndReps);
         });
@@ -158,7 +163,20 @@ public class WorkoutActivity extends AppCompatActivity {
                 exerciseAmount = integer;
             }
         });
+    }
 
+    private void finishWorkout() {
+        workoutTimeChronometer.stop();
+        workoutTimeChronometer.setVisibility(View.INVISIBLE);
+        chronometer.stop();
+
+        String exerciseTime = workoutTimeChronometer.getText().toString();
+            //  DOESNT WORK WHEN THE LAST EXERCISE WAS CHOSEN FROM THE LIST
+        chronometer.setText(exerciseTime);
+
+        finishTextView.setVisibility(View.VISIBLE);
+        finishButton.setVisibility(View.VISIBLE);
+        finishButton.setOnClickListener(new ClickHandler().onFinishButtonClick);
     }
 
     private void setExerciseData(QuantityAndReps quantityAndReps) {
@@ -182,13 +200,17 @@ public class WorkoutActivity extends AppCompatActivity {
             //  Chronometers
         chronometer = findViewById(R.id.workout_activity_Chronometer);
         workoutTimeChronometer = findViewById(R.id.workout_activity_workoutTimeChronometer);
-
+            //  TextViews
         currentWorkoutTextView = findViewById(R.id.workout_activity_currentWorkoutTextView);
+        finishTextView = findViewById(R.id.workout_activity_finishTextView);
+            //  RecyclerViews
         pickerSlider = findViewById(R.id.workout_activity_pickerSlider);
         workoutRecyclerView = findViewById(R.id.workout_activity_workoutRecyclerView);
             //  CheckBoxes
         negativeCheckbox = findViewById(R.id.workout_activity_negativeCheckBox);
         canMoreCheckbox = findViewById(R.id.workout_activity_canMoreCheckBox);
+            //  Button
+        finishButton = findViewById(R.id.workout_activity_finishButton);
 
         workoutTimeContainer = findViewById(R.id.workout_activity_workoutTimeContainer);
     }
@@ -219,13 +241,20 @@ public class WorkoutActivity extends AppCompatActivity {
         Done done = new Done(currentExerciseId, exerciseAmount,
                 (int)exerciseTime,
                 negativeCheckbox.isChecked(), canMoreCheckbox.isChecked());
-        DB.addDone(done);
+        //DB.addDone(done);
 
         if(addNewExercise)
             workoutRecyclerViewAdapter.exerciseFinished();
     }
 
     private void countTime() {
+        saved = Boolean.FALSE;
+            //  runs if it was the last exercise
+        if(workoutRecyclerViewAdapter.getItemCount() == 0 && !lastOfStartExerciseAfterRest) {
+            finishWorkout();
+            return;
+        }
+
         canSaveInExerciseClick = Boolean.TRUE;
         if(chronometer.isStarted() && !chronometer.isBackwards()) {
             chronometer.stop();
@@ -239,23 +268,33 @@ public class WorkoutActivity extends AppCompatActivity {
                 firstExercise = Boolean.FALSE;
             }
 
-            chronometer.startBackwards(REST_TIME);
-            chronometer.start();
+            if(!lastOfStartExerciseAfterRest) {
+                chronometer.startBackwards(REST_TIME);
+                chronometer.start();
+            }
+            else {
+                if(workoutRecyclerViewAdapter.getItemCount() == 0) {
+                    saveDone(false);
+                    currentWorkoutTextView.setText("");
+                    finishWorkout();
+                    return;
+                }
+            }
+
             workoutRecyclerViewAdapter.setDuringRest(Boolean.TRUE);
 
             if(startExerciseAfterRest) {
-                Log.d(TAG, "starting observer");
                 chronometer.observeIfTimeFinished().observe(this, new Observer<Boolean>() {
                     @Override
                     public void onChanged(Boolean aBoolean) {
                         chronometer.stop();
                         workoutRecyclerViewAdapter.setDuringRest(Boolean.FALSE);
                         if(!saved) {
-                            Log.d(TAG, "saving done from observer");
                             canSaveInExerciseClick = Boolean.FALSE;
                             saveDone(true);
+                            if(workoutRecyclerViewAdapter.getItemCount() == 0)
+                                lastOfStartExerciseAfterRest = Boolean.TRUE;
                         }
-                        saved = Boolean.FALSE;
                         countTime();
                     }
                 });
@@ -281,7 +320,6 @@ public class WorkoutActivity extends AppCompatActivity {
             countTime();
         };
         View.OnClickListener onWorkoutTimeClick = v -> {
-            Log.d(TAG, "clicked: ");
             if(workoutTimeChronometer.getVisibility() == View.VISIBLE)
                 workoutTimeChronometer.setVisibility(View.INVISIBLE);
             else
@@ -291,6 +329,10 @@ public class WorkoutActivity extends AppCompatActivity {
         View.OnClickListener onNegativeCheckboxClick = v -> {
         };
         View.OnClickListener onCanMoreCheckboxClick = v -> {
+        };
+            //  Button
+        View.OnClickListener onFinishButtonClick = v -> {
+            Toast.makeText(context, "The workout is finished!", Toast.LENGTH_SHORT).show();
         };
     }
 }
