@@ -9,6 +9,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -36,11 +37,20 @@ public class WorkoutActivity extends AppCompatActivity {
     private CardView containerCardView;
     private ImageView circleImageView;
     private TextView currentWorkoutTextView;
-    private com.example.workout.model.helper.Chronometer chronometer;
+    private com.example.workout.model.helper.Chronometer chronometer, workoutTimeChronometer;
     private RecyclerView pickerSlider, workoutRecyclerView;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
     private PickerSliderAdapter pickerSliderAdapter;
     private CheckableImageView negativeCheckbox, canMoreCheckbox;
+    private LinearLayout workoutTimeContainer;
+
+    private boolean firstExercise = Boolean.TRUE;
+    
+    //  will be exported into the settings
+    /**
+     * Rest time in seconds
+     */
+    private final int REST_TIME = 5;
 
     private int exerciseAmount;
 
@@ -129,18 +139,25 @@ public class WorkoutActivity extends AppCompatActivity {
     private void setUpViews() {
         containerCardView = findViewById(R.id.workout_activity_containerCardView);
         circleImageView = findViewById(R.id.workout_activity_circleImageView);
+            //  Chronometers
         chronometer = findViewById(R.id.workout_activity_Chronometer);
+        workoutTimeChronometer = findViewById(R.id.workout_activity_workoutTimeChronometer);
+
         currentWorkoutTextView = findViewById(R.id.workout_activity_currentWorkoutTextView);
         pickerSlider = findViewById(R.id.workout_activity_pickerSlider);
         workoutRecyclerView = findViewById(R.id.workout_activity_workoutRecyclerView);
             //  CheckBoxes
         negativeCheckbox = findViewById(R.id.workout_activity_negativeCheckBox);
         canMoreCheckbox = findViewById(R.id.workout_activity_canMoreCheckBox);
+
+        workoutTimeContainer = findViewById(R.id.workout_activity_workoutTimeContainer);
     }
 
     private void setOnClickListeners() {
         ClickHandler clickHandler = new ClickHandler();
         circleImageView.setOnClickListener(clickHandler.onCircleClick);
+        workoutTimeContainer.setOnClickListener(clickHandler.onWorkoutTimeClick);
+
         currentWorkoutTextView.setOnClickListener(clickHandler.onCurrentWorkoutClick);
 
         negativeCheckbox.setOnClickListener(clickHandler.onNegativeCheckboxClick);
@@ -149,8 +166,27 @@ public class WorkoutActivity extends AppCompatActivity {
     }
 
     private void countTime() {
-        if(chronometer.isStarted())
+        if(chronometer.isStarted()) {
             chronometer.stop();
+
+            if(firstExercise) {
+                workoutTimeChronometer.setDelayMillis(1000);
+                workoutTimeChronometer.setBase(chronometer.getBase());
+                workoutTimeChronometer.start();
+                workoutTimeChronometer.setVisibility(View.VISIBLE);
+                firstExercise = Boolean.FALSE;
+            }
+
+            chronometer.startBackwards(REST_TIME);
+            chronometer.start();
+
+            chronometer.observeIfTimeFinished().observe(this, new Observer<Boolean>() {
+                @Override
+                public void onChanged(Boolean aBoolean) {
+                    chronometer.stop();
+                }
+            });
+        }
         else {
             chronometer.init();
             chronometer.start();
@@ -161,6 +197,14 @@ public class WorkoutActivity extends AppCompatActivity {
         View.OnClickListener onCircleClick = v -> {
             countTime();
         };
+        View.OnClickListener onWorkoutTimeClick = v -> {
+            Log.d(TAG, "clicked: ");
+            if(workoutTimeChronometer.getVisibility() == View.VISIBLE)
+                workoutTimeChronometer.setVisibility(View.INVISIBLE);
+            else
+                workoutTimeChronometer.setVisibility(View.VISIBLE);
+        };
+
         View.OnClickListener onCurrentWorkoutClick = v -> {
 
         };

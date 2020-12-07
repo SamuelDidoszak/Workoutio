@@ -38,6 +38,24 @@
             android:layout_gravity="center"
             android:textSize="64sp" />
 
+        <LinearLayout
+            android:id="@+id/workout_activity_workoutTimeContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|right"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="32dp"
+            android:padding="4dp">
+
+            <com.example.workout.model.helper.Chronometer
+                android:id="@+id/workout_activity_workoutTimeChronometer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:visibility="invisible"/>
+
+        </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
     <LinearLayout
