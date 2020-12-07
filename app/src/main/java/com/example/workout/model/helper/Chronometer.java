@@ -74,6 +74,10 @@ public class Chronometer extends androidx.appcompat.widget.AppCompatTextView {
         setBase(base);
     }
 
+    public boolean isBackwards() {
+        return backwards;
+    }
+
     /**
      * Starts observing for finishing of countdown <br/>
      * Useless without calling startBackwards method first

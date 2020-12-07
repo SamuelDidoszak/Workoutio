@@ -24,11 +24,18 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
     private List<QuantityAndReps> quantityAndRepsList;
     public Context context;
     private DatabaseHandler DB;
-    private MutableLiveData<Integer> chosenExercise;
+    private MutableLiveData<QuantityAndReps> chosenExercise;
+    private MutableLiveData<Integer> chosenExerciseQuantity;
     private WorkoutRecyclerViewAdapter thisAdapter;
 
-    private int previousExerciseIndex;
+    private Boolean duringRest = Boolean.FALSE;
+
+    private int chosenExerciseIndex;
     private QuantityAndReps previousExercise;
+
+    public void setDuringRest(Boolean duringRest) {
+        this.duringRest = duringRest;
+    }
 
     public WorkoutRecyclerViewAdapter(Context context, List<QuantityAndReps> quantityAndRepsList) {
         this.quantityAndRepsList = quantityAndRepsList;
@@ -40,12 +47,12 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
 
         if(quantityAndRepsList.size() != 0) {
             previousExercise = this.quantityAndRepsList.get(0);
-            previousExerciseIndex = 0;
+            chosenExerciseIndex = 0;
             this.quantityAndRepsList.remove(0);
         }
     }
 
-    public MutableLiveData<Integer> getChosenExercise() {
+    public MutableLiveData<QuantityAndReps> getChosenExercise() {
         return chosenExercise;
     }
 
@@ -106,19 +113,39 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
                 //  Handles the situation, in which user clicked an item while the recyclerview wasn't updated
             if(position == RecyclerView.NO_POSITION)
                 return;
-            quantityAndRepsList.add(previousExerciseIndex, previousExercise);
-            thisAdapter.notifyItemInserted(previousExerciseIndex);
 
-            if(position >= previousExerciseIndex)
-                position ++;
+                //  if clicked during rest time, current exercise shouldn't be added again
+            if(!duringRest) {
+                quantityAndRepsList.add(chosenExerciseIndex, previousExercise);
+                thisAdapter.notifyItemInserted(chosenExerciseIndex);
+
+                if(position >= chosenExerciseIndex)
+                    position ++;
+            }
+            else
+                duringRest = Boolean.FALSE;
+
             QuantityAndReps quantityAndReps = quantityAndRepsList.get(position);
-            chosenExercise.setValue(quantityAndReps.getExerciseId());
+            chosenExercise.setValue(quantityAndReps);
             quantityAndRepsList.remove(position);
             thisAdapter.notifyItemRemoved(position);
 
-            previousExerciseIndex = position;
+            chosenExerciseIndex = position;
             previousExercise = quantityAndReps;
         };
+    }
+
+    /**
+     * Adds the first exercise to become the new one
+     */
+    public void exerciseFinished() {
+        QuantityAndReps quantityAndReps = quantityAndRepsList.get(0);
+        chosenExercise.setValue(quantityAndReps);
+        quantityAndRepsList.remove(0);
+        thisAdapter.notifyItemRemoved(0);
+
+        chosenExerciseIndex = 0;
+        previousExercise = quantityAndReps;
     }
 }
 
