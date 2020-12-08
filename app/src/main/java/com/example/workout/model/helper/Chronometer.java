@@ -102,6 +102,17 @@ public class Chronometer extends androidx.appcompat.widget.AppCompatTextView {
         updateText(SystemClock.elapsedRealtime());
     }
 
+    /**
+     * Sets the base as the current time + modifier <br/>
+     * Can be used to continue the previous time after stopping, by passing the previous elapsedTime * (-1) as a parameter.
+     * @param modifier changes the current base time. Can be negative
+     */
+    public void setBaseWithCurrentTime(long modifier) {
+        mBase = SystemClock.elapsedRealtime() + modifier;
+        dispatchChronometerTick();
+        updateText(SystemClock.elapsedRealtime());
+    }
+
     public long getBase() {
         return mBase;
     }

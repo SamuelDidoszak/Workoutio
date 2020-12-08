@@ -8,6 +8,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,7 +64,7 @@ public class WorkoutActivity extends AppCompatActivity {
      * Rest time in seconds
      */
     private int REST_TIME = 1;
-    private Boolean startExerciseAfterRest = Boolean.TRUE;
+    private Boolean startExerciseAfterRest = Boolean.FALSE;
 
     Boolean canSaveInExerciseClick = Boolean.FALSE;
 
@@ -70,8 +72,7 @@ public class WorkoutActivity extends AppCompatActivity {
     private Context context;
 
     private List<QuantityAndReps> quantityAndRepsList;
-
-
+    
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,7 +86,7 @@ public class WorkoutActivity extends AppCompatActivity {
         quantityAndRepsList = (List<QuantityAndReps>) getIntent().getSerializableExtra("quantityAndReps");
 
         setUpViews();
-        setOnClickListeners();
+        setOnClickAndSwipeListeners();
             //  variable is only temporary  ================================================================================================
         QuantityAndReps temporaryQuantityAndReps = null;
         if(quantityAndRepsList.size() != 0) {
@@ -215,26 +216,56 @@ public class WorkoutActivity extends AppCompatActivity {
         workoutTimeContainer = findViewById(R.id.workout_activity_workoutTimeContainer);
     }
 
-    private void setOnClickListeners() {
+    private void setOnClickAndSwipeListeners() {
         ClickHandler clickHandler = new ClickHandler();
         circleImageView.setOnClickListener(clickHandler.onCircleClick);
         workoutTimeContainer.setOnClickListener(clickHandler.onWorkoutTimeClick);
 
         negativeCheckbox.setOnClickListener(clickHandler.onNegativeCheckboxClick);
         canMoreCheckbox.setOnClickListener(clickHandler.onCanMoreCheckboxClick);
-
-
-        SwipeDetection detection = new SwipeDetection(context);
-        currentWorkoutTextView.setOnTouchListener((v, event) -> detection.onTouch(currentWorkoutTextView, event));
-        detection.getSwipeDirection().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                if(s.equals("right")) {
-                    canSaveInExerciseClick = Boolean.FALSE;
-                    saveDone(true);
-                }
+            //  onSwipeListeners
+        SwipeDetection textSwipeDetection = new SwipeDetection(context);
+        currentWorkoutTextView.setOnTouchListener((v, event) -> textSwipeDetection.onTouch(currentWorkoutTextView, event));
+        textSwipeDetection.getSwipeDirection().observe(this, s -> {
+            if(s.equals("right")) {
+//                canSaveInExerciseClick = Boolean.FALSE;
+//                saveDone(true);
             }
         });
+
+        SwipeDetection circleSwipeDetection = new SwipeDetection(context);
+        circleImageView.setOnTouchListener((v, event) -> circleSwipeDetection.onTouch(currentWorkoutTextView, event));
+        circleSwipeDetection.getSwipeDirection().observe(this, s -> {
+            switch(s) {
+                case "up":
+                case "down":
+                    pauseOrStart();
+                    break;
+                case "left":
+                case "right":
+
+                    break;
+                case "tap":
+                    countTime();
+                    break;
+            }
+        });
+    }
+
+    private void pauseOrStart() {
+        if(chronometer.isStarted()) {
+            chronometer.stop();
+            Animation blinking = new AlphaAnimation(0.0f, 1.0f);
+            blinking.setDuration(500);
+            blinking.setRepeatMode(Animation.REVERSE);
+            blinking.setRepeatCount(Animation.INFINITE);
+            chronometer.startAnimation(blinking);
+        }
+        else {
+            chronometer.clearAnimation();
+            chronometer.setBaseWithCurrentTime(chronometer.getTimeElapsed() * (-1));
+            chronometer.start();
+        }
     }
 
     private void saveDone(Boolean addNewExercise) {
