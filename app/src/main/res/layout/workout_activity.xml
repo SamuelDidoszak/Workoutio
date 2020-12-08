@@ -12,186 +12,26 @@
         android:id="@+id/appToolbar"
         layout="@layout/app_toolbar"/>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/workout_activity_containerCardView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/circle"
-        android:backgroundTint="@color/transparentBlack"
-        android:outlineSpotShadowColor="@color/transparentBlack"
-        android:layout_weight="5">
+   <androidx.fragment.app.FragmentContainerView
+       android:id="@+id/workout_activity_mainFragmentContainer"
+       android:name="com/example/workout/fragment/ChronometerFragment"
+       android:layout_width="match_parent"
+       android:layout_height="0dp"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="parent"
+       android:layout_weight="5" />
 
-        <ImageView
-            android:id="@+id/workout_activity_circleImageView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/circle"/>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_gravity="center">
-
-            <TextView
-                android:id="@+id/workout_activity_finishTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:translationY="16dp"
-                android:text="Workout time:"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@id/workout_activity_Chronometer"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                android:visibility="invisible"/>
-
-            <com.example.workout.model.helper.Chronometer
-                android:id="@+id/workout_activity_Chronometer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="64sp"
-                android:layout_gravity="center"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"/>
-
-            <Button
-                android:id="@+id/workout_activity_finishButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="32sp"
-                android:text="finish"
-                android:textAllCaps="false"
-                android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/workout_activity_Chronometer"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                android:visibility="invisible"/>
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-        <LinearLayout
-            android:id="@+id/workout_activity_workoutTimeContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|right"
-            android:layout_marginTop="8dp"
-            android:layout_marginRight="32dp"
-            android:padding="4dp">
-
-            <com.example.workout.model.helper.Chronometer
-                android:id="@+id/workout_activity_workoutTimeChronometer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:visibility="invisible"/>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <LinearLayout
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/workout_activity_secondaryFragmentContainer"
+        android:name="com/example/workout/fragment/CurrentWorkoutFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:weightSum="2">
-
-        <TextView
-            android:id="@+id/workout_activity_currentWorkoutTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:text="WORKOUT"
-            android:textSize="32sp"
-            android:textStyle="bold|italic"
-            android:layout_weight="1"
-            android:gravity="center"/>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/workout_activity_negativeTextView"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="@string/negative"
-                android:gravity="center"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/workout_activity_pickerSlider"
-                app:layout_constraintBottom_toTopOf="@id/workout_activity_negativeCheckBox"
-                app:layout_constraintVertical_weight="1"
-                app:layout_constraintHorizontal_weight="1"/>
-
-            <com.example.workout.model.helper.CheckableImageView
-                android:id="@+id/workout_activity_negativeCheckBox"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:src="@drawable/toggle_button_checkbox_style"
-                app:layout_constraintTop_toBottomOf="@id/workout_activity_negativeTextView"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/workout_activity_pickerSlider"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintVertical_weight="1"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/workout_activity_pickerSlider"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/workout_activity_canMoreTextView"
-                app:layout_constraintHorizontal_weight="3"
-                app:layout_constraintStart_toEndOf="@id/workout_activity_negativeTextView"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
-
-            <TextView
-                android:id="@+id/workout_activity_canMoreTextView"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="@string/can_more"
-                android:gravity="center"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@id/workout_activity_pickerSlider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/workout_activity_canMoreCheckBox"
-                app:layout_constraintVertical_weight="1"
-                app:layout_constraintHorizontal_weight="1"/>
-
-            <com.example.workout.model.helper.CheckableImageView
-                android:id="@+id/workout_activity_canMoreCheckBox"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:src="@drawable/toggle_button_checkbox_style"
-                app:layout_constraintTop_toBottomOf="@id/workout_activity_canMoreTextView"
-                app:layout_constraintStart_toEndOf="@id/workout_activity_pickerSlider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintVertical_weight="1"/>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </LinearLayout>
+        android:weightSum="2" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/workout_activity_workoutRecyclerView"
