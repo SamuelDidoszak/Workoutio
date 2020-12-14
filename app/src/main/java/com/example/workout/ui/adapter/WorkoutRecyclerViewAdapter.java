@@ -16,9 +16,10 @@ import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.QuantityAndReps;
 import com.example.workout.model.helper.MuscleImageAllocation;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapter.ViewHolder>  {
+public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecyclerViewAdapter.ViewHolder> implements Serializable {
 
     private String TAG = "WorkoutRVA";
     private List<QuantityAndReps> quantityAndRepsList;

@@ -8,13 +8,13 @@ import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.text.DecimalFormat;
 
 public class Chronometer extends androidx.appcompat.widget.AppCompatTextView {
     @SuppressWarnings("unused")
-    private static final String TAG = "Chronometer";
 
     public interface OnChronometerTickListener {
         void onChronometerTick(Chronometer chronometer);
@@ -29,8 +29,8 @@ public class Chronometer extends androidx.appcompat.widget.AppCompatTextView {
     private long timeElapsed;
 
     private boolean backwards = Boolean.FALSE;
-    private boolean observeTimeFinished = Boolean.FALSE;
-    MutableLiveData<Boolean> countdownFinished;
+    private int timeStop;
+    private MutableLiveData<Boolean> timeFinished;
 
     private int delayMillis = 10;
 
@@ -50,6 +50,18 @@ public class Chronometer extends androidx.appcompat.widget.AppCompatTextView {
 
     }
 
+    public int getTimeStop() {
+        return timeStop;
+    }
+
+    public void setTimeStop(int timeStop) {
+        this.timeStop = timeStop;
+    }
+
+    public void removeTimeStop() {
+        this.timeStop = Integer.MAX_VALUE;
+    }
+
     public Chronometer(Context context) {
         this (context, null, 0);
     }
@@ -60,12 +72,21 @@ public class Chronometer extends androidx.appcompat.widget.AppCompatTextView {
 
     public Chronometer(Context context, AttributeSet attrs, int defStyle) {
         super (context, attrs, defStyle);
-
+        timeStop = Integer.MAX_VALUE;
         init();
     }
 
     /**
-     * Starts the chronometer to count time backwards.
+     * Starts the chronometer set to count time backwards. Starts at 0 seconds.
+     */
+    public void startBackwards() {
+        backwards = Boolean.TRUE;
+        long base = SystemClock.elapsedRealtime();
+        setBase(base);
+    }
+
+    /**
+     * Starts the chronometer set to count time backwards.
      * @param secondsFrom amount of seconds to start counting from
      */
     public void startBackwards(long secondsFrom) {
@@ -78,18 +99,26 @@ public class Chronometer extends androidx.appcompat.widget.AppCompatTextView {
         return backwards;
     }
 
+    public void setBackwards(boolean backwards) {
+        this.backwards = backwards;
+    }
+
     /**
-     * Starts observing for finishing of countdown <br/>
+     * Starts observing for finish of the countdown <br/>
      * Useless without calling startBackwards method first
      * @return MutableLiveData to be observed
      */
-    public MutableLiveData<Boolean> observeIfTimeFinished() {
-        countdownFinished = new MutableLiveData<>();
-        observeTimeFinished = Boolean.TRUE;
+    public LiveData<Boolean> observeIfTimeFinished(int timeStop) {
+        timeFinished = new MutableLiveData<>();
+        this.timeStop = timeStop;
 
-        return countdownFinished;
+        return timeFinished;
     }
-    
+
+    /**
+     * Initializes a new base for the chronometer. <br/>
+     * Sets the backwards value to false
+     */
     public void init() {
         backwards = false;
         mBase = SystemClock.elapsedRealtime();
@@ -167,18 +196,33 @@ public class Chronometer extends androidx.appcompat.widget.AppCompatTextView {
         String minus = "";
         if(backwards) {
             timeElapsed = mBase - now;
-                //  runs if the timeFinish observer was set
-            if(observeTimeFinished) {
-                if(timeElapsed / delayMillis <= 0)
-                    countdownFinished.setValue(Boolean.TRUE);
+            //  runs if the timeFinish observer was set
+            if(timeStop != Integer.MAX_VALUE) {
+                if(timeElapsed <= timeStop * 1000)
+                    timeFinished.setValue(Boolean.TRUE);
             }
-            if(timeElapsed / delayMillis < 0) {
+            //  a special case when milliseconds are not showing. Chronometer shows one second more to get more intuitive results
+            if(delayMillis == 1000) {
+                timeElapsed += 1000;
+                if(timeElapsed / 10 < 0) {
+                    timeElapsed -= 1000;
+                    minus = "-";
+                    timeElapsed = Math.abs(timeElapsed);
+                }
+            }
+            else if(timeElapsed / delayMillis < 0) {
+                timeElapsed -= 1000;
                 minus = "-";
                 timeElapsed = Math.abs(timeElapsed);
             }
         }
-        else
+        else {
             timeElapsed = now - mBase;
+            if (timeStop != Integer.MAX_VALUE) {
+                if (timeElapsed / 1000 >= timeStop)
+                    timeFinished.setValue(Boolean.TRUE);
+            }
+        }
 
         DecimalFormat tripleZeros = new DecimalFormat("000");
         DecimalFormat doubleZeros = new DecimalFormat("00");
@@ -200,33 +244,37 @@ public class Chronometer extends androidx.appcompat.widget.AppCompatTextView {
         if(hours > 0) {
             text += doubleZeros.format(hours) + divider;
         }
-            //  delete if and else if you want minutes to always show two digits
+        //  delete if and else if you want minutes to always show two digits
         if(minutes >= 10)
             text += doubleZeros.format(minutes) + divider;
         else
             text += singleZero.format(minutes) + divider;
-        text += doubleZeros.format(seconds) + divider;
+        text += doubleZeros.format(seconds);
 
-            //  Different formatting based on the millisecondDelay
+        //  Different formatting based on the millisecondDelay
         int millisLength = 0;
         switch (delayMillis) {
             case 1000:
                 break;
             case 100:
-                text += singleZero.format(milliseconds);
+                text += divider + milliseconds / 10;
                 millisLength = 1;
                 break;
             case 10:
-                text += doubleZeros.format(milliseconds);
+                text += divider + doubleZeros.format(milliseconds);
                 millisLength = 2;
                 break;
             case 1:
-                text += tripleZeros.format(milliseconds);
+                text += divider + tripleZeros.format(milliseconds);
                 millisLength = 3;
                 break;
         }
 
-            //  Makes the output text's milliseconds smaller
+        //  makes the millisecond divider smaller
+        if(delayMillis != 1000 && !divider.equals(" "))
+            millisLength++;
+
+        //  Makes the output text's milliseconds smaller
         SpannableString spannableText = new SpannableString(minus + text);
         spannableText.setSpan(new RelativeSizeSpan(0.5f), spannableText.length() - millisLength, spannableText.length(), 0);
 
