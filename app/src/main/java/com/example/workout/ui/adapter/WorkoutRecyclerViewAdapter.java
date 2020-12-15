@@ -49,6 +49,7 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
         if(quantityAndRepsList.size() != 0) {
             previousExercise = this.quantityAndRepsList.get(0);
             chosenExerciseIndex = 0;
+            chosenExercise.setValue(previousExercise);
             this.quantityAndRepsList.remove(0);
         }
     }

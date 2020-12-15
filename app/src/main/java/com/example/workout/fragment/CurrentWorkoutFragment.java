@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,6 +43,14 @@ public class CurrentWorkoutFragment extends Fragment {
 
     private int exerciseAmount;
 
+    public CurrentWorkoutFragment() {
+    }
+
+    public CurrentWorkoutFragment(Context context) {
+        this.context = context;
+        DB = new DatabaseHandler(context);
+    }
+
     public void setCurrentWorkoutTextViewText(String text) {
         currentWorkoutTextView.setText(text);
     }
@@ -65,6 +72,7 @@ public class CurrentWorkoutFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         this.context = context;
+        setRetainInstance(true);
     }
 
     @Nullable
@@ -76,7 +84,7 @@ public class CurrentWorkoutFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        DB = new DatabaseHandler(context);
         setUpViews(view);
         setOnClickAndSwipeListeners();
         setUpRecyclerViews();
@@ -127,12 +135,9 @@ public class CurrentWorkoutFragment extends Fragment {
             }
         });
 
-        clickedNumber.observe(getViewLifecycleOwner(), new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                pickerSlider.smoothScrollToPosition(integer);
-                exerciseAmount = integer;
-            }
+        clickedNumber.observe(getViewLifecycleOwner(), integer -> {
+            pickerSlider.smoothScrollToPosition(integer);
+            exerciseAmount = integer;
         });
     }
 

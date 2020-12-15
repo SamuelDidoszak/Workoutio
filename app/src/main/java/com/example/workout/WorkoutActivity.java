@@ -32,7 +32,7 @@ public class WorkoutActivity extends AppCompatActivity {
     private RecyclerView workoutRecyclerView;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
 
-//    private boolean firstExercise;
+    private boolean lastExercise = false;
 
     private DatabaseHandler DB;
     private Context context;
@@ -49,32 +49,24 @@ public class WorkoutActivity extends AppCompatActivity {
         context = this;
         DB = new DatabaseHandler(context);
 
-//        firstExercise = Boolean.TRUE;
         quantityAndRepsList = (List<QuantityAndReps>) getIntent().getSerializableExtra("quantityAndReps");
 
         setUpViews();
-        setUpFragments();
-            //  variable is only temporary  ================================================================================================
-        QuantityAndReps temporaryQuantityAndReps = null;
-        if(quantityAndRepsList.size() != 0) {
-            temporaryQuantityAndReps = quantityAndRepsList.get(0);
-            currentExerciseId = quantityAndRepsList.get(0).getExerciseId();
-            currentWorkoutFragment.setExerciseData(quantityAndRepsList.get(0));
-        }
         setUpRecyclerView();
-
-        if(temporaryQuantityAndReps != null)
-            currentWorkoutFragment.setExerciseData(temporaryQuantityAndReps);
+        setUpFragments();
 
         chronometerFragment.getSaveDone().observe(this, aBoolean -> {
             saveDone(aBoolean);
             if(workoutRecyclerViewAdapter.getItemCount() == 0) {
-                currentWorkoutFragment.setCurrentWorkoutTextViewText("");
+                if (lastExercise)
+                    currentWorkoutFragment.setCurrentWorkoutTextViewText("");
+                lastExercise = true;
             }
         });
     }
 
-        //  add time is amount =======================================
+
+    //  add time is amount =======================================
     private void setUpRecyclerView() {
         workoutRecyclerViewAdapter = new WorkoutRecyclerViewAdapter(context, quantityAndRepsList);
         workoutRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -112,17 +104,14 @@ public class WorkoutActivity extends AppCompatActivity {
         Bundle chronometerBundle = new Bundle();
         chronometerBundle.putSerializable("WorkoutRecyclerViewAdapter", workoutRecyclerViewAdapter);
 
-        Bundle workoutBundle = new Bundle();
+        currentWorkoutFragment = new CurrentWorkoutFragment(context);
 
-        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).add(R.id.workout_activity_primaryFragmentContainer, ChronometerFragment.class, chronometerBundle, "Chronometer").commit();
-//        transaction.setReorderingAllowed(true).add(R.id.workout_activity_currentWorkoutTextView, CurrentWorkoutFragment.class, workoutBundle, "Workout");
-//        transaction.commit();
+        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).add(R.id.workout_activity_primaryFragmentContainer, ChronometerFragment.class, chronometerBundle).commit();
+        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).add(R.id.workout_activity_secondaryFragmentContainer, currentWorkoutFragment, "CurrentWorkout").commit();
+        getSupportFragmentManager().executePendingTransactions();
 
-        chronometerFragment = (ChronometerFragment)getSupportFragmentManager().findFragmentByTag("Chronometer");
-        currentWorkoutFragment = (CurrentWorkoutFragment)getSupportFragmentManager().findFragmentByTag("Workout");
-
-        Log.d(TAG, "setUpFragments: " + chronometerFragment);
-        Log.d(TAG, "setUpFragments: " + currentWorkoutFragment);
+        chronometerFragment = (ChronometerFragment)getSupportFragmentManager().findFragmentById(R.id.workout_activity_primaryFragmentContainer);
+        currentWorkoutFragment = (CurrentWorkoutFragment)getSupportFragmentManager().findFragmentByTag("CurrentWorkout");
     }
 
     public void saveDone(Boolean addNewExercise) {
@@ -130,6 +119,8 @@ public class WorkoutActivity extends AppCompatActivity {
                 (int)chronometerFragment.getExerciseTime(),
                 currentWorkoutFragment.isNegativeCheckboxChecked(), currentWorkoutFragment.isCanMoreCheckboxChecked());
         //DB.addDone(done);
+
+        Log.d(TAG, DB.getExercise(done.getExerciseId()).getExerciseName() + ", " + done.getQuantity() + ", " + done.getTime() + ", " + done.isNegative() + ", " + done.isCanMore());
 
         if(addNewExercise)
             workoutRecyclerViewAdapter.exerciseFinished();

@@ -86,6 +86,7 @@ public class ChronometerFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        setRetainInstance(true);
         this.context = context;
     }
 
@@ -99,8 +100,8 @@ public class ChronometerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        workoutRecyclerViewAdapter = (WorkoutRecyclerViewAdapter)getArguments().getSerializable("quantityAndReps");
-
+        if(getArguments() != null)
+            workoutRecyclerViewAdapter = (WorkoutRecyclerViewAdapter)requireArguments().getSerializable("WorkoutRecyclerViewAdapter");
         saved = Boolean.FALSE;
         firstExercise = Boolean.TRUE;
 
@@ -126,9 +127,10 @@ public class ChronometerFragment extends Fragment {
     }
 
     private void countTime() {
-        saved = Boolean.FALSE;
         //  runs if it was the last exercise
-        if(workoutRecyclerViewAdapter.getItemCount() == 0 && !lastOfStartExerciseAfterRest) {
+        if(workoutRecyclerViewAdapter.getItemCount() == 0 && !lastOfStartExerciseAfterRest && !saved) {
+            exerciseTime = chronometer.getTimeElapsed();
+            saveDone.setValue(false);
             finishWorkout();
             return;
         }
@@ -153,7 +155,6 @@ public class ChronometerFragment extends Fragment {
             else {
                 if(workoutRecyclerViewAdapter.getItemCount() == 0) {
                     saveDone.setValue(false);
-//                    currentWorkoutTextView.setText("");
                     finishWorkout();
                     return;
                 }
@@ -166,11 +167,13 @@ public class ChronometerFragment extends Fragment {
                     chronometer.stop();
                     workoutRecyclerViewAdapter.setDuringRest(Boolean.FALSE);
                     if(!saved) {
+                        saved = true;
                         canSaveInExerciseClick = Boolean.FALSE;
                         saveDone.setValue(true);
                         if(workoutRecyclerViewAdapter.getItemCount() == 0)
                             lastOfStartExerciseAfterRest = Boolean.TRUE;
                     }
+                    chronometer.removeTimeStop();
                     countTime();
                 });
             }
@@ -180,14 +183,13 @@ public class ChronometerFragment extends Fragment {
                 if(!saved) {
                     canSaveInExerciseClick = Boolean.FALSE;
                     saveDone.setValue(true);
-                    saved = Boolean.TRUE;
                 }
             }
             chronometer.init();
             chronometer.start();
             workoutRecyclerViewAdapter.setDuringRest(Boolean.FALSE);
-            saved = Boolean.FALSE;
         }
+        saved = Boolean.FALSE;
     }
 
 
@@ -202,8 +204,6 @@ public class ChronometerFragment extends Fragment {
 
         workoutTimeContainer = view.findViewById(R.id.workout_activity_workoutTimeContainer);
     }
-
-
 
     private void setOnClickAndSwipeListeners() {
         ClickHandler clickHandler = new ClickHandler();
@@ -237,7 +237,6 @@ public class ChronometerFragment extends Fragment {
         });
     }
 
-
     private class ClickHandler {
         View.OnClickListener onCircleClick = v -> {
             countTime();
@@ -260,7 +259,6 @@ public class ChronometerFragment extends Fragment {
         chronometer.stop();
 
         String exerciseTime = workoutTimeChronometer.getText().toString();
-            //  DOESNT WORK WHEN THE LAST EXERCISE WAS CHOSEN FROM THE LIST
         chronometer.setText(exerciseTime);
 
         finishTextView.setVisibility(View.VISIBLE);
