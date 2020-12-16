@@ -55,9 +55,6 @@ public class CurrentWorkoutFragment extends Fragment {
         currentWorkoutTextView.setText(text);
     }
 
-    public String getCurrentWorkoutTextViewText() {
-        return currentWorkoutTextView.getText().toString();
-    }
     public int getExerciseAmount() {
         return exerciseAmount;
     }

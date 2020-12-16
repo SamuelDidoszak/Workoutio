@@ -2,6 +2,7 @@ package com.example.workout.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,7 @@ public class ChronometerFragment extends Fragment {
     private Boolean saved;
     private long exerciseTime;
     private MutableLiveData<Boolean> saveDone;
+    private MutableLiveData<Boolean> showDoneExercises;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
 
 
@@ -67,8 +69,15 @@ public class ChronometerFragment extends Fragment {
     }
 
     public LiveData<Boolean> getSaveDone() {
-        saveDone = new MutableLiveData<>();
+        if(saveDone == null)
+            saveDone = new MutableLiveData<>();
         return saveDone;
+    }
+
+    public LiveData<Boolean> showDoneExercises() {
+        if(showDoneExercises == null)
+            showDoneExercises = new MutableLiveData<>();
+        return showDoneExercises;
     }
 
     //  will be exported into the settings
@@ -101,7 +110,7 @@ public class ChronometerFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         if(getArguments() != null)
-            workoutRecyclerViewAdapter = (WorkoutRecyclerViewAdapter)requireArguments().getSerializable("WorkoutRecyclerViewAdapter");
+            workoutRecyclerViewAdapter = (WorkoutRecyclerViewAdapter)requireArguments().getSerializable("workoutRecyclerViewAdapter");
         saved = Boolean.FALSE;
         firstExercise = Boolean.TRUE;
 
@@ -219,7 +228,7 @@ public class ChronometerFragment extends Fragment {
         });
 
         SwipeDetection circleSwipeDetection = new SwipeDetection(context);
-//        circleImageView.setOnTouchListener((v, event) -> circleSwipeDetection.onTouch(currentWorkoutTextView, event));
+        circleImageView.setOnTouchListener((v, event) -> circleSwipeDetection.onTouch(circleImageView, event));
         circleSwipeDetection.getSwipeDirection().observe(getViewLifecycleOwner(), s -> {
             switch(s) {
                 case "up":
@@ -228,7 +237,8 @@ public class ChronometerFragment extends Fragment {
                     break;
                 case "left":
                 case "right":
-
+                    Log.d(TAG, "Left||Right");
+                    showDoneExercises.setValue(Boolean.TRUE);
                     break;
                 case "tap":
                     countTime();

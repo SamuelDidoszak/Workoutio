@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    android:id="@+id/done_exercises_row_containerCardView"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@color/hardDark">
+
+        <TextView
+            android:id="@+id/done_exercises_row_exerciseNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:text="@string/exercise"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/done_exercises_row_amountTextView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/quantity"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/done_exercises_row_timeTextView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/time"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <com.example.workout.model.helper.CheckableImageView
+            android:id="@+id/done_exercises_row_negativeCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:src="@drawable/toggle_button_checkbox_style"/>
+
+        <com.example.workout.model.helper.CheckableImageView
+            android:id="@+id/done_exercises_row_canMoreCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:src="@drawable/toggle_button_checkbox_style"/>
+
+
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

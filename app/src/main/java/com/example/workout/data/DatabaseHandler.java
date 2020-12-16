@@ -384,39 +384,44 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return done;
     }
 
-        public List<Done> getDonesByDate(String date) {
-            SQLiteDatabase db = this.getReadableDatabase();
-            List<Done> doneList = new ArrayList<>();
+        /**
+         * Fetches Dones by Date.
+         * @param date date with a pattern of "dd.MM.yyyy". If not provided, method fetches dones for a current date.
+         * @return list of dones.
+         */
+        public List<Done> getDonesByDate(@Nullable String date) {
+                SQLiteDatabase db = this.getReadableDatabase();
+                List<Done> doneList = new ArrayList<>();
 
-            if(date == null) {
-                Date currentDate = Calendar.getInstance().getTime();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-                date = dateFormat.format(currentDate);
-            }
-            Cursor cursor = db.query(Constants.TABLE_DONE,
-                    new String[]{Constants.COLUMN_DONE_ID,
-                            Constants.COLUMN_DATE,
-                            Constants.COLUMN_EXERCISE_ID,
-                            Constants.COLUMN_QUANTITY,
-                            Constants.COLUMN_TIME,
-                            Constants.COLUMN_NEGATIVE,
-                            Constants.COLUMN_CAN_MORE},
-                    Constants.COLUMN_DATE + " LIKE '" + date + "%'",
-                    null,
-                    null, null, null, null);
-
-            if (cursor.getCount() != 0) {
-                cursor.moveToFirst();
-                do {
-                    Boolean negative = cursor.getInt(5) == 1 ? Boolean.TRUE : Boolean.FALSE;
-                    Boolean canMore = cursor.getInt(6) == 1 ? Boolean.TRUE : Boolean.FALSE;
-                    doneList.add(new Done(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getInt(4), negative, canMore));
+                if(date == null) {
+                    Date currentDate = Calendar.getInstance().getTime();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                    date = dateFormat.format(currentDate);
                 }
-                while (cursor.moveToNext());
+                Cursor cursor = db.query(Constants.TABLE_DONE,
+                        new String[]{Constants.COLUMN_DONE_ID,
+                                Constants.COLUMN_DATE,
+                                Constants.COLUMN_EXERCISE_ID,
+                                Constants.COLUMN_QUANTITY,
+                                Constants.COLUMN_TIME,
+                                Constants.COLUMN_NEGATIVE,
+                                Constants.COLUMN_CAN_MORE},
+                        Constants.COLUMN_DATE + " LIKE '" + date + "%'",
+                        null,
+                        null, null, null, null);
+
+                if (cursor.getCount() != 0) {
+                    cursor.moveToFirst();
+                    do {
+                        Boolean negative = cursor.getInt(5) == 1 ? Boolean.TRUE : Boolean.FALSE;
+                        Boolean canMore = cursor.getInt(6) == 1 ? Boolean.TRUE : Boolean.FALSE;
+                        doneList.add(new Done(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getInt(4), negative, canMore));
+                    }
+                    while (cursor.moveToNext());
+                }
+                db.close();
+                return doneList;
             }
-            db.close();
-            return doneList;
-        }
 
     public Exercise getExercise(int exerciseId) {
         SQLiteDatabase db = this.getReadableDatabase();
