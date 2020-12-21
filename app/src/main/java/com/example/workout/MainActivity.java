@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,6 +26,7 @@ import com.example.workout.model.Done;
 import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
 import com.example.workout.model.QuantityAndReps;
+import com.example.workout.model.helper.LinearLayoutManagerHorizontalSwipe;
 import com.example.workout.model.helper.MuscleDateTime;
 import com.example.workout.ui.adapter.DayExerciseRecyclerViewAdapter;
 import com.example.workout.ui.adapter.DayMuscleRecyclerViewAdapter;
@@ -86,16 +88,20 @@ public class MainActivity extends AppCompatActivity {
 
         doneList = DB.getAllDones();
         new SetUp().setAll();
+    }
 
-            //  CHANGE INTO MORE SOPHISTICATED HANDLER, PROBABLY SIMPLEGESTUREHANDLER   ==========================================================================================
-        dayRecyclerView.setOnTouchListener((v, event) -> {
-            if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                dayRecyclerViewSetAdapter();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LinearLayoutManagerHorizontalSwipe layoutManager = (LinearLayoutManagerHorizontalSwipe)dayRecyclerView.getLayoutManager();
+        layoutManager.isSwipeHorizontal().observe(MainActivity.this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                layoutManager.isSwipeHorizontal().removeObserver(this);
                 Intent intent = new Intent(context, WorkoutActivity.class);
                 intent.putExtra("quantityAndReps", (Serializable) quantityAndRepsList);
                 startActivity(intent);
             }
-            return true;
         });
     }
 
@@ -124,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
      *  DayMuscleRecyclerViewAdapter if TRUE <br/>
      *  DayExerciseRecyclerViewAdapter if FALSE
      */
+        //  it has a commented out part and i dont know why ======================================================================================================================================================
     private void dayRecyclerViewSetAdapter() {
         if(isDayRecyclerViewMuscle) {
 //            if(quantityAndRepsList.size() == 0)
@@ -277,12 +284,22 @@ public class MainActivity extends AppCompatActivity {
                 //  Create RecyclerViews
                     //  DayRecyclerView
             dayRecyclerView.setHasFixedSize(true);
-            dayRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+            LinearLayoutManagerHorizontalSwipe layoutManager = new LinearLayoutManagerHorizontalSwipe(context, LinearLayoutManager.VERTICAL, false);
+            dayRecyclerView.setLayoutManager(layoutManager);
 
             dayMuscleRecyclerViewAdapter = new DayMuscleRecyclerViewAdapter(context, dayMuscleList);
             dayExerciseRecyclerViewAdapter = new DayExerciseRecyclerViewAdapter(context, quantityAndRepsList);
             dayRecyclerView.setAdapter(dayMuscleRecyclerViewAdapter);
             isDayRecyclerViewMuscle = Boolean.TRUE;
+
+            dayRecyclerView.setOnTouchListener((v, event) -> {
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    dayRecyclerViewSetAdapter();
+                    return true;
+                }
+                else
+                    return false;
+            });
 
                     //  HistoryRecyclerView
             historyRecyclerView.setHasFixedSize(true);

@@ -47,6 +47,8 @@ public class ChronometerFragment extends Fragment {
     private MutableLiveData<Boolean> showDoneExercises;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
 
+    private long pauseTimeBase = 0, overallTimeBase = 0;
+
 
         //  getters and setters
         public Chronometer getChronometer() {
@@ -99,6 +101,33 @@ public class ChronometerFragment extends Fragment {
         this.context = context;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(chronometer.isBackwards())
+            pauseTimeBase = chronometer.getBase();
+        if(workoutTimeChronometer.isStarted())
+            overallTimeBase = workoutTimeChronometer.getBase();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(pauseTimeBase != 0) {
+            chronometer.setBase(pauseTimeBase);
+            chronometer.setBackwards(true);
+            chronometer.start();
+        }
+        if(overallTimeBase != 0) {
+            workoutTimeChronometer.setBase(overallTimeBase);
+            workoutTimeChronometer.start();
+            workoutTimeChronometer.setVisibility(View.VISIBLE);
+        }
+        pauseTimeBase = 0;
+    }
+
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -136,6 +165,7 @@ public class ChronometerFragment extends Fragment {
     }
 
     private void countTime() {
+        Log.d(TAG, "countTime called");
         //  runs if it was the last exercise
         if(workoutRecyclerViewAdapter.getItemCount() == 0 && !lastOfStartExerciseAfterRest && !saved) {
             exerciseTime = chronometer.getTimeElapsed();

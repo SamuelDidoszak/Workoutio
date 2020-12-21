@@ -2,49 +2,66 @@ package com.example.workout.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.R;
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.model.Done;
+import com.example.workout.model.helper.LinearLayoutManagerHorizontalSwipe;
 import com.example.workout.ui.adapter.DoneExercisesRecyclerViewAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DoneExercisesFragment extends Fragment {
 
     private Context context;
     private DatabaseHandler DB;
-    private CardView container;
     private RecyclerView doneRecyclerView;
+    private TextView noExercises;
     private DoneExercisesRecyclerViewAdapter doneExercisesRecyclerViewAdapter;
     private List<Done> doneList;
-    private MutableLiveData<Boolean> showDoneExercises;
+    private List<Integer> editedDoneList;
+    private MutableLiveData<Boolean> fragmentFinished;
+
+    public LiveData<Boolean> getFragmentFinished() {
+        if(fragmentFinished == null)
+            fragmentFinished = new MutableLiveData<>();
+        return fragmentFinished;
+    }
+
+    public int getDoneId() {
+        return doneExercisesRecyclerViewAdapter.getDoneId();
+    }
+
+    public void notifyItemChanged(int position, @Nullable Integer amount, @Nullable Integer time) {
+        if(amount != null)
+            doneList.get(position).setQuantity(amount);
+        if(time != null)
+            doneList.get(position).setTime(time);
+
+        addPositionToEditedList(position);
+        doneExercisesRecyclerViewAdapter.notifyItemChanged(position);
+    }
+
+
 
     public LiveData<Done> getChosenDone() {
+        if(doneExercisesRecyclerViewAdapter == null)
+            return null;
         return doneExercisesRecyclerViewAdapter.getChosenDone();
-    }
-    public LiveData<Boolean> isTimePicker() {
-        return doneExercisesRecyclerViewAdapter.isTimePicker();
-    }
-    public LiveData<Boolean> showDoneExercises() {
-        if(showDoneExercises == null)
-            showDoneExercises = new MutableLiveData<>();
-        return showDoneExercises;
     }
 
     @Override
@@ -64,92 +81,54 @@ public class DoneExercisesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         DB = new DatabaseHandler(context);
 
-        container = view.findViewById(R.id.done_exercises_fragment_container);
         doneRecyclerView = view.findViewById(R.id.done_exercises_fragment_doneRecyclerView);
         doneList = DB.getDonesByDate(null);
 
-        doneExercisesRecyclerViewAdapter = new DoneExercisesRecyclerViewAdapter(doneList, context);
-        doneRecyclerView.setLayoutManager(new LinearLayoutManager(context, RecyclerView.VERTICAL, false));
-        doneRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
+        editedDoneList = new ArrayList<>();
 
-        SwipeDetection containerSwipeDetection = new SwipeDetection(context);
-        doneRecyclerView.setOnTouchListener((v, event) -> containerSwipeDetection.onTouch(doneRecyclerView, event));
-        containerSwipeDetection.getSwipeDirection().observe(getViewLifecycleOwner(), s -> {
-            switch(s) {
-                case "up":
-                case "down":
-                    Log.d("TAG", "onViewCreated: jeff");
-                    break;
-                case "left":
-                case "right":
-                    Log.d("TAG", "left||right");
-//                    showDoneExercises.setValue(Boolean.FALSE);
-                    break;
-                case "tap":
-                    Log.d("TAG", "tap");
-                    break;
-            }
-        });
-    }
+        if (doneList.size() == 0) {
+            noExercises = view.findViewById(R.id.done_exercises_fragment_noExercisesTextView);
+            noExercises.setVisibility(View.VISIBLE);
 
-    class SwipeDetection extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
+            noExercises.setOnTouchListener((v, event) -> {
+                getParentFragmentManager().popBackStack("chronometerBackStack", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                return false;
+            });
+        } else {
+            doneExercisesRecyclerViewAdapter = new DoneExercisesRecyclerViewAdapter(doneList, context);
+            LinearLayoutManagerHorizontalSwipe layoutManager = new LinearLayoutManagerHorizontalSwipe(context, RecyclerView.VERTICAL, false);
+            doneRecyclerView.setLayoutManager(layoutManager);
+            doneRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
 
-        private MutableLiveData<String> swipeDirection;
-        private GestureDetector detector;
+            layoutManager.isSwipeHorizontal().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+                @Override
+                public void onChanged(Boolean aBoolean) {
+                        //  save all changes
+                    for(Integer i : editedDoneList) {
+                        DB.editDone(doneList.get(i));
+                    }
 
-        public LiveData<String> getSwipeDirection() {
-            return swipeDirection;
-        }
+                    layoutManager.isSwipeHorizontal().removeObserver(this);
+                    fragmentFinished.setValue(Boolean.TRUE);
+                }
+            });
 
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if(Math.abs(velocityX) > Math.abs(velocityY))
-            {
-                if(e1.getX() > e2.getX())
-                    swipeDirection.setValue("left");
-                else
-                    swipeDirection.setValue("right");
-            }
-            else {
-                if(e1.getY() > e2.getY())
-                    swipeDirection.setValue("up");
-                else
-                    swipeDirection.setValue("down");
-            }
-            return true;
-        }
-
-        public boolean onSingleTapUp(MotionEvent e) {
-//            swipeDirection.setValue("tap");
-            return false;
-        }
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            detector.onTouchEvent(event);
-            return true;
-        }
-
-        public GestureDetector getDetector()
-        {
-            return detector;
-        }
-
-        public SwipeDetection(Context context) {
-            this(context, null);
-        }
-
-        public SwipeDetection(Context context, GestureDetector gestureDetector) {
-            if(gestureDetector == null)
-                gestureDetector = new GestureDetector(context, this);
-            this.detector = gestureDetector;
-            swipeDirection = new MutableLiveData<>();
-
+            doneExercisesRecyclerViewAdapter.getChangedCheckables().observe(getViewLifecycleOwner(), integer -> addPositionToEditedList(integer));
         }
     }
 
+    /**
+     * Adds the position to the list if it doesn't already exist
+     * @param position
+     */
+    private void addPositionToEditedList(int position) {
+        for(Integer i : editedDoneList) {
+            if(i == position)
+                return;
+        }
+        editedDoneList.add(position);
+    }
 }
-
-
 
 
 

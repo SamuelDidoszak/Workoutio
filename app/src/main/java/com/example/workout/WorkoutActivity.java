@@ -3,12 +3,16 @@ package com.example.workout;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +21,7 @@ import com.example.workout.data.DatabaseHandler;
 import com.example.workout.fragment.ChronometerFragment;
 import com.example.workout.fragment.CurrentWorkoutFragment;
 import com.example.workout.fragment.DoneExercisesFragment;
+import com.example.workout.fragment.EditExerciseFragment;
 import com.example.workout.model.Done;
 import com.example.workout.model.QuantityAndReps;
 import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
@@ -30,6 +35,7 @@ public class WorkoutActivity extends AppCompatActivity {
     private FragmentContainerView primaryFragmentContainer, secondaryFragmentContainer;
     private ChronometerFragment chronometerFragment;
     private CurrentWorkoutFragment currentWorkoutFragment;
+    private EditExerciseFragment editExerciseFragment;
     private DoneExercisesFragment doneExercisesFragment;
 
     private CardView containerCardView;
@@ -122,43 +128,94 @@ public class WorkoutActivity extends AppCompatActivity {
     private void watchFragmentChange() {
         if(chronometerFragment.isAdded()) {
             chronometerFragment.showDoneExercises().observe(this, aBoolean -> {
-                Log.d(TAG, "watchFragmentChange: ye");
                 if(aBoolean == Boolean.TRUE) {
-                    Log.d(TAG, "watchFragmentChange: true");
                     getSupportFragmentManager().beginTransaction().setReorderingAllowed(true)
                             .replace(R.id.workout_activity_primaryFragmentContainer, DoneExercisesFragment.class, null, "doneExercises").addToBackStack("chronometerBackStack").commit();
                     getSupportFragmentManager().executePendingTransactions();
-
                     doneExercisesFragment = (DoneExercisesFragment) getSupportFragmentManager().findFragmentByTag("doneExercises");
-                    Log.d(TAG, "watchFragmentChange: " + doneExercisesFragment);
-                    Log.d(TAG, "watchFragmentChange: " + doneExercisesFragment.getLifecycle().getCurrentState().toString());
-                }
-            });
-        }
-        else {
-            Log.d(TAG, "watchFragmentChange: ???");
-            doneExercisesFragment.showDoneExercises().observe(this, aBoolean -> {
-                Log.d(TAG, "watchFragmentChange: ?????");
-                if(aBoolean == Boolean.FALSE) {
-                    getSupportFragmentManager().popBackStack("chronometerBackStack", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                    getSupportFragmentManager().executePendingTransactions();
-                }
-            });
-        }
-    }
 
-    private void replaceFragments() {
-        if(chronometerFragment.isVisible()) {
-            getSupportFragmentManager().beginTransaction().setReorderingAllowed(true)
-                    .replace(R.id.workout_activity_primaryFragmentContainer, DoneExercisesFragment.class, null, "doneExercises").addToBackStack("chronometerBackStack");
-            getSupportFragmentManager().executePendingTransactions();
-            doneExercisesFragment = (DoneExercisesFragment)getSupportFragmentManager().findFragmentByTag("doneExercises");
+                    secondaryFragmentContainer.setVisibility(View.GONE);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 7f);
+                    primaryFragmentContainer.setLayoutParams(params);
+
+                    LifecycleOwner owner = this;
+                    do {
+                        try {
+                            if(doneExercisesFragment.isAdded()) {
+                                if(doneExercisesFragment.getChosenDone() != null) {
+                                    doneExercisesFragment.getChosenDone().observe(owner, done -> {
+                                        doneExercisesFragment.getChosenDone();
+                                        int id = doneExercisesFragment.getDoneId();
+                                        setUpSecondaryFragment(id);
+                                        editExerciseFragment.setExerciseData(done);
+                                    });
+                                }
+                                break;
+                            }
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                    while (true);
+
+                    doneExercisesFragment.getFragmentFinished().observe(this, aBoolean1 -> watchFragmentChange());
+                }
+            });
         }
         else {
             getSupportFragmentManager().popBackStack("chronometerBackStack", FragmentManager.POP_BACK_STACK_INCLUSIVE);
             getSupportFragmentManager().executePendingTransactions();
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 5f);
+            primaryFragmentContainer.setLayoutParams(params);
+
+            getSupportFragmentManager().popBackStack("currentWorkoutBackStack", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            getSupportFragmentManager().executePendingTransactions();
+            secondaryFragmentContainer.setVisibility(View.VISIBLE);
+
+            currentWorkoutFragment = (CurrentWorkoutFragment)getSupportFragmentManager().findFragmentByTag("currentWorkout");
+            Log.d(TAG, "watchFragmentChange: " + currentWorkoutFragment.toString());
         }
     }
+
+
+    private void setUpSecondaryFragment(int id) {
+        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true)
+                .replace(R.id.workout_activity_secondaryFragmentContainer, EditExerciseFragment.class, null, "editExercise").addToBackStack("currentWorkoutBackStack").commit();
+        getSupportFragmentManager().executePendingTransactions();
+        editExerciseFragment = (EditExerciseFragment) getSupportFragmentManager().findFragmentByTag("editExercise");
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 5f);
+        primaryFragmentContainer.setLayoutParams(params);
+
+        secondaryFragmentContainer.setVisibility(View.VISIBLE);
+
+        editExerciseFragment.resetLiveDatas();
+
+        LifecycleOwner owner = this;
+        do {
+            try {
+                if(editExerciseFragment.isAdded()) {
+                    editExerciseFragment.getExerciseAmount().observe(owner, number -> {
+                        quantityAndRepsList.get(id).setQuantity(number);
+                        doneExercisesFragment.notifyItemChanged(id, number, null);
+                    });
+                    editExerciseFragment.getExerciseTime().observe(owner, number -> {
+                        doneExercisesFragment.notifyItemChanged(id, null, number);
+                    });
+                    break;
+                }
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        } while (true);
+    }
+
+
 
     public void saveDone(Boolean addNewExercise) {
         Done done = new Done(currentExerciseId, currentWorkoutFragment.getExerciseAmount(),

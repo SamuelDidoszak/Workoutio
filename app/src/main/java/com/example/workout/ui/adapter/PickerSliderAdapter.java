@@ -14,11 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.workout.R;
 
 public class PickerSliderAdapter extends RecyclerView.Adapter<PickerSliderAdapter.ViewHolder> {
-    private final int MAXIMUM_RANGE = 50 + 1;
+    private int maximumRange = 50 + 1;
     private Context context;
     private PickerSliderAdapter thisAdapter = this;
     private MutableLiveData<Integer> clickedNumber;
     private int exerciseAmount;
+
+    public void setMaximumRange(int maximumRange) {
+        this.maximumRange = maximumRange + 1;
+    }
 
     public void setExerciseAmount(int exerciseAmount) {
         this.exerciseAmount = exerciseAmount;
@@ -54,7 +58,7 @@ public class PickerSliderAdapter extends RecyclerView.Adapter<PickerSliderAdapte
 
     @Override
     public int getItemCount() {
-        return MAXIMUM_RANGE;
+        return maximumRange;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -72,22 +76,6 @@ public class PickerSliderAdapter extends RecyclerView.Adapter<PickerSliderAdapte
             clickedNumber.setValue(position);
         };
     }
-
-
-
-//    public class SliderLayoutManager extends LinearLayoutManager {
-//
-//        public SliderLayoutManager(Context context) {
-//            super(context);
-//        }
-//
-//        @Override
-//        public void onScrollStateChanged(int state) {
-//            super.onScrollStateChanged(state);
-//            if(state == RecyclerView.SCROLL_STATE_IDLE) {
-//                int recyclerViewCenter =
-//            }
-//        }
 //    }
 }
 

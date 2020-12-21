@@ -931,6 +931,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         DB.close();
     }
 
+    public void editDone(Done done) {
+        SQLiteDatabase DB = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(Constants.COLUMN_DATE, done.getDate());
+        values.put(Constants.COLUMN_EXERCISE_ID, done.getExerciseId());
+        values.put(Constants.COLUMN_QUANTITY, done.getQuantity());
+        values.put(Constants.COLUMN_TIME, done.getTime());
+        int negative = done.isNegative() ? 1 : 0;
+        values.put(Constants.COLUMN_NEGATIVE, negative);
+        int canMore = done.isCanMore() ? 1 : 0;
+        values.put(Constants.COLUMN_CAN_MORE, canMore);
+
+        DB.update(Constants.TABLE_DONE, values, Constants.COLUMN_DONE_ID + "=" + done.getDoneId(), null);
+        DB.close();
+    }
+
 
 
 

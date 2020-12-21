@@ -3,6 +3,7 @@ package com.example.workout.ui.adapter;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -21,33 +22,42 @@ import com.example.workout.model.helper.CheckableImageView;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneExercisesRecyclerViewAdapter.ViewHolder> {
+public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneExercisesRecyclerViewAdapter.ViewHolder> implements View.OnTouchListener {
 
     private String TAG = "DoneExercisesFragment";
     private List<Done> doneList;
     private Context context;
     private MutableLiveData<Done> chosenDone;
-    private MutableLiveData<Boolean> timePicker;
+    private MutableLiveData<Integer> changedCheckables;
     private DatabaseHandler DB;
+    private int doneId;
 
-    public LiveData<Done> getChosenDone() {
-        return chosenDone;
+    public int getDoneId() {
+        return doneId;
     }
 
+    public LiveData<Done> getChosenDone() {
+        if(chosenDone == null)
+            chosenDone = new MutableLiveData<>();
+        return chosenDone;
+    }
     /**
-     * @return true if picker should be for time. <br/> false if picker should be for amount
+     * @return id of done with changed checkables
      */
-    public LiveData<Boolean> isTimePicker() {
-        return timePicker;
+    public LiveData<Integer> getChangedCheckables() {
+        if(changedCheckables == null)
+            changedCheckables = new MutableLiveData<>();
+        return changedCheckables;
     }
 
     public DoneExercisesRecyclerViewAdapter(List<Done> doneList, Context context) {
         this.doneList = doneList;
         this.context = context;
         DB = new DatabaseHandler(context);
+        Log.d(TAG, "DoneExercisesRecyclerViewAdapter: onCreate");
         chosenDone = new MutableLiveData<>();
-        timePicker = new MutableLiveData<>();
-        timePicker.setValue(Boolean.FALSE);
+        changedCheckables = new MutableLiveData<>();
+
     }
 
     @NonNull
@@ -81,8 +91,6 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
         holder.canMore.setChecked(done.isCanMore());
 
         holder.container.setOnClickListener(holder.clickHandler.onContainerClick);
-        holder.amount.setOnClickListener(holder.clickHandler.onAmountClick);
-        holder.time.setOnClickListener(holder.clickHandler.onTimeClick);
         holder.negative.setOnClickListener(holder.clickHandler.onNegativeClick);
         holder.canMore.setOnClickListener(holder.clickHandler.onCanMoreClick);
     }
@@ -92,6 +100,12 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
         return doneList.size();
     }
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        Log.d(TAG, "onTouch: " + v.getId());
+        Log.d(TAG, "onTouch: " + event.toString());
+        return false;
+    }
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -117,23 +131,17 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
         private class ClickHandler {
 
             View.OnClickListener onContainerClick = v -> {
-                Log.d(TAG, "container: " + getAdapterPosition());
+                doneId = getAdapterPosition();
                 chosenDone.setValue(doneList.get(getAdapterPosition()));
             };
 
-            View.OnClickListener onAmountClick = v -> {
-                Log.d(TAG, "amount: " + getAdapterPosition());
-                timePicker.setValue(Boolean.FALSE);
-            };
-
-            View.OnClickListener onTimeClick = v -> {
-                Log.d(TAG, "time: " + getAdapterPosition());
-                timePicker.setValue(Boolean.TRUE);
-            };
-
             View.OnClickListener onNegativeClick = v -> {
+                doneList.get(getAdapterPosition()).setNegative(!doneList.get(getAdapterPosition()).isNegative());
+                changedCheckables.setValue(getAdapterPosition());
             };
             View.OnClickListener onCanMoreClick = v -> {
+                doneList.get(getAdapterPosition()).setCanMore(!doneList.get(getAdapterPosition()).isCanMore());
+                changedCheckables.setValue(getAdapterPosition());
             };
 
         }
