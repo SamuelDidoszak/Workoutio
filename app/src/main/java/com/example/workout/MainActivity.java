@@ -30,6 +30,7 @@ import com.example.workout.model.helper.LinearLayoutManagerHorizontalSwipe;
 import com.example.workout.model.helper.MuscleDateTime;
 import com.example.workout.ui.adapter.DayExerciseRecyclerViewAdapter;
 import com.example.workout.ui.adapter.DayMuscleRecyclerViewAdapter;
+import com.example.workout.ui.adapter.DoneExercisesRecyclerViewAdapter;
 import com.example.workout.ui.adapter.HistoryRecyclerViewFullAdapter;
 
 import java.io.Serializable;
@@ -57,8 +58,10 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView dayRecyclerView;
     private DayExerciseRecyclerViewAdapter dayExerciseRecyclerViewAdapter;
     private DayMuscleRecyclerViewAdapter dayMuscleRecyclerViewAdapter;
+    private DoneExercisesRecyclerViewAdapter doneExercisesRecyclerViewAdapter;
     private RecyclerView historyRecyclerView;
     private HistoryRecyclerViewFullAdapter historyRecyclerViewFullAdapter;
+    private boolean workoutIsDone;
 
     private ImageButton addButton, accountButton;
 
@@ -100,7 +103,8 @@ public class MainActivity extends AppCompatActivity {
                 layoutManager.isSwipeHorizontal().removeObserver(this);
                 Intent intent = new Intent(context, WorkoutActivity.class);
                 intent.putExtra("quantityAndReps", (Serializable) quantityAndRepsList);
-                startActivity(intent);
+                startActivityForResult(intent, 2);
+
             }
         });
     }
@@ -108,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     /** Gets the result from AddMenu. Processes it and shows the data in HistoryRecyclerView */
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        Log.d(TAG, "getting cock");
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_FIRST_USER) {
             int doneId = data.getIntExtra("doneId", -1);
@@ -123,6 +128,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        //  if it takes too long, change to do the refresh only for a current day
+        else if(requestCode == 2) {
+            new SetUp().refreshHistory();
+            doneExercisesRecyclerViewAdapter = new DoneExercisesRecyclerViewAdapter(DB.getDonesByDate(null), context);
+            dayRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
+            workoutIsDone = true;
+            isDayRecyclerViewMuscle = false;
+
+            //  refreshes muscles for a current day
+            dayMuscleList = DB.getMusclesByCurrentDay();
+            dayMuscleRecyclerViewAdapter.notifyDataSetChanged();
+        }
     }
 
     /** checks value of {@code isDayRecyclerViewMuscle} <br/>
@@ -136,7 +153,10 @@ public class MainActivity extends AppCompatActivity {
 //            if(quantityAndRepsList.size() == 0)
 //                populateQuantityAndReps(null);
 //            getExercisesForThisDay();
-            dayRecyclerView.setAdapter(dayExerciseRecyclerViewAdapter);
+            if(workoutIsDone)
+                dayRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
+            else
+                dayRecyclerView.setAdapter(dayExerciseRecyclerViewAdapter);
         }
         else {
             dayRecyclerView.setAdapter(dayMuscleRecyclerViewAdapter);
@@ -234,6 +254,8 @@ public class MainActivity extends AppCompatActivity {
          * Sets up the views, actionBar, buttons and recyclerViews
          */
         void setAll() {
+            workoutIsDone = false;
+
             setViews();
             setUpActionBar();
             setUpButtons();
@@ -278,10 +300,13 @@ public class MainActivity extends AppCompatActivity {
                 //  Instantiate variables
             dayMuscleList = DB.getMusclesByCurrentDay();
             populateQuantityAndReps(null);
-            sortedDoneList = new DoneOperations().sortDoneListByDateGroup();
-            quantityAndRepsList = getExercisesForThisDay();
 
                 //  Create RecyclerViews
+                    //  HistoryRecyclerView
+            historyRecyclerView.setHasFixedSize(true);
+            historyRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+            refreshHistory();
+
                     //  DayRecyclerView
             dayRecyclerView.setHasFixedSize(true);
             LinearLayoutManagerHorizontalSwipe layoutManager = new LinearLayoutManagerHorizontalSwipe(context, LinearLayoutManager.VERTICAL, false);
@@ -300,13 +325,15 @@ public class MainActivity extends AppCompatActivity {
                 else
                     return false;
             });
+        }
 
-                    //  HistoryRecyclerView
-            historyRecyclerView.setHasFixedSize(true);
-            historyRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        private void refreshHistory() {
+            sortedDoneList = new DoneOperations().sortDoneListByDateGroup();
+            quantityAndRepsList = getExercisesForThisDay();
 
             historyRecyclerViewFullAdapter = new HistoryRecyclerViewFullAdapter(context, sortedDoneList, muscleDateTimeList);
             historyRecyclerView.setAdapter(historyRecyclerViewFullAdapter);
+
         }
 
         class ButtonHandler {

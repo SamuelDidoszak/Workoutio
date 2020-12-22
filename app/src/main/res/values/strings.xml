@@ -9,4 +9,5 @@
     <string name="exercise">Exercise</string>
     <string name="hour">Hour</string>
     <string name="save">save</string>
+    <string name="continue_workout">continue&#10;workout</string>
 </resources>

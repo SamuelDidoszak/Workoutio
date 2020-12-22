@@ -38,6 +38,10 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
         this.duringRest = duringRest;
     }
 
+    public List<QuantityAndReps> getQuantityAndRepsList() {
+        return quantityAndRepsList;
+    }
+
     public WorkoutRecyclerViewAdapter(Context context, List<QuantityAndReps> quantityAndRepsList) {
         this.quantityAndRepsList = quantityAndRepsList;
         this.context = context;

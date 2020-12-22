@@ -42,6 +42,10 @@ public class DoneExercisesFragment extends Fragment {
         return fragmentFinished;
     }
 
+    public DoneExercisesRecyclerViewAdapter getDoneExercisesRecyclerViewAdapter() {
+        return doneExercisesRecyclerViewAdapter;
+    }
+
     public int getDoneId() {
         return doneExercisesRecyclerViewAdapter.getDoneId();
     }
@@ -55,8 +59,6 @@ public class DoneExercisesFragment extends Fragment {
         addPositionToEditedList(position);
         doneExercisesRecyclerViewAdapter.notifyItemChanged(position);
     }
-
-
 
     public LiveData<Done> getChosenDone() {
         if(doneExercisesRecyclerViewAdapter == null)
@@ -84,6 +86,8 @@ public class DoneExercisesFragment extends Fragment {
         doneRecyclerView = view.findViewById(R.id.done_exercises_fragment_doneRecyclerView);
         doneList = DB.getDonesByDate(null);
 
+        fragmentFinished = new MutableLiveData<>();
+
         editedDoneList = new ArrayList<>();
 
         if (doneList.size() == 0) {
@@ -103,10 +107,7 @@ public class DoneExercisesFragment extends Fragment {
             layoutManager.isSwipeHorizontal().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
                 @Override
                 public void onChanged(Boolean aBoolean) {
-                        //  save all changes
-                    for(Integer i : editedDoneList) {
-                        DB.editDone(doneList.get(i));
-                    }
+                    saveAllChanges();
 
                     layoutManager.isSwipeHorizontal().removeObserver(this);
                     fragmentFinished.setValue(Boolean.TRUE);
@@ -114,6 +115,15 @@ public class DoneExercisesFragment extends Fragment {
             });
 
             doneExercisesRecyclerViewAdapter.getChangedCheckables().observe(getViewLifecycleOwner(), integer -> addPositionToEditedList(integer));
+        }
+    }
+
+    /**
+     * Saves all done changes if any
+     */
+    public void saveAllChanges() {
+        for(Integer i : editedDoneList) {
+            DB.editDone(doneList.get(i));
         }
     }
 

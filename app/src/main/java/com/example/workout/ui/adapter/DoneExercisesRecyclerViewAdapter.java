@@ -54,7 +54,6 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
         this.doneList = doneList;
         this.context = context;
         DB = new DatabaseHandler(context);
-        Log.d(TAG, "DoneExercisesRecyclerViewAdapter: onCreate");
         chosenDone = new MutableLiveData<>();
         changedCheckables = new MutableLiveData<>();
 

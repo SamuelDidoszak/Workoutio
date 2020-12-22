@@ -44,6 +44,11 @@
             android:banner="@style/Theme.AppCompat.NoActionBar"
             android:launchMode="standard">
         </activity>
+        <activity
+            android:name=".WorkoutOverviewActivity"
+            android:banner="@style/Theme.AppCompat.NoActionBar"
+            android:launchMode="standard">
+        </activity>
     </application>
 
 </manifest>

@@ -1,6 +1,7 @@
 package com.example.workout.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,7 +13,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,9 +21,12 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.workout.R;
+import com.example.workout.WorkoutOverviewActivity;
 import com.example.workout.controller.SwipeDetection;
 import com.example.workout.model.helper.Chronometer;
 import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
+
+import java.io.Serializable;
 
 public class ChronometerFragment extends Fragment {
 
@@ -139,7 +142,7 @@ public class ChronometerFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         if(getArguments() != null)
-            workoutRecyclerViewAdapter = (WorkoutRecyclerViewAdapter)requireArguments().getSerializable("workoutRecyclerViewAdapter");
+            workoutRecyclerViewAdapter = (WorkoutRecyclerViewAdapter)getArguments().getSerializable("workoutRecyclerViewAdapter");
         saved = Boolean.FALSE;
         firstExercise = Boolean.TRUE;
 
@@ -164,8 +167,17 @@ public class ChronometerFragment extends Fragment {
         }
     }
 
+    public void initializeWorkoutTimeChronometer(@Nullable Long baseTime) {
+        if(baseTime == null)
+            baseTime = chronometer.getBase();
+        workoutTimeChronometer.setDelayMillis(1000);
+        workoutTimeChronometer.setBase(baseTime);
+        workoutTimeChronometer.start();
+        workoutTimeChronometer.setVisibility(View.VISIBLE);
+        firstExercise = Boolean.FALSE;
+    }
+
     private void countTime() {
-        Log.d(TAG, "countTime called");
         //  runs if it was the last exercise
         if(workoutRecyclerViewAdapter.getItemCount() == 0 && !lastOfStartExerciseAfterRest && !saved) {
             exerciseTime = chronometer.getTimeElapsed();
@@ -180,11 +192,7 @@ public class ChronometerFragment extends Fragment {
             exerciseTime = chronometer.getTimeElapsed();
 
             if(firstExercise) {
-                workoutTimeChronometer.setDelayMillis(1000);
-                workoutTimeChronometer.setBase(chronometer.getBase());
-                workoutTimeChronometer.start();
-                workoutTimeChronometer.setVisibility(View.VISIBLE);
-                firstExercise = Boolean.FALSE;
+                initializeWorkoutTimeChronometer(null);
             }
 
             if(!lastOfStartExerciseAfterRest) {
@@ -242,6 +250,7 @@ public class ChronometerFragment extends Fragment {
         finishButton = view.findViewById(R.id.workout_activity_finishButton);
 
         workoutTimeContainer = view.findViewById(R.id.workout_activity_workoutTimeContainer);
+        Log.d(TAG, "setUpViews: views set");
     }
 
     private void setOnClickAndSwipeListeners() {
@@ -289,7 +298,13 @@ public class ChronometerFragment extends Fragment {
         };
         //  Button
         View.OnClickListener onFinishButtonClick = v -> {
-            Toast.makeText(getContext(), "The workout is finished!", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "finish: ");
+            getActivity().finish();
+            Intent intent = new Intent(context, WorkoutOverviewActivity.class);
+            intent.putExtra("overallTime", workoutTimeChronometer.getText().toString());
+            intent.putExtra("overallTimeBase", workoutTimeChronometer.getBase());
+            intent.putExtra("remainingQuantityAndReps", (Serializable)workoutRecyclerViewAdapter.getQuantityAndRepsList());
+            startActivity(intent);
         };
     }
 

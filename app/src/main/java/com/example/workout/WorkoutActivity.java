@@ -2,7 +2,6 @@ package com.example.workout;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -50,7 +49,7 @@ public class WorkoutActivity extends AppCompatActivity {
 
         //  helper variable
     private int currentExerciseId;
-    
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +75,16 @@ public class WorkoutActivity extends AppCompatActivity {
         watchFragmentChange();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        long overallTimeBase = getIntent().getLongExtra("overallTimeBase", 0);
+        if(overallTimeBase != 0) {
+            chronometerFragment.initializeWorkoutTimeChronometer(overallTimeBase);
+        }
+
+    }
 
     //  add time is amount =======================================
     private void setUpRecyclerView() {
@@ -138,27 +147,14 @@ public class WorkoutActivity extends AppCompatActivity {
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 7f);
                     primaryFragmentContainer.setLayoutParams(params);
 
-                    LifecycleOwner owner = this;
-                    do {
-                        try {
-                            if(doneExercisesFragment.isAdded()) {
-                                if(doneExercisesFragment.getChosenDone() != null) {
-                                    doneExercisesFragment.getChosenDone().observe(owner, done -> {
-                                        doneExercisesFragment.getChosenDone();
-                                        int id = doneExercisesFragment.getDoneId();
-                                        setUpSecondaryFragment(id);
-                                        editExerciseFragment.setExerciseData(done);
-                                    });
-                                }
-                                break;
-                            }
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
+                    if(doneExercisesFragment.getChosenDone() != null) {
+                        doneExercisesFragment.getChosenDone().observe(this, done -> {
+                            doneExercisesFragment.getChosenDone();
+                            int id = doneExercisesFragment.getDoneId();
+                            setUpSecondaryFragment(id);
+                            editExerciseFragment.setExerciseData(done);
+                        });
                     }
-                    while (true);
 
                     doneExercisesFragment.getFragmentFinished().observe(this, aBoolean1 -> watchFragmentChange());
                 }
@@ -176,10 +172,8 @@ public class WorkoutActivity extends AppCompatActivity {
             secondaryFragmentContainer.setVisibility(View.VISIBLE);
 
             currentWorkoutFragment = (CurrentWorkoutFragment)getSupportFragmentManager().findFragmentByTag("currentWorkout");
-            Log.d(TAG, "watchFragmentChange: " + currentWorkoutFragment.toString());
         }
     }
-
 
     private void setUpSecondaryFragment(int id) {
         getSupportFragmentManager().beginTransaction().setReorderingAllowed(true)
@@ -215,15 +209,11 @@ public class WorkoutActivity extends AppCompatActivity {
         } while (true);
     }
 
-
-
     public void saveDone(Boolean addNewExercise) {
         Done done = new Done(currentExerciseId, currentWorkoutFragment.getExerciseAmount(),
                 (int)chronometerFragment.getExerciseTime(),
                 currentWorkoutFragment.isNegativeCheckboxChecked(), currentWorkoutFragment.isCanMoreCheckboxChecked());
         DB.addDone(done);
-
-        Log.d(TAG, DB.getExercise(done.getExerciseId()).getExerciseName() + ", " + done.getQuantity() + ", " + done.getTime() + ", " + done.isNegative() + ", " + done.isCanMore());
 
         if(addNewExercise)
             workoutRecyclerViewAdapter.exerciseFinished();
