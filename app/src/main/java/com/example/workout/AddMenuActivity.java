@@ -12,7 +12,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,17 +50,32 @@ public class AddMenuActivity extends AppCompatActivity {
     private String chosenDate;
     CopyTextWatcher timeEditTextWatcher = null, quantityEditTextWatcher = null;
 
+    private int changesInExercises;
     private Context context;
     private DatabaseHandler DB;
 
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_menu);
+        this.setFinishOnTouchOutside(false);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 
         context = this;
         DB = new DatabaseHandler(this);
 
         new SetUp().setUpAll();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (MotionEvent.ACTION_OUTSIDE == event.getAction()) {
+            setResult(RESULT_FIRST_USER,
+                    new Intent().putExtra("changesInExercises", changesInExercises));
+            finish();
+            return true;
+        }
+        return super.onTouchEvent(event);
     }
 
     /** Gets called when an activity finishes. <br/>
@@ -77,6 +94,8 @@ public class AddMenuActivity extends AppCompatActivity {
             //  user can edit an exercise and then click out of ExerciseMenuActivity. Then, local exercise from this activity won't be updated. Call to DB is necessary
         else if(exerciseTextView.getText().length() != 0)
             fillViewsBasedOnExercise();
+
+        changesInExercises = data.getIntExtra("changesInExercises", 0);
     }
 
     /** Checkes if there is enough data to form a new Done. <br/>
@@ -175,8 +194,10 @@ public class AddMenuActivity extends AppCompatActivity {
         DB.addCustomDone(done);
         int id = done.getDoneId();
 
-        setResult(RESULT_FIRST_USER,
-                new Intent().putExtra("doneId", id));
+        Intent intent = new Intent();
+        intent.putExtra("doneId", id);
+        intent.putExtra("changesInExercises", changesInExercises);
+        setResult(RESULT_FIRST_USER, intent);
         finish();
     }
 

@@ -45,6 +45,13 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
     private MutableLiveData<Integer> chosenExercise;
     private MutableLiveData<Integer> editExercise;
     private int editPosition;
+    /**
+     * 0 = no changes <br/>
+     * 1 = changes in muscles <br/>
+     * 2 = changes in exercises <br/>
+     * 3 = changes in both
+     */
+    private int changesInExercises;
 
     private Boolean resetDayAdapter = Boolean.TRUE;
 
@@ -56,6 +63,7 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
         setContentView(R.layout.exercise_menu);
 
         context = getApplicationContext();
+        changesInExercises = 0;
 
         DB = new DatabaseHandler(this);
 
@@ -117,8 +125,10 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
 
             //  wait for user to chose exercise in RecyclerViewAdapter and finish the activity passing exerciseId
         chosenExercise.observe(this, exerciseId -> {
-            setResult(RESULT_FIRST_USER,
-                    new Intent().putExtra("ExerciseId", exerciseId));
+            Intent intent = new Intent();
+            intent.putExtra("ExerciseId", exerciseId);
+            intent.putExtra("changesInExercises", changesInExercises);
+            setResult(RESULT_FIRST_USER, intent);
             finish();
         });
             //  start ExerciseMenuDayAdapter if edit imageButton is clicked
@@ -133,14 +143,17 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_FIRST_USER) {
             int exerciseId = data.getIntExtra("exerciseId", -1);
-            boolean[] changeList = data.getBooleanArrayExtra("changeList");
             if(exerciseId == -1)
                 return;
+            boolean[] changeList = data.getBooleanArrayExtra("changeList");
             if(!changeList[0] && !changeList[1])
                 return;
 
-            if(changeList[0] && exerciseMenuDayAdapter != null)
-                resetDayAdapter = Boolean.TRUE;
+            if(changeList[0]) {
+                setChangesInExercises(1);
+                if(exerciseMenuDayAdapter != null)
+                    resetDayAdapter = Boolean.TRUE;
+            }
 
             switch (currentRecyclerViewType) {
                 case ExerciseMenuRecyclerViewTypes.DAY_RECYCLER_VIEW:
@@ -161,6 +174,7 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                         myExercisesList.set(editPosition, DB.getExercise(exerciseId));
                         myExercisesRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(editPosition);
                         myExercisesRecyclerViewAdapter.notifyItemChanged(editPosition);
+                        setChangesInExercises(2);
                     }
                     break;
                 case ExerciseMenuRecyclerViewTypes.AVAILABLE_EXERCISE_RECYCLER_VIEW:
@@ -168,9 +182,25 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
                         availableExercisesList.set(editPosition, DB.getExercise(exerciseId));
                         availableExercisesRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(editPosition);
                         availableExercisesRecyclerViewAdapter.notifyItemChanged(editPosition);
+                        setChangesInExercises(2);
                     }
                     break;
             }
+        }
+    }
+
+    private void setChangesInExercises(int i) {
+        switch (changesInExercises) {
+            case 0:
+                changesInExercises = i;
+                break;
+            case 1:
+            case 2:
+                if(i != changesInExercises)
+                    changesInExercises = 3;
+                break;
+            default:
+                changesInExercises = 0;
         }
     }
 
@@ -277,6 +307,8 @@ public class ExerciseMenuActivity extends AppCompatActivity implements ExerciseM
     class ClickHandler {
             // Space
         public View.OnClickListener spaceClick = v -> {
+            setResult(RESULT_CANCELED,
+                    new Intent().putExtra("changesInExercises", changesInExercises));
             finish();
         };
             // TextView
