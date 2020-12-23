@@ -15,17 +15,10 @@ public class MuscleDateTime {
     String time;
     int sortedDoneListEndIndex;
 
-    public void setTime(String timeBeginning, String timeEnd) {
-        int timeStart, timeStop;
-        timeStart = Integer.valueOf(timeBeginning.substring(0, 2)) * 60;
-        timeStart += Integer.valueOf(timeBeginning.substring(3));
-
-        timeStop = Integer.valueOf(timeEnd.substring(0, 2)) * 60;
-        timeStop += Integer.valueOf(timeEnd.substring(3));
-
-        int time = timeStop - timeStart;
-
-        this.time = String.format("%02d:%02d", time / 60, time % 60);
+    public void setTime(int timeBeginning, int timeEnd) {
+        int time = timeEnd - timeBeginning;
+        this.time = String.format("%02d:", time / 60);
+        this.time += String.format("%02d", time % 60);
     }
 
     public MuscleDateTime(List<Muscle> muscleList, String date, String time) {
@@ -85,10 +78,10 @@ public class MuscleDateTime {
         this.sortedDoneListEndIndex = sortedDoneListEndIndex;
     }
 
-    public MuscleDateTime(List<Muscle> muscleList, String date, String timeBeginning, String timeEnd) {
+    public MuscleDateTime(List<Muscle> muscleList, String date, int timeBeginningMinutes, int timeEndMinutes) {
         this.muscleList = muscleList;
         this.date = date;
-        setTime(timeBeginning, timeEnd);
+        setTime(timeBeginningMinutes, timeEndMinutes);
     }
 
     public List<Muscle> getMuscleList() {

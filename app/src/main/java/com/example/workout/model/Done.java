@@ -39,6 +39,15 @@ public class Done {
      *  return: "Wed 01.01"
      * @return dayName and date without a year.
      */
+    public int getTrimmedDateTimeInMinutes() {
+        return Integer.valueOf(date.substring(11, 13) )* 60 + Integer.valueOf(date.substring(14));
+    }
+
+    /** Example:<br/>
+     *  date: "01.01.2020 20:48" <br/>
+     *  return: "Wed 01.01"
+     * @return dayName and date without a year.
+     */
     public String getTrimmedDateWithDayName() {
         try {
             long time = new SimpleDateFormat("dd.MM.yyyy")

@@ -115,9 +115,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         Date currentDate = Calendar.getInstance().getTime();
-        currentDate.setTime(currentDate.getTime() - done.getTime() * 100);
+        currentDate.setTime(currentDate.getTime() - done.getTime());
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
         String formattedDate = dateFormat.format(currentDate);
+
+        Log.d("TAG", "addDone: " + formattedDate);
 
         ContentValues values = new ContentValues();
         values.put(Constants.COLUMN_DATE, formattedDate);
