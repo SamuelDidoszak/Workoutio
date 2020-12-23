@@ -11,10 +11,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,7 +45,8 @@ public class AddMenuActivity extends AppCompatActivity {
     private CardView cardView;
     private int chosenExerciseId;
     private String chosenDate;
-    CopyTextWatcher timeEditTextWatcher = null, quantityEditTextWatcher = null;
+    private CopyTextWatcher timeEditTextWatcher = null, quantityEditTextWatcher = null;
+    private int newDoneId;
 
     private int changesInExercises;
     private Context context;
@@ -57,9 +55,6 @@ public class AddMenuActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_menu);
-        this.setFinishOnTouchOutside(false);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 
         context = this;
         DB = new DatabaseHandler(this);
@@ -67,35 +62,44 @@ public class AddMenuActivity extends AppCompatActivity {
         new SetUp().setUpAll();
     }
 
+    /**
+     * I have to override the finish() method in order to pass the data into MainActivity because it's the most optimal way. <br/>
+     * Other way is to set <br/>{@code this.setFinishOnTouchOutside(false); getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL); getWindow().addFlags(WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);}
+     * but this makes the outside click event to pass into the MainActivity and click there. This event cannot be detected there, or consumed here. <br/>
+     * To avoid this, a rectangle with the size of this window has to be created and clicks outside its boundaries have to pass the data and finish this activity
+     */
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (MotionEvent.ACTION_OUTSIDE == event.getAction()) {
-            setResult(RESULT_FIRST_USER,
-                    new Intent().putExtra("changesInExercises", changesInExercises));
-            finish();
-            return true;
+    public void finish() {
+        Intent intent = new Intent();
+        intent.putExtra("changesInExercises", (Integer)changesInExercises != null ? changesInExercises : 0);
+        if(newDoneId != 0) {
+            intent.putExtra("doneId", newDoneId);
+            setResult(RESULT_FIRST_USER, intent);
         }
-        return super.onTouchEvent(event);
+        else
+            setResult(RESULT_CANCELED, intent);
+        super.finish();
     }
 
     /** Gets called when an activity finishes. <br/>
      *  Checkes which activity returned results and handles it */
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_FIRST_USER) {
-            chosenExerciseId = data.getIntExtra("ExerciseId", 0);
-            fillViewsBasedOnExercise();
+        if(requestCode == RESULT_FIRST_USER) {
+            changesInExercises = data.getIntExtra("changesInExercises", 0);
+            if (resultCode == RESULT_FIRST_USER) {
+                chosenExerciseId = data.getIntExtra("ExerciseId", 0);
+                fillViewsBasedOnExercise();
+            }
         }
         else if(resultCode == 2) {
             chosenDate = data.getStringExtra("date");
             dateEditText.setText(chosenDate);
-            new SetUp().setEditTextTint(dateEditText, getResources().getColorStateList(R.color.white));
+            setEditTextTint(dateEditText, getResources().getColorStateList(R.color.white));
         }
             //  user can edit an exercise and then click out of ExerciseMenuActivity. Then, local exercise from this activity won't be updated. Call to DB is necessary
         else if(exerciseTextView.getText().length() != 0)
             fillViewsBasedOnExercise();
-
-        changesInExercises = data.getIntExtra("changesInExercises", 0);
     }
 
     /** Checkes if there is enough data to form a new Done. <br/>
@@ -112,7 +116,7 @@ public class AddMenuActivity extends AppCompatActivity {
         for(EditText editText : editTextList) {
             if(editText.getText().toString().equals("")) {
                 editText.setHintTextColor(getResources().getColor(R.color.mediumRed));
-                new SetUp().setEditTextTint(editText, getResources().getColorStateList(R.color.mediumRed));
+                setEditTextTint(editText, getResources().getColorStateList(R.color.mediumRed));
                 validData = Boolean.FALSE;
             }
         }
@@ -192,12 +196,7 @@ public class AddMenuActivity extends AppCompatActivity {
 
         Done done = new Done(chosenDate, chosenExerciseId, quantity, time, negative, canMore);
         DB.addCustomDone(done);
-        int id = done.getDoneId();
-
-        Intent intent = new Intent();
-        intent.putExtra("doneId", id);
-        intent.putExtra("changesInExercises", changesInExercises);
-        setResult(RESULT_FIRST_USER, intent);
+        newDoneId = done.getDoneId();
         finish();
     }
 
@@ -222,6 +221,12 @@ public class AddMenuActivity extends AppCompatActivity {
         addButton = findViewById(R.id.add_menuAddButton);
         // CardView
         cardView = findViewById(R.id.add_menuCardView);
+
+
+        setEditTextTint(quantityEditText, getResources().getColorStateList(R.color.white));
+        setEditTextTint(timeEditText, getResources().getColorStateList(R.color.white));
+        setEditTextTint(dateEditText, getResources().getColorStateList(R.color.white));
+        setEditTextTint(hourEditText, getResources().getColorStateList(R.color.white));
     }
 
         /** Adds onClickListeners and onFocusChangeListeners for all of the views */
@@ -231,9 +236,9 @@ public class AddMenuActivity extends AppCompatActivity {
             exerciseTextView.setOnClickListener(clickHandler.onExerciseTextViewClick);
             //  EditText Focus listeners
             dateEditText.setOnFocusChangeListener(clickHandler.onDateEditTextFocus);
+            hourEditText.setOnFocusChangeListener(clickHandler.onHourEditTextFocus);
             quantityEditText.setOnFocusChangeListener(clickHandler.onQuantityEditTextFocus);
             timeEditText.setOnFocusChangeListener(clickHandler.onTimeEditTextFocus);
-            hourEditText.setOnFocusChangeListener(clickHandler.onHourEditTextFocus);
             //  CheckBoxes
             negativeCheckBox.setOnClickListener(clickHandler.onNegativeCheckBoxClick);
             canMoreCheckBox.setOnClickListener(clickHandler.onCanMoreCheckBoxClick);
@@ -244,6 +249,8 @@ public class AddMenuActivity extends AppCompatActivity {
         }
 
         void setUpAll() {
+            newDoneId = 0;
+
             addViews();
             addOnClickListeners();
         }
@@ -260,56 +267,43 @@ public class AddMenuActivity extends AppCompatActivity {
                 if(hasFocus) {
                     Intent addIntent = new Intent(context, CalendarActivity.class);
                     startActivityForResult(addIntent, 2);
-                    if (getEditTextTint(dateEditText) != null &&
+                    if (dateEditText.getText().length() != 0 &&
                             getEditTextTint(dateEditText).equals(getResources().getColorStateList(R.color.mediumRed))) {
                         dateEditText.setHintTextColor(getResources().getColor(R.color.white));
                         setEditTextTint(dateEditText, getResources().getColorStateList(R.color.white));
                     }
                 }
-                //  Makes the editView red when date isn't picked
-//            else {
-//                if(dateEditText.getText().toString().equals("")) {
-//                    dateEditText.setHintTextColor(getResources().getColor(R.color.mediumRed));
-//                    setEditTextTint(dateEditText, getResources().getColorStateList(R.color.mediumRed));
-//                }
-//                else
-//                    setEditTextTint(dateEditText, getResources().getColorStateList(R.color.white));
-//            }
                 dateEditText.clearFocus();
             };
-            public View.OnFocusChangeListener onQuantityEditTextFocus = (v, hasFocus) -> {
-                changeEditTextColor(hasFocus, quantityEditText);
-            };
-            public View.OnFocusChangeListener onTimeEditTextFocus = (v, hasFocus) -> {
-                changeEditTextColor(hasFocus, timeEditText);
-            };
+
             public View.OnFocusChangeListener onHourEditTextFocus = (v, hasFocus) -> {
                 if(hasFocus) {
                         //  Hide soft keyboard
                     InputMethodManager inputMethodManager = (InputMethodManager)AddMenuActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
                     inputMethodManager.hideSoftInputFromWindow(hourEditText.getWindowToken(), 0);
-
                         //  Create timePickerDialog
                     TimePickerFragment timePickerFragment = new TimePickerFragment();
                     timePickerFragment.setHourEditText(hourEditText);
                     timePickerFragment.show(getSupportFragmentManager(), "timePicker");
-
-                    changeEditTextColor(hasFocus, hourEditText);
                 }
-                //  Makes the editView red when date isn't picked
-//            else {
-//                if(hourEditText.getText().toString().equals("")) {
-//                    setEditTextTint(hourEditText, getResources().getColorStateList(R.color.mediumRed));
-//                }
-//            }
                 hourEditText.clearFocus();
+            };
+
+            public View.OnFocusChangeListener onQuantityEditTextFocus = (v, hasFocus) -> {
+                if (quantityEditText.getText().length() != 0 &&
+                        getEditTextTint(quantityEditText).equals(getResources().getColorStateList(R.color.mediumRed)))
+                    setEditTextTint(quantityEditText, getResources().getColorStateList(R.color.white));
+            };
+            public View.OnFocusChangeListener onTimeEditTextFocus = (v, hasFocus) -> {
+                if (timeEditText.getText().length() != 0 &&
+                        getEditTextTint(timeEditText).equals(getResources().getColorStateList(R.color.mediumRed)))
+                    setEditTextTint(timeEditText, getResources().getColorStateList(R.color.white));
+
             };
             //  CheckBoxes
             public View.OnClickListener onNegativeCheckBoxClick = v -> {
-                Log.d(TAG, "clicked checkbox1: ");
             };
             public View.OnClickListener onCanMoreCheckBoxClick = v -> {
-                Log.d(TAG, "clicked checkbox2: ");
             };
             //  Button
             public View.OnClickListener onAddButtonClick = v -> {
@@ -322,43 +316,28 @@ public class AddMenuActivity extends AppCompatActivity {
                 InputMethodManager inputMethodManager = (InputMethodManager)AddMenuActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
                 inputMethodManager.hideSoftInputFromWindow(cardView.getWindowToken(), 0);
             };
-
-
-            private void changeEditTextColor(Boolean hasFocus, EditText editText) {
-                if(hasFocus) {
-                    if (getEditTextTint(editText) != null &&
-                            getEditTextTint(editText).equals(getResources().getColorStateList(R.color.mediumRed)))
-                        setEditTextTint(editText, getResources().getColorStateList(R.color.white));
-                }
-                else {
-                    if(editText.getText().toString().equals("")) {
-                        setEditTextTint(editText, getResources().getColorStateList(R.color.mediumRed));
-                    }
-                }
-            }
         }
+    }
 
-
-        /** Uses appropriate method for the API version */
-        public void setEditTextTint(EditText editText, ColorStateList tint) {
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) //&& editText instanceof AppCompatEditText
-            {
-                ((AppCompatEditText) editText).setSupportBackgroundTintList(tint);
-            }
-            else {
-                editText.setBackgroundTintList(tint);
-            }
+    /** Uses appropriate method for the API version */
+    public void setEditTextTint(EditText editText, ColorStateList tint) {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) //&& editText instanceof AppCompatEditText
+        {
+            ((AppCompatEditText) editText).setSupportBackgroundTintList(tint);
         }
+        else {
+            editText.setBackgroundTintList(tint);
+        }
+    }
 
-        /** Uses appropriate method for the API version */
-        public ColorStateList getEditTextTint(EditText editText) {
-            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) //&& editText instanceof AppCompatEditText
-            {
-                return ((AppCompatEditText) editText).getSupportBackgroundTintList();
-            }
-            else {
-                return editText.getBackgroundTintList();
-            }
+    /** Uses appropriate method for the API version */
+    public ColorStateList getEditTextTint(EditText editText) {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) //&& editText instanceof AppCompatEditText
+        {
+            return ((AppCompatEditText) editText).getSupportBackgroundTintList();
+        }
+        else {
+            return editText.getBackgroundTintList();
         }
     }
 
@@ -383,7 +362,12 @@ public class AddMenuActivity extends AppCompatActivity {
             time += ":";
             time += (minute >= 10) ? Integer.toString(minute) : "0" + minute;
             hourEditText.setText(time);
+
+            if(new AddMenuActivity().getEditTextTint(hourEditText).equals(getResources().getColorStateList(R.color.mediumRed)))
+                new AddMenuActivity().setEditTextTint(hourEditText, getResources().getColorStateList(R.color.white));
+
         }
+
     }
 }
 
