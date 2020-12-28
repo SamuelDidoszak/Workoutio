@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,9 +29,11 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
     private List<Done> doneList;
     private Context context;
     private MutableLiveData<Done> chosenDone;
-    private MutableLiveData<Integer> changedCheckables;
+    private boolean[] changedDoneList;
     private DatabaseHandler DB;
     private int doneId;
+
+    private boolean showChangesMode;
 
     public int getDoneId() {
         return doneId;
@@ -41,13 +44,24 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
             chosenDone = new MutableLiveData<>();
         return chosenDone;
     }
+
     /**
-     * @return id of done with changed checkables
+     * Saves all done changes if any
      */
-    public LiveData<Integer> getChangedCheckables() {
-        if(changedCheckables == null)
-            changedCheckables = new MutableLiveData<>();
-        return changedCheckables;
+    public void saveAllChanges() {
+            //  doneList size can change. ChangedDoneList length cannot
+        for(int i = 0; i < doneList.size(); i++) {
+            if(changedDoneList[i] == true)
+                DB.editDone(doneList.get(i));
+        }
+    }
+
+    /**
+     * Adds the position to the list if it doesn't already exist
+     * @param position
+     */
+    public void addPositionToEditedList(int position) {
+        changedDoneList[position] = true;
     }
 
     public DoneExercisesRecyclerViewAdapter(List<Done> doneList, Context context) {
@@ -55,8 +69,12 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
         this.context = context;
         DB = new DatabaseHandler(context);
         chosenDone = new MutableLiveData<>();
-        changedCheckables = new MutableLiveData<>();
 
+        changedDoneList = new boolean[doneList.size()];
+        for(int i = 0; i < doneList.size(); i++) {
+            changedDoneList[i] = false;
+        }
+        showChangesMode = false;
     }
 
     @NonNull
@@ -86,12 +104,18 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
         }
         holder.time.setText(time);
 
+
         holder.negative.setChecked(done.isNegative());
         holder.canMore.setChecked(done.isCanMore());
 
+        holder.showChangesMode(showChangesMode);
+
         holder.container.setOnClickListener(holder.clickHandler.onContainerClick);
+        holder.container.setOnLongClickListener(holder.clickHandler.onContainerLongClick);
         holder.negative.setOnClickListener(holder.clickHandler.onNegativeClick);
         holder.canMore.setOnClickListener(holder.clickHandler.onCanMoreClick);
+        holder.restore.setOnClickListener(holder.clickHandler.onRestoreClick);
+        holder.delete.setOnClickListener(holder.clickHandler.onDeleteClick);
     }
 
     @Override
@@ -106,12 +130,12 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
         return false;
     }
 
-
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         CardView container;
         TextView exerciseName, amount, time;
         CheckableImageView negative, canMore;
+        ImageButton restore, delete;
         ClickHandler clickHandler;
 
         public ViewHolder(@NonNull View itemView) {
@@ -123,6 +147,8 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
             time = itemView.findViewById(R.id.done_exercises_row_timeTextView);
             negative = itemView.findViewById(R.id.done_exercises_row_negativeCheckbox);
             canMore = itemView.findViewById(R.id.done_exercises_row_canMoreCheckbox);
+            restore = itemView.findViewById(R.id.done_exercises_row_restoreButton);
+            delete = itemView.findViewById(R.id.done_exercises_row_deleteButton);
 
             clickHandler = new ClickHandler();
         }
@@ -134,15 +160,56 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
                 chosenDone.setValue(doneList.get(getAdapterPosition()));
             };
 
+            View.OnLongClickListener onContainerLongClick = v -> {
+                showChangesMode = !showChangesMode;
+                notifyDataSetChanged();
+                return true;
+            };
+
             View.OnClickListener onNegativeClick = v -> {
                 doneList.get(getAdapterPosition()).setNegative(!doneList.get(getAdapterPosition()).isNegative());
-                changedCheckables.setValue(getAdapterPosition());
+                addPositionToEditedList(getAdapterPosition());
             };
             View.OnClickListener onCanMoreClick = v -> {
                 doneList.get(getAdapterPosition()).setCanMore(!doneList.get(getAdapterPosition()).isCanMore());
-                changedCheckables.setValue(getAdapterPosition());
+                addPositionToEditedList(getAdapterPosition());
             };
 
+            View.OnClickListener onRestoreClick = v -> {
+                int position = getAdapterPosition();
+                restore.setVisibility(View.INVISIBLE);
+                changedDoneList[position] = false;
+                doneList.set(position, DB.getDone(doneList.get(position).getDoneId()));
+                notifyItemChanged(position);
+            };
+            View.OnClickListener onDeleteClick = v -> {
+                int position = getAdapterPosition();
+                DB.removeDone(doneList.get(position).getDoneId());
+                doneList.remove(position);
+                for(int i = position; i < changedDoneList.length - 1; i++) {
+                    changedDoneList[i] = changedDoneList[i + 1];
+                }
+                notifyItemRemoved(position);
+            };
+
+        }
+
+        private void showChangesMode(Boolean show) {
+            if(show) {
+                negative.setVisibility(View.GONE);
+                canMore.setVisibility(View.GONE);
+                delete.setVisibility(View.VISIBLE);
+                if(changedDoneList[getAdapterPosition()] == true)
+                    restore.setVisibility(View.VISIBLE);
+                else
+                    restore.setVisibility(View.INVISIBLE);
+            }
+            else {
+                restore.setVisibility(View.GONE);
+                delete.setVisibility(View.GONE);
+                negative.setVisibility(View.VISIBLE);
+                canMore.setVisibility(View.VISIBLE);
+            }
         }
     }
 }

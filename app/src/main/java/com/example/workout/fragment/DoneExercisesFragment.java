@@ -56,7 +56,7 @@ public class DoneExercisesFragment extends Fragment {
         if(time != null)
             doneList.get(position).setTime(time);
 
-        addPositionToEditedList(position);
+        doneExercisesRecyclerViewAdapter.addPositionToEditedList(position);
         doneExercisesRecyclerViewAdapter.notifyItemChanged(position);
     }
 
@@ -107,36 +107,13 @@ public class DoneExercisesFragment extends Fragment {
             layoutManager.isSwipeHorizontal().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
                 @Override
                 public void onChanged(Boolean aBoolean) {
-                    saveAllChanges();
+                    doneExercisesRecyclerViewAdapter.saveAllChanges();
 
                     layoutManager.isSwipeHorizontal().removeObserver(this);
                     fragmentFinished.setValue(Boolean.TRUE);
                 }
             });
-
-            doneExercisesRecyclerViewAdapter.getChangedCheckables().observe(getViewLifecycleOwner(), integer -> addPositionToEditedList(integer));
         }
-    }
-
-    /**
-     * Saves all done changes if any
-     */
-    public void saveAllChanges() {
-        for(Integer i : editedDoneList) {
-            DB.editDone(doneList.get(i));
-        }
-    }
-
-    /**
-     * Adds the position to the list if it doesn't already exist
-     * @param position
-     */
-    private void addPositionToEditedList(int position) {
-        for(Integer i : editedDoneList) {
-            if(i == position)
-                return;
-        }
-        editedDoneList.add(position);
     }
 }
 

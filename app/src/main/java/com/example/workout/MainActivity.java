@@ -101,21 +101,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         new SetUp().setAll();
-
-        for(MuscleDateTime mdt : muscleDateTimeList) {
-            Log.d(TAG, mdt.getTrimmedDateWithDayName() + ", " + mdt.getTime());
-        }
-        Log.d(TAG, "onCreate: \n");
-        for(Done done : sortedDoneList) {
-            Log.d(TAG, done.getDate() + ", " + DB.getExercise(done.getExerciseId()).getExerciseName() + ", " + done.getTime());
-        }
-
-        Log.d(TAG, "onCreate: \nnow straight from the DB \n");
-        List<Done> hahaDoneList = DB.getAllDones();
-        for(Done done : hahaDoneList) {
-            Log.d(TAG, done.getDate() + ", " + DB.getExercise(done.getExerciseId()).getExerciseName() + ", " + done.getTime());
-        }
-
     }
 
     @Override

@@ -113,7 +113,7 @@ public class WorkoutOverviewActivity extends AppCompatActivity {
 
     private void setOnClickListeners() {
         saveButton.setOnClickListener(v -> {
-            doneExercisesFragment.saveAllChanges();
+            doneExercisesFragment.getDoneExercisesRecyclerViewAdapter().saveAllChanges();
             setResult(2);
             finish();
         });

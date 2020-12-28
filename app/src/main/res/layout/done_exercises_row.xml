@@ -57,6 +57,26 @@
             android:gravity="center"
             android:src="@drawable/toggle_button_checkbox_style"/>
 
+        <ImageButton
+            android:id="@+id/done_exercises_row_restoreButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:src="@drawable/ic_baseline_restore_24"
+            android:background="@color/hardDark"
+            android:visibility="gone"/>
+
+        <ImageButton
+            android:id="@+id/done_exercises_row_deleteButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:src="@drawable/ic_baseline_delete_24"
+            android:background="@color/hardDark"
+            android:visibility="gone"/>
+
 
 
     </LinearLayout>
