@@ -1,5 +1,8 @@
 package com.example.workout.model.helper;
 
+import android.util.Log;
+import android.util.TimingLogger;
+
 import com.example.workout.model.Muscle;
 
 import java.text.ParseException;
@@ -43,17 +46,45 @@ public class MuscleDateTime {
      * @return dayName and date with or without a year depending on if it's a current year.
      */
     public String getTrimmedDateWithDayName() {
+        TimingLogger timingLogger = new TimingLogger("timmingLogger", "old way");
         try {
+            Log.d("TAG", "getTrimmedDateWithDayName: " + date);
+            timingLogger.addSplit("start");
             long time = new SimpleDateFormat("dd.MM.yyyy")
                     .parse(date.substring(0, 10)).getTime();
             Date formattedDate = new Date(time);
             String newDate = new SimpleDateFormat("EEE dd.MM")
                     .format(formattedDate);
+            timingLogger.addSplit("stop");
+            timingLogger.dumpToLog();
             return newDate += dateIfDifferentYear();
         }
         catch (ParseException e) {
             e.printStackTrace();
             return "";
+        }
+    }
+
+    /** Example:<br/>
+     *  date: "01.01.2020 20:48" <br/>
+     *  return: "[0]: Wed  [1]: 01.01"
+     * @return dayName and date with or without a year depending on if it's a current year.
+     */
+    public String[] getTrimmedDateAndDayNameDivided() {
+        try {
+            String[] dayAndDate = new String[2];
+            dayAndDate[1] = date.substring(0, 5);
+            long time = new SimpleDateFormat("dd.MM.yyyy")
+                    .parse(date.substring(0, 10)).getTime();
+            Date formattedDate = new Date(time);
+            dayAndDate[0] = new SimpleDateFormat("EEE")
+                    .format(formattedDate);
+            dayAndDate[0] += dateIfDifferentYear();
+            return dayAndDate;
+        }
+        catch (ParseException e) {
+            e.printStackTrace();
+            return new String[] {"", ""};
         }
     }
 

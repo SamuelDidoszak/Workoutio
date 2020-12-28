@@ -65,7 +65,8 @@ public class WorkoutActivity extends AppCompatActivity {
         setUpFragments();
 
         chronometerFragment.getSaveDone().observe(this, aBoolean -> {
-            saveDone(aBoolean);
+            if((Integer)currentExerciseId != null)
+                saveDone(aBoolean);
             if(workoutRecyclerViewAdapter.getItemCount() == 0) {
                 if (lastExercise)
                     currentWorkoutFragment.setCurrentWorkoutTextViewText("");

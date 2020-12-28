@@ -22,17 +22,6 @@
             android:paddingTop="4dp"
             android:paddingBottom="4dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:id="@+id/history_row_exercise_details_dateTextView"
-                android:text="20.05"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"
-                android:layout_marginRight="12dp"
-                android:textStyle="italic"
-                android:textAlignment="center"/>
-
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/history_row_exercise_details_exerciseNameTextView"
                 android:layout_width="0dp"

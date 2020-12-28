@@ -61,8 +61,10 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
     @Override
     public void onBindViewHolder(@NonNull HistoryRecyclerViewFullAdapter.ViewHolder holder, int position) {
         MuscleDateTime muscleDateTime = muscleDateTimeList.get(position);
+        String[] dateAndDayName = muscleDateTime.getTrimmedDateAndDayNameDivided();
 
-        holder.historyRowDate.setText(muscleDateTime.getTrimmedDateWithDayName());
+        holder.historyRowDay.setText(dateAndDayName[0]);
+        holder.historyRowDate.setText(dateAndDayName[1]);
         holder.historyRowTime.setText(muscleDateTime.getTime());
 
             //  Removing allocated images is necessary, otherwise images are recycled and show at inappropriate, multiple positions. It takes 0 ms on a lower end device to clear views.
@@ -83,7 +85,7 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView historyRowDate, historyRowTime;
+        TextView historyRowDay, historyRowDate, historyRowTime;
         RecyclerView exerciseDetailsRecyclerView;
         Context context;
         LinearLayout muscleIconContainer;
@@ -91,7 +93,8 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
         public ViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
             this.context = context;
-            historyRowDate = itemView.findViewById(R.id.history_row_date);
+            historyRowDay = itemView.findViewById(R.id.history_row_day);
+            historyRowDate = itemView.findViewById(R.id.history_row_dat);
             historyRowTime = itemView.findViewById(R.id.history_row_time);
             muscleIconContainer = itemView.findViewById(R.id.history_row_muscle_container);
             exerciseDetailsRecyclerView = itemView.findViewById(R.id.history_row_details_recyclerView);
@@ -187,7 +190,6 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
                     TimeUnit.MILLISECONDS.toSeconds(timeMillis) % 60);
         }
 
-        holder.exerciseDetailsDateTextView.setText(done.getDate().substring(0, 5));
         holder.exerciseDetailsExerciseNameTextView.setText(DB.getExercise(done.getExerciseId()).getExerciseName());
         holder.exerciseDetailsQuantityTextView.setText(String.valueOf(done.getQuantity()));
         holder.exerciseDetailsTimeTextView.setText(time);
@@ -199,11 +201,10 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
-            TextView exerciseDetailsDateTextView, exerciseDetailsQuantityTextView, exerciseDetailsTimeTextView;
+            TextView exerciseDetailsQuantityTextView, exerciseDetailsTimeTextView;
             AppCompatTextView exerciseDetailsExerciseNameTextView;
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
-                exerciseDetailsDateTextView = itemView.findViewById(R.id.history_row_exercise_details_dateTextView);
                 exerciseDetailsQuantityTextView = itemView.findViewById(R.id.history_row_exercise_details_quantityTextView);
                 exerciseDetailsTimeTextView = itemView.findViewById(R.id.history_row_exercise_details_timeTextView);
                 exerciseDetailsExerciseNameTextView = itemView.findViewById(R.id.history_row_exercise_details_exerciseNameTextView);

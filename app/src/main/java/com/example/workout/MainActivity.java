@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.data.DatabaseHandler;
+import com.example.workout.data.DatabaseTesting;
 import com.example.workout.model.Done;
 import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Muscle> dayMuscleList;
     private List<MuscleDateTime> muscleDateTimeList;
 
+    private TextView noExercisesTextView;
     private RecyclerView dayRecyclerView;
     private DayExerciseRecyclerViewAdapter dayExerciseRecyclerViewAdapter;
     private DayMuscleRecyclerViewAdapter dayMuscleRecyclerViewAdapter;
@@ -92,9 +95,27 @@ public class MainActivity extends AppCompatActivity {
 
         context = this;
         DB = new DatabaseHandler(this);
+        if(DB.getAllDays().size() == 0) {
+            Log.d(TAG, "onCreate: recreatin");
+            new DatabaseTesting(context).recreateDatabase();
+        }
 
-        doneList = DB.getAllDones();
         new SetUp().setAll();
+
+        for(MuscleDateTime mdt : muscleDateTimeList) {
+            Log.d(TAG, mdt.getTrimmedDateWithDayName() + ", " + mdt.getTime());
+        }
+        Log.d(TAG, "onCreate: \n");
+        for(Done done : sortedDoneList) {
+            Log.d(TAG, done.getDate() + ", " + DB.getExercise(done.getExerciseId()).getExerciseName() + ", " + done.getTime());
+        }
+
+        Log.d(TAG, "onCreate: \nnow straight from the DB \n");
+        List<Done> hahaDoneList = DB.getAllDones();
+        for(Done done : hahaDoneList) {
+            Log.d(TAG, done.getDate() + ", " + DB.getExercise(done.getExerciseId()).getExerciseName() + ", " + done.getTime());
+        }
+
     }
 
     @Override
@@ -286,6 +307,7 @@ public class MainActivity extends AppCompatActivity {
          *Sets up the necessary views
          */
         void setViews() {
+//            noExercisesTextView = findViewById(R.id.activity_main_no_exercises);
             dayRecyclerView = findViewById(R.id.dayRecyclerView);
             historyRecyclerView = findViewById(R.id.historyRecyclerView);
             addButton = findViewById(R.id.app_toolbar_addButton);
@@ -352,6 +374,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void refreshHistory() {
+            doneList = DB.getAllDones();
             sortedDoneList = new DoneOperations().sortDoneListByDateGroup();
             quantityAndRepsList = getExercisesForThisDay();
 
@@ -363,6 +386,12 @@ public class MainActivity extends AppCompatActivity {
 
         private void refreshMuscles() {
             dayMuscleList = DB.getMusclesByCurrentDay();
+            Log.d(TAG, "refreshMuscles: size: " + dayMuscleList.size());
+            if(dayMuscleList.size() == 0){
+                Log.d(TAG, "refreshMuscles: yeeeeah");
+//                noExercisesTextView.setVisibility(View.VISIBLE);
+            }
+            
             // Bruteforce way
             dayMuscleRecyclerViewAdapter = new DayMuscleRecyclerViewAdapter(context, dayMuscleList);
             if(isDayRecyclerViewMuscle)
