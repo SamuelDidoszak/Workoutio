@@ -1,9 +1,11 @@
 package com.example.workout;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
@@ -22,6 +24,7 @@ import com.example.workout.fragment.CurrentWorkoutFragment;
 import com.example.workout.fragment.DoneExercisesFragment;
 import com.example.workout.fragment.EditExerciseFragment;
 import com.example.workout.model.Done;
+import com.example.workout.model.Exercise;
 import com.example.workout.model.QuantityAndReps;
 import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
 
@@ -40,6 +43,7 @@ public class WorkoutActivity extends AppCompatActivity {
     private CardView containerCardView;
     private RecyclerView workoutRecyclerView;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
+    private ImageButton addButton;
 
     private boolean lastExercise = false;
 
@@ -49,6 +53,9 @@ public class WorkoutActivity extends AppCompatActivity {
 
         //  helper variable
     private int currentExerciseId;
+
+        //  will be extracted as an option
+    private final boolean addAsCurrent = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,6 +81,32 @@ public class WorkoutActivity extends AppCompatActivity {
             }
         });
         watchFragmentChange();
+        
+        addButton.setOnClickListener(v -> startActivityForResult(new Intent(this, ExerciseMenuActivity.class), RESULT_FIRST_USER));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_FIRST_USER) {
+            int exerciseId = data.getIntExtra("ExerciseId", -1);
+            if(exerciseId == -1)
+                return;
+
+            int quantity = -1;
+            boolean canMore = false;
+                //  Checks if this exercise was done today. If true, gives adequate quantity and canMore
+            List<QuantityAndReps> tempQuantityAndRepsList = (List<QuantityAndReps>) getIntent().getSerializableExtra("quantityAndReps");
+            for(QuantityAndReps quantityAndReps : tempQuantityAndRepsList) {
+                if(quantityAndReps.getExerciseId() == exerciseId) {
+                    quantity = quantityAndReps.getQuantity();
+                    canMore = quantityAndReps.isCanMore();
+                }
+            }
+            Exercise newExercise = DB.getExercise(exerciseId);
+            QuantityAndReps newQuantityAndReps = new QuantityAndReps(newExercise.getExerciseId(), newExercise.getExerciseName(), quantity, canMore, 1);
+            workoutRecyclerViewAdapter.addNewQAR(newQuantityAndReps, addAsCurrent);
+        }
     }
 
     @Override
@@ -119,6 +152,8 @@ public class WorkoutActivity extends AppCompatActivity {
             //  FragmentContainers
         primaryFragmentContainer = findViewById(R.id.workout_activity_primaryFragmentContainer);
         secondaryFragmentContainer = findViewById(R.id.workout_activity_secondaryFragmentContainer);
+            //  ImageButtons
+        addButton = findViewById(R.id.app_toolbar_addButton);
     }
 
     private void setUpFragments() {

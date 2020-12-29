@@ -201,7 +201,6 @@ public class MainActivity extends AppCompatActivity {
         List<QuantityAndReps> localQuantityAndRepsList = new ArrayList<>();
         List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
         Long currentDate = Calendar.getInstance().getTimeInMillis();
-        SimpleDateFormat dayName = new SimpleDateFormat("EEEE");
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             //  find the latest exercises for this day
         for(int i = 0; i < maximumWeeksBefore; i++) {
@@ -247,9 +246,9 @@ public class MainActivity extends AppCompatActivity {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             date = dateFormat.format(currentDate);
         }
-        List<Done> donesListByDate = DB.getDonesByDate(date);
+        List<Done> doneListByDate = DB.getDonesByDate(date);
         List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
-        for(Done done : donesListByDate) {
+        for(Done done : doneListByDate) {
             int doneExerciseId = done.getExerciseId();
             Boolean isBreak = Boolean.FALSE;
             for(int i = 0; i < quantityAndRepsList.size(); i++) {
