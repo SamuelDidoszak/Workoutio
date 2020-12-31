@@ -41,7 +41,6 @@ public class WorkoutOverviewActivity extends AppCompatActivity {
 
         overallExerciseTime = getIntent().getStringExtra("overallTime");
 
-
         setUpViews();
         setUpFragments();
         setOnClickListeners();

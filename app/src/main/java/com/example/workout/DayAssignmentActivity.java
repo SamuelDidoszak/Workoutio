@@ -7,35 +7,17 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.data.DatabaseHandler;
-import com.example.workout.model.Exercise;
-import com.example.workout.model.helper.ExerciseMenuRecyclerViewTypes;
-import com.example.workout.ui.adapter.ExerciseMenuExercisesRecyclerViewAdapter;
 
-import java.util.List;
-
-public class DayAssignmentActivity extends AppCompatActivity implements ExerciseMenuRecyclerViewTypes {
-    TextView dayName, myExercises, exercises;
+public class DayAssignmentActivity extends AppCompatActivity {
+    TextView dayName;
     LinearLayout spaceTop, spaceBottom;
-    RecyclerView dayExercisesRecyclerView, exerciseRecyclerView;
-    private ExerciseMenuExercisesRecyclerViewAdapter myExercisesRecyclerViewAdapter, availableExercisesRecyclerViewAdapter;
+    RecyclerView dayExercisesRecyclerView;
 
-    private List<Exercise> myExercisesList, availableExercisesList;
-    private DatabaseHandler DB;
-    private Context context;
-    private int currentRecyclerViewType = MY_EXERCISE_RECYCLER_VIEW;
-    private MutableLiveData<Integer> editExercise;
-    private int editPosition;
-    /**
-     * 0 = no changes <br/>
-     * 1 = changes in muscles <br/>
-     * 2 = changes in exercises <br/>
-     * 3 = changes in both
-     */
-    private int changesInExercises;
+    Context context;
+    DatabaseHandler DB;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,7 +25,6 @@ public class DayAssignmentActivity extends AppCompatActivity implements Exercise
         setContentView(R.layout.exercise_menu);
 
         context = getApplicationContext();
-        changesInExercises = 0;
 
         DB = new DatabaseHandler(this);
 
