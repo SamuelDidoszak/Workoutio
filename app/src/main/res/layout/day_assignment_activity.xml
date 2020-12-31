@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:orientation="vertical"
+    android:weightSum="10">
+
+    <LinearLayout
+        android:id="@+id/day_assignment_spaceTop"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/transparentBlack"
+        android:layout_weight="1.5"
+        android:orientation="horizontal" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3.5"
+        android:background="@color/hardDark"
+        android:orientation="vertical"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/day_assignment_dayName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Day"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:padding="4dp"
+            android:textStyle="bold|italic"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/day_assignment_dayExercisesRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3.5"
+        android:background="@color/hardDark"
+        android:paddingTop="4dp"
+        android:padding="4dp"
+        android:name=""/>
+
+    <LinearLayout
+        android:id="@+id/day_assignment_spaceBottom"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/transparentBlack"
+        android:layout_weight="1.5"
+        android:orientation="horizontal" />
+
+</LinearLayout>

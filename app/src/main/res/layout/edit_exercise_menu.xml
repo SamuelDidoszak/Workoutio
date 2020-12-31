@@ -107,23 +107,23 @@
                 android:id="@+id/edit_exercise_menu_timeAsCountCheckbox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginRight="8dp"
                 android:src="@drawable/toggle_button_checkbox_style"
                 android:layout_weight="2"
                 android:focusable="true"
                 android:clickable="true"
-                android:gravity="center"/>
+                android:layout_gravity="top|center_horizontal"/>
 
             <com.example.workout.model.helper.CheckableImageView
                 android:id="@+id/edit_exercise_menu_defaultNegativeCheckbox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginRight="8dp"
                 android:src="@drawable/toggle_button_checkbox_style"
                 android:layout_weight="2"
-                android:gravity="center"/>
+                android:layout_gravity="top|center_horizontal"/>
 
         </LinearLayout>
 

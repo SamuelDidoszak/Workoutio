@@ -49,6 +49,12 @@
             android:banner="@style/Theme.AppCompat.NoActionBar"
             android:launchMode="standard">
         </activity>
+        <activity
+            android:name=".DayAssignmentActivity"
+            android:theme="@style/emptyPopupFullScreen"
+            android:banner="@style/Theme.AppCompat.NoActionBar"
+            android:launchMode="standard">
+        </activity>
     </application>
 
 </manifest>
