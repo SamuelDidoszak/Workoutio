@@ -9,11 +9,11 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.widget.TextViewCompat;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,6 +34,7 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private Context context;
     private List<DayExercise> dayExerciseList;
     private MutableLiveData<Integer> chosenExercise;
+    private MutableLiveData<Integer> chosenDay;
     private MutableLiveData<Integer> exerciseToEdit;
     private List<Boolean> exerciseVisibilityList;
     private List<List<Muscle>> muscleListForImages;
@@ -54,6 +55,9 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public MutableLiveData<Integer> getExerciseToEdit() {
         return exerciseToEdit;
     }
+    public LiveData<Integer> getChosenDay() {
+        return chosenDay;
+    }
     public void resetExerciseToEdit() {
         this.exerciseToEdit = new MutableLiveData<>();
     }
@@ -63,6 +67,7 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         this.dayExerciseList = dayExerciseList;
         chosenExercise = new MutableLiveData<>();
         exerciseToEdit = new MutableLiveData<>();
+        chosenDay = new MutableLiveData<>();
         exerciseVisibilityList = new ArrayList<>();
         muscleListForImages = new ArrayList<>();
 
@@ -172,8 +177,7 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 notifyItemRangeChanged(position + 1, exerciseAmount);
             };
             View.OnClickListener onAddImageButtonClick = v -> {
-
-                Toast.makeText(context, "Add to " + dayExercise.getName(), Toast.LENGTH_SHORT).show();
+                chosenDay.setValue(dayExercise.getTypeId());
             };
         }
     }

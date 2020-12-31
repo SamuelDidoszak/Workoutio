@@ -1,7 +1,6 @@
 package com.example.workout;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.LinearLayout;
@@ -9,7 +8,6 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.workout.data.DatabaseHandler;
 import com.example.workout.fragment.ExerciseMenuFragment;
 
 public class ExerciseMenuActivity extends AppCompatActivity{
@@ -18,18 +16,10 @@ public class ExerciseMenuActivity extends AppCompatActivity{
     private ExerciseMenuFragment exerciseMenuFragment;
     private LinearLayout spaceTop, spaceBottom;
 
-    private Boolean resetDayAdapter = Boolean.TRUE;
-
-    private DatabaseHandler DB;
-    private Context context;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.exercise_menu);
-
-        context = getApplicationContext();
-        DB = new DatabaseHandler(this);
 
         setUpViews();
         setOnClickListeners();
@@ -54,7 +44,7 @@ public class ExerciseMenuActivity extends AppCompatActivity{
         spaceBottom = findViewById(R.id.exercise_menu_spaceBottom);
         // Fragment
         exerciseMenuFragment = new ExerciseMenuFragment(true);
-        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).add(R.id.exercise_menu_fragmentContainer, ExerciseMenuFragment.class, null, "exerciseMenuFragment").commit();
+        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).add(R.id.exercise_menu_fragmentContainer, exerciseMenuFragment, "exerciseMenuFragment").commit();
         getSupportFragmentManager().executePendingTransactions();
         exerciseMenuFragment = (ExerciseMenuFragment) getSupportFragmentManager().findFragmentByTag("exerciseMenuFragment");
     }

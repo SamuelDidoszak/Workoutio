@@ -17,6 +17,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.workout.DayAssignmentActivity;
 import com.example.workout.EditExerciseMenuActivity;
 import com.example.workout.R;
 import com.example.workout.data.DatabaseHandler;
@@ -42,7 +43,6 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
 
     private List<Exercise> myExercisesList, availableExercisesList;
     private List<DayExercise> dayExerciseList;
-    private DatabaseHandler DB;
 
     private ExerciseMenuRecyclerViewData[] recyclerViewList = {null, null, null};
     private int currentRecyclerViewType = MY_EXERCISE_RECYCLER_VIEW;
@@ -60,6 +60,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
 
     private Boolean resetDayAdapter = Boolean.TRUE;
 
+    private DatabaseHandler DB;
     private Context context;
 
     public ExerciseMenuFragment() {
@@ -155,6 +156,14 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
             editPosition = recyclerView.getChosenPosition();
             startActivityForResult(new Intent(context, EditExerciseMenuActivity.class).putExtra("exerciseId", exerciseId), Activity.RESULT_FIRST_USER);
         });
+
+        if(currentRecyclerViewType == DAY_RECYCLER_VIEW) {
+            exerciseMenuDayAdapter.getChosenDay().observe(getViewLifecycleOwner(), integer -> {
+                Intent intent = new Intent(context, DayAssignmentActivity.class);
+                intent.putExtra("dayId", integer);
+                startActivityForResult(intent, Activity.RESULT_FIRST_USER);
+            });
+        }
     }
 
     @Override
