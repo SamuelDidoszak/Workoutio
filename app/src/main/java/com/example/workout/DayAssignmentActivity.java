@@ -2,11 +2,13 @@ package com.example.workout;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,22 +16,24 @@ import com.example.workout.data.DatabaseHandler;
 import com.example.workout.fragment.ExerciseMenuFragment;
 import com.example.workout.model.DayExerciseConnector;
 import com.example.workout.model.Exercise;
-import com.example.workout.ui.adapter.ExerciseMenuExercisesRecyclerViewAdapter;
+import com.example.workout.model.helper.SimpleItemTouchHelperCallback;
+import com.example.workout.ui.adapter.DayAssignmentRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DayAssignmentActivity extends AppCompatActivity {
-    TextView dayName;
-    LinearLayout spaceTop, spaceBottom;
-    RecyclerView dayExercisesRecyclerView;
-    ExerciseMenuExercisesRecyclerViewAdapter dayExercisesRecyclerViewAdapter;
-    ExerciseMenuFragment exerciseMenuFragment;
+public class DayAssignmentActivity extends AppCompatActivity implements DayAssignmentRecyclerViewAdapter.OnStartDragListener {
+    private TextView dayName;
+    private LinearLayout spaceTop, spaceBottom;
+    private RecyclerView dayExercisesRecyclerView;
+    private DayAssignmentRecyclerViewAdapter dayAssignmentRecyclerViewAdapter;
+    private ExerciseMenuFragment exerciseMenuFragment;
+    private ItemTouchHelper itemTouchHelper;
 
-    List<Exercise> dayExercises;
+    private List<Exercise> dayExercises;
 
-    Context context;
-    DatabaseHandler DB;
+    private Context context;
+    private DatabaseHandler DB;
 
     int dayId;
 
@@ -44,6 +48,9 @@ public class DayAssignmentActivity extends AppCompatActivity {
         dayId = getIntent().getIntExtra("dayId", -1);
 
         addViews();
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(dayAssignmentRecyclerViewAdapter);
+        itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(dayExercisesRecyclerView);
     }
 
     private void addViews() {
@@ -68,9 +75,9 @@ public class DayAssignmentActivity extends AppCompatActivity {
         else {
             dayName.setText(R.string.custom);
         }
-        dayExercisesRecyclerViewAdapter = new ExerciseMenuExercisesRecyclerViewAdapter(context, dayExercises);
+        dayAssignmentRecyclerViewAdapter = new DayAssignmentRecyclerViewAdapter(context, dayExercises, this);
         dayExercisesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
-        dayExercisesRecyclerView.setAdapter(dayExercisesRecyclerViewAdapter);
+        dayExercisesRecyclerView.setAdapter(dayAssignmentRecyclerViewAdapter);
 
         // Fragment
         exerciseMenuFragment = new ExerciseMenuFragment(false);
@@ -80,7 +87,11 @@ public class DayAssignmentActivity extends AppCompatActivity {
     }
 
 
-
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        Log.d("TAG", "onStartDrag: jeff");
+        itemTouchHelper.startDrag(viewHolder);
+    }
 }
 
 

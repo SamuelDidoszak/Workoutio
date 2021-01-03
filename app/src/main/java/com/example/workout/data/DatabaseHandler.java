@@ -743,6 +743,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         cursor.close();
         db.close();
+
+        //insertion sort
+        for(int i = 0; i < dayExerciseConnectorList.size(); i++) {
+            DayExerciseConnector current = dayExerciseConnectorList.get(i);
+            int j = i - 1;
+            while(j >= 0 && current.getPosition() < dayExerciseConnectorList.get(j).getPosition()) {
+                dayExerciseConnectorList.set(j + 1, dayExerciseConnectorList.get(j));
+                j--;
+            }
+            dayExerciseConnectorList.set(j + 1, current);
+        }
+
         return dayExerciseConnectorList;
     }
 
@@ -763,6 +775,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         cursor.close();
         db.close();
+
+        //insertion sort
+        for(int i = 0; i < dayExerciseConnectorList.size(); i++) {
+            DayExerciseConnector current = dayExerciseConnectorList.get(i);
+            int j = i - 1;
+            while(j >= 0 && current.getPosition() < dayExerciseConnectorList.get(j).getPosition()) {
+                dayExerciseConnectorList.set(j + 1, dayExerciseConnectorList.get(j));
+                j--;
+            }
+            dayExerciseConnectorList.set(j + 1, current);
+        }
+
         return dayExerciseConnectorList;
     }
 
