@@ -26,9 +26,10 @@
 
         <TextView
             android:id="@+id/day_assignment_dayName"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:text="Day"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/day"
             android:textColor="@color/white"
             android:textSize="24sp"
             android:padding="4dp"

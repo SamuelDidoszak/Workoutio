@@ -2,7 +2,6 @@ package com.example.workout;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -67,7 +66,7 @@ public class DayAssignmentActivity extends AppCompatActivity {
             }
         }
         else {
-            Log.d("TAG", "addViews: create a custom set of exercises");
+            dayName.setText(R.string.custom);
         }
         dayExercisesRecyclerViewAdapter = new ExerciseMenuExercisesRecyclerViewAdapter(context, dayExercises);
         dayExercisesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));

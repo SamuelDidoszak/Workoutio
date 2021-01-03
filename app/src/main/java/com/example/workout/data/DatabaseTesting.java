@@ -250,51 +250,51 @@ public class DatabaseTesting {
     }
 
     private void addDayExerciseConnectors() {
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 2));
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 6));
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 7));
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 8));
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 9));
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 10));
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 11));
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 12));
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 13));
-        DB.addDayExerciseConnector(new DayExerciseConnector(1, 14));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 2, 0));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 6, 1));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 7, 2));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 8, 3));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 9, 4));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 10, 5));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 11, 6));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 12, 7));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 13, 8));
+        DB.addDayExerciseConnector(new DayExerciseConnector(1, 14, 9));
 
-        DB.addDayExerciseConnector(new DayExerciseConnector(2, 1));
-        DB.addDayExerciseConnector(new DayExerciseConnector(2, 2));
-        DB.addDayExerciseConnector(new DayExerciseConnector(2, 3));
-        DB.addDayExerciseConnector(new DayExerciseConnector(2, 4));
-        DB.addDayExerciseConnector(new DayExerciseConnector(2, 5));
+        DB.addDayExerciseConnector(new DayExerciseConnector(2, 1, 0));
+        DB.addDayExerciseConnector(new DayExerciseConnector(2, 2, 1));
+        DB.addDayExerciseConnector(new DayExerciseConnector(2, 3, 2));
+        DB.addDayExerciseConnector(new DayExerciseConnector(2, 4, 3));
+        DB.addDayExerciseConnector(new DayExerciseConnector(2, 5, 4));
 
-        DB.addDayExerciseConnector(new DayExerciseConnector(3, 16));
-        DB.addDayExerciseConnector(new DayExerciseConnector(3, 17));
-        DB.addDayExerciseConnector(new DayExerciseConnector(3, 18));
-        DB.addDayExerciseConnector(new DayExerciseConnector(3, 19));
-        DB.addDayExerciseConnector(new DayExerciseConnector(3, 20));
+        DB.addDayExerciseConnector(new DayExerciseConnector(3, 16, 0));
+        DB.addDayExerciseConnector(new DayExerciseConnector(3, 17, 1));
+        DB.addDayExerciseConnector(new DayExerciseConnector(3, 18, 2));
+        DB.addDayExerciseConnector(new DayExerciseConnector(3, 19, 3));
+        DB.addDayExerciseConnector(new DayExerciseConnector(3, 20, 4));
 
-        DB.addDayExerciseConnector(new DayExerciseConnector(4, 1));
-        DB.addDayExerciseConnector(new DayExerciseConnector(4, 2));
-        DB.addDayExerciseConnector(new DayExerciseConnector(4, 3));
-        DB.addDayExerciseConnector(new DayExerciseConnector(4, 4));
-        DB.addDayExerciseConnector(new DayExerciseConnector(4, 5));
+        DB.addDayExerciseConnector(new DayExerciseConnector(4, 1, 0));
+        DB.addDayExerciseConnector(new DayExerciseConnector(4, 2, 1));
+        DB.addDayExerciseConnector(new DayExerciseConnector(4, 3, 2));
+        DB.addDayExerciseConnector(new DayExerciseConnector(4, 4, 3));
+        DB.addDayExerciseConnector(new DayExerciseConnector(4, 5, 4));
 
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 2));
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 6));
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 7));
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 8));
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 9));
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 10));
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 11));
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 12));
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 13));
-        DB.addDayExerciseConnector(new DayExerciseConnector(5, 14));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 2, 0));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 6, 1));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 7, 2));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 8, 3));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 9, 4));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 10, 5));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 11, 6));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 12, 7));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 13, 8));
+        DB.addDayExerciseConnector(new DayExerciseConnector(5, 14, 9));
 
-        DB.addDayExerciseConnector(new DayExerciseConnector(6, 2));
-        DB.addDayExerciseConnector(new DayExerciseConnector(6, 15));
-        DB.addDayExerciseConnector(new DayExerciseConnector(6, 1));
-        DB.addDayExerciseConnector(new DayExerciseConnector(6, 19));
-        DB.addDayExerciseConnector(new DayExerciseConnector(6, 10));
+        DB.addDayExerciseConnector(new DayExerciseConnector(6, 2, 0));
+        DB.addDayExerciseConnector(new DayExerciseConnector(6, 15, 1));
+        DB.addDayExerciseConnector(new DayExerciseConnector(6, 1, 2));
+        DB.addDayExerciseConnector(new DayExerciseConnector(6, 19,3));
+        DB.addDayExerciseConnector(new DayExerciseConnector(6, 10, 4));
     }
 
     private void addNotes() {

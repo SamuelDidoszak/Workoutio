@@ -1,7 +1,7 @@
 package com.example.workout.util;
 
 public class Constants {
-    public static final double APPLICATION_VERSION = 0.555;
+    public static final double APPLICATION_VERSION = 0.74;
         //  Database related constants
     public static final String DATABASE_NAME = "workoutDatabase";
     public static final int DATABASE_VERSION = 1;
@@ -38,6 +38,7 @@ public class Constants {
     public static final String COLUMN_NOTE_ID = "noteID";
     public static final String COLUMN_NOTE = "note";
             //  connectors
-    public static final String COLUMN_MUSCLE_EXERCISE_CONNECTOR_ID = "MuscleExerciseConnectorID";
+    public static final String COLUMN_MUSCLE_EXERCISE_CONNECTOR_ID = "muscleExerciseConnectorID";
     public static final String COLUMN_DAY_EXERCISE_CONNECTOR_ID = "dayExerciseConnectorID";
+    public static final String COLUMN_DAY_EXERCISE_CONNECTOR_POSITION = "dayExerciseConnectorPosition";
 }

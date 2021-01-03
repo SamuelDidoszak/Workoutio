@@ -46,7 +46,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String CREATE_TABLE_MUSCLE_EXERCISE_CONNECTOR = "CREATE TABLE " + Constants.TABLE_MUSCLE_EXERCISE_CONNECTOR + "(" + Constants.COLUMN_MUSCLE_EXERCISE_CONNECTOR_ID
                 + " INTEGER PRIMARY KEY, " + Constants.COLUMN_MUSCLE_ID + " INTEGER, " + Constants.COLUMN_EXERCISE_ID + " INTEGER)";
         String CREATE_TABLE_DAY_EXERCISE_CONNECTOR = "CREATE TABLE " + Constants.TABLE_DAY_EXERCISE_CONNECTOR + "(" + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID
-                + " INTEGER PRIMARY KEY, " + Constants.COLUMN_DAY_ID + " INTEGER, " + Constants.COLUMN_EXERCISE_ID + " INTEGER)";
+                + " INTEGER PRIMARY KEY, " + Constants.COLUMN_DAY_ID + " INTEGER, " + Constants.COLUMN_EXERCISE_ID + " INTEGER, " + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_POSITION + " INTEGER)";
         String CREATE_TABLE_NOTE = "CREATE TABLE " + Constants.TABLE_NOTE + "(" + Constants.COLUMN_NOTE_ID + " INTEGER PRIMARY KEY, " + Constants.COLUMN_DATE + " TEXT, " + Constants.COLUMN_NOTE + " TEXT)";
 
         db.execSQL(CREATE_TABLE_MUSCLE);
@@ -178,9 +178,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void addDayExerciseConnector(DayExerciseConnector dayExerciseConnector) {
         SQLiteDatabase db = this.getWritableDatabase();
 
+        if(dayExerciseConnector.getPosition() == null) {
+            int position = 0;
+            List<DayExerciseConnector> dayExerciseConnectorList = getDayExerciseConnectorByDay(dayExerciseConnector.getDayId());
+            for(DayExerciseConnector tempDayExerciseConnector : dayExerciseConnectorList) {
+                if(tempDayExerciseConnector.getPosition() > position)
+                    position = tempDayExerciseConnector.getPosition() + 1;
+            }
+            dayExerciseConnector.setPosition(position);
+        }
+
         ContentValues values = new ContentValues();
         values.put(Constants.COLUMN_DAY_ID, dayExerciseConnector.getDayId());
         values.put(Constants.COLUMN_EXERCISE_ID, dayExerciseConnector.getExerciseId());
+        values.put(Constants.COLUMN_DAY_EXERCISE_CONNECTOR_POSITION, dayExerciseConnector.getPosition());
 
         long id = db.insert(Constants.TABLE_DAY_EXERCISE_CONNECTOR, null, values);
         dayExerciseConnector.setDayExerciseConnectorId((int)id);
@@ -243,6 +254,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
             removeMuscleExerciseConnectorByExercise(exerciseId);
             removeDayExerciseConnectorByDay(exerciseId);
+            cursor.close();
         }
         db.close();
     }
@@ -262,6 +274,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     db.delete(Constants.TABLE_MUSCLE_EXERCISE_CONNECTOR, Constants.COLUMN_MUSCLE_ID + "=" + ids[i], null);
                 }
             }
+            cursor.close();
         }
         db.close();
     }
@@ -330,6 +343,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             day.setDayName(cursor.getString(cursor.getColumnIndex(Constants.COLUMN_DAY_NAME)));
         }
 
+        cursor.close();
         db.close();
         return day;
     }
@@ -382,6 +396,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             done.setCanMore(canMore);
         }
 
+        cursor.close();
         db.close();
         return done;
     }
@@ -392,38 +407,39 @@ public class DatabaseHandler extends SQLiteOpenHelper {
          * @return list of dones.
          */
         public List<Done> getDonesByDate(@Nullable String date) {
-                SQLiteDatabase db = this.getReadableDatabase();
-                List<Done> doneList = new ArrayList<>();
+            SQLiteDatabase db = this.getReadableDatabase();
+            List<Done> doneList = new ArrayList<>();
 
-                if(date == null) {
-                    Date currentDate = Calendar.getInstance().getTime();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-                    date = dateFormat.format(currentDate);
-                }
-                Cursor cursor = db.query(Constants.TABLE_DONE,
-                        new String[]{Constants.COLUMN_DONE_ID,
-                                Constants.COLUMN_DATE,
-                                Constants.COLUMN_EXERCISE_ID,
-                                Constants.COLUMN_QUANTITY,
-                                Constants.COLUMN_TIME,
-                                Constants.COLUMN_NEGATIVE,
-                                Constants.COLUMN_CAN_MORE},
-                        Constants.COLUMN_DATE + " LIKE '" + date + "%'",
-                        null,
-                        null, null, null, null);
-
-                if (cursor.getCount() != 0) {
-                    cursor.moveToFirst();
-                    do {
-                        Boolean negative = cursor.getInt(5) == 1 ? Boolean.TRUE : Boolean.FALSE;
-                        Boolean canMore = cursor.getInt(6) == 1 ? Boolean.TRUE : Boolean.FALSE;
-                        doneList.add(new Done(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getInt(4), negative, canMore));
-                    }
-                    while (cursor.moveToNext());
-                }
-                db.close();
-                return doneList;
+            if(date == null) {
+                Date currentDate = Calendar.getInstance().getTime();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                date = dateFormat.format(currentDate);
             }
+            Cursor cursor = db.query(Constants.TABLE_DONE,
+                    new String[]{Constants.COLUMN_DONE_ID,
+                            Constants.COLUMN_DATE,
+                            Constants.COLUMN_EXERCISE_ID,
+                            Constants.COLUMN_QUANTITY,
+                            Constants.COLUMN_TIME,
+                            Constants.COLUMN_NEGATIVE,
+                            Constants.COLUMN_CAN_MORE},
+                    Constants.COLUMN_DATE + " LIKE '" + date + "%'",
+                    null,
+                    null, null, null, null);
+
+            if (cursor.getCount() != 0) {
+                cursor.moveToFirst();
+                do {
+                    Boolean negative = cursor.getInt(5) == 1 ? Boolean.TRUE : Boolean.FALSE;
+                    Boolean canMore = cursor.getInt(6) == 1 ? Boolean.TRUE : Boolean.FALSE;
+                    doneList.add(new Done(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), cursor.getInt(3), cursor.getInt(4), negative, canMore));
+                }
+                while (cursor.moveToNext());
+            }
+            cursor.close();
+            db.close();
+            return doneList;
+        }
 
     public Exercise getExercise(int exerciseId) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -450,6 +466,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             exercise.setDefaultNegative(defaultNegative);
         }
 
+        cursor.close();
         db.close();
         return exercise;
     }
@@ -477,6 +494,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
             dayCursor.moveToFirst();
             int dayId = dayCursor.getInt(0);
+            dayCursor.close();
 
             List<DayExerciseConnector> dayExerciseConnectorList = getDayExerciseConnectorByDay(dayId);
 
@@ -651,6 +669,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             while(cursor.moveToNext());
         }
 
+        cursor.close();
         db.close();
         return muscleExerciseConnectorList;
     }
@@ -671,6 +690,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             while(cursor.moveToNext());
         }
 
+        cursor.close();
         db.close();
         return muscleExerciseConnectorList;
     }
@@ -695,6 +715,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 }
                 while(cursor.moveToNext());
             }
+            cursor.close();
 
             for(MuscleExerciseConnector muscleExerciseConnector : muscleExerciseConnectorList) {
                 if(muscleExerciseConnector.getMuscleId() == muscleId) {
@@ -708,18 +729,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public List<DayExerciseConnector> getDayExerciseConnectorByDay(int dayId) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT " + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID + ", " + Constants.COLUMN_DAY_ID + ", " + Constants.COLUMN_EXERCISE_ID + " FROM " +
-                Constants.TABLE_DAY_EXERCISE_CONNECTOR + " WHERE " + Constants.COLUMN_DAY_ID + "=" + dayId, null);
+        Cursor cursor = db.rawQuery("SELECT " + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID + ", " + Constants.COLUMN_DAY_ID + ", " + Constants.COLUMN_EXERCISE_ID + ", " +
+                Constants.COLUMN_DAY_EXERCISE_CONNECTOR_POSITION + " FROM " + Constants.TABLE_DAY_EXERCISE_CONNECTOR + " WHERE " + Constants.COLUMN_DAY_ID + "=" + dayId, null);
 
         List<DayExerciseConnector> dayExerciseConnectorList = new ArrayList<>();
 
         if(cursor.getCount() != 0) {
             cursor.moveToFirst();
             do {
-                dayExerciseConnectorList.add(new DayExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2)));
+                dayExerciseConnectorList.add(new DayExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)));
             }
             while(cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return dayExerciseConnectorList;
     }
@@ -727,18 +749,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public List<DayExerciseConnector> getDayExerciseConnectorByExercise(int exerciseId) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT " + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID + ", " + Constants.COLUMN_DAY_ID + ", " + Constants.COLUMN_EXERCISE_ID + " FROM " +
-                Constants.TABLE_DAY_EXERCISE_CONNECTOR + " WHERE " + Constants.COLUMN_EXERCISE_ID + "=" + exerciseId, null);
+        Cursor cursor = db.rawQuery("SELECT " + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID + ", " + Constants.COLUMN_DAY_ID + ", " + Constants.COLUMN_EXERCISE_ID + ", " +
+                Constants.COLUMN_DAY_EXERCISE_CONNECTOR_POSITION + " FROM " + Constants.TABLE_DAY_EXERCISE_CONNECTOR + " WHERE " + Constants.COLUMN_EXERCISE_ID + "=" + exerciseId, null);
 
         List<DayExerciseConnector> dayExerciseConnectorList = new ArrayList<>();
 
         if(cursor.getCount() != 0) {
             cursor.moveToFirst();
             do {
-                dayExerciseConnectorList.add(new DayExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2)));
+                dayExerciseConnectorList.add(new DayExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)));
             }
             while(cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return dayExerciseConnectorList;
     }
@@ -753,16 +776,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             SQLiteDatabase DB = this.getReadableDatabase();
 
             List<DayExerciseConnector> dayExerciseConnectorList = new ArrayList<>();
-            Cursor cursor = DB.rawQuery("SELECT " + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID + ", " + Constants.COLUMN_DAY_ID + ", " + Constants.COLUMN_EXERCISE_ID +
-                    " FROM " + Constants.TABLE_DAY_EXERCISE_CONNECTOR + " WHERE " + Constants.COLUMN_DAY_ID + " = " + dayId, null);
+            Cursor cursor = DB.rawQuery("SELECT " + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID + ", " + Constants.COLUMN_DAY_ID + ", " + Constants.COLUMN_EXERCISE_ID + ", " +
+                    Constants.COLUMN_DAY_EXERCISE_CONNECTOR_POSITION + " FROM " + Constants.TABLE_DAY_EXERCISE_CONNECTOR + " WHERE " + Constants.COLUMN_DAY_ID + " = " + dayId, null);
 
             if(cursor.getCount() != 0) {
                 cursor.moveToFirst();
                 do {
-                    dayExerciseConnectorList.add(new DayExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2)));
+                    dayExerciseConnectorList.add(new DayExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)));
                 }
                 while(cursor.moveToNext());
             }
+            cursor.close();
 
             for(DayExerciseConnector dayExerciseConnector : dayExerciseConnectorList) {
                 if(dayExerciseConnector.getExerciseId() == exerciseId) {
@@ -792,6 +816,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             note.setDate(cursor.getString(1));
             note.setNote(cursor.getString(2));
         }
+        cursor.close();
         db.close();
         return note;
     }
@@ -810,6 +835,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
             while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return dayList;
     }
@@ -828,6 +854,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
             while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return doneList;
     }
@@ -848,6 +875,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
             while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return exerciseList;
     }
@@ -864,6 +892,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
             while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return muscleList;
     }
@@ -874,13 +903,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         Cursor cursor = db.rawQuery("SELECT * FROM " + Constants.TABLE_MUSCLE_EXERCISE_CONNECTOR, null);
 
-        if(cursor.moveToFirst())
-        {
+        if(cursor.moveToFirst()) {
             do {
                 muscleExerciseConnectorList.add(new MuscleExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2)));
             }
             while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return muscleExerciseConnectorList;
     }
@@ -891,13 +920,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         List<DayExerciseConnector> dayExerciseConnectorList = new ArrayList<>();
 
-        if(cursor.moveToFirst())
-        {
+        if(cursor.moveToFirst()) {
             do {
-                dayExerciseConnectorList.add(new DayExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2)));
+                dayExerciseConnectorList.add(new DayExerciseConnector(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)));
             }
             while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return dayExerciseConnectorList;
     }
@@ -914,6 +943,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
             while(cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return noteList;
     }
@@ -950,6 +980,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         DB.close();
     }
 
+    public void editDayExerciseConnector(DayExerciseConnector dayExerciseConnector) {
+        SQLiteDatabase DB = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(Constants.COLUMN_DAY_ID, dayExerciseConnector.getDayId());
+        values.put(Constants.COLUMN_EXERCISE_ID, dayExerciseConnector.getExerciseId());
+        values.put(Constants.COLUMN_DAY_EXERCISE_CONNECTOR_POSITION, dayExerciseConnector.getPosition());
+
+        DB.update(Constants.TABLE_DAY_EXERCISE_CONNECTOR, values, Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID + "=" + dayExerciseConnector.getDayExerciseConnectorId(), null);
+        DB.close();
+    }
+
 
 
 
@@ -962,7 +1004,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Constants.COLUMN_DATE + " TEXT, " + Constants.COLUMN_EXERCISE_ID + " INTEGER, " + Constants.COLUMN_QUANTITY + " INTEGER, " +
                 Constants.COLUMN_TIME + " INTEGER, " + Constants.COLUMN_NEGATIVE + " INTEGER, " + Constants.COLUMN_CAN_MORE + " INTEGER)";
         String CREATE_TABLE_DAY = "CREATE TABLE " + Constants.TABLE_DAY + "(" + Constants.COLUMN_DAY_ID + " INTEGER PRIMARY KEY, " + Constants.COLUMN_DAY_NAME + " TEXT)";
-        String CREATE_TABLE_MUSCLE_EXERCISE_CONNECTOR = "CREATE TABLE " + Constants.TABLE_MUSCLE_EXERCISE_CONNECTOR + "(" + Constants.COLUMN_MUSCLE_ID + " INTEGER, " + Constants.COLUMN_EXERCISE_ID + " INTEGER)";
+        String CREATE_TABLE_MUSCLE_EXERCISE_CONNECTOR = "CREATE TABLE " + Constants.TABLE_MUSCLE_EXERCISE_CONNECTOR + "(" + Constants.COLUMN_MUSCLE_EXERCISE_CONNECTOR_ID
+                + " INTEGER PRIMARY KEY, " + Constants.COLUMN_MUSCLE_ID + " INTEGER, " + Constants.COLUMN_EXERCISE_ID + " INTEGER)";
+        String CREATE_TABLE_DAY_EXERCISE_CONNECTOR = "CREATE TABLE " + Constants.TABLE_DAY_EXERCISE_CONNECTOR + "(" + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID
+                + " INTEGER PRIMARY KEY, " + Constants.COLUMN_DAY_ID + " INTEGER, " + Constants.COLUMN_EXERCISE_ID + " INTEGER, " + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_POSITION + " INTEGER)";
         String CREATE_TABLE_NOTE = "CREATE TABLE " + Constants.TABLE_NOTE + "(" + Constants.COLUMN_NOTE_ID + " INTEGER PRIMARY KEY, " + Constants.COLUMN_DATE + " TEXT, " + Constants.COLUMN_NOTE + " TEXT)";
 
 
@@ -971,6 +1016,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Log.d("CREATE DONE", CREATE_TABLE_DONE);
         Log.d("CREATE DAY", CREATE_TABLE_DAY);
         Log.d("CREATE MUSCLE_CONNECTOR", CREATE_TABLE_MUSCLE_EXERCISE_CONNECTOR);
+        Log.d("CREATE DAY_CONNECTOR", CREATE_TABLE_DAY_EXERCISE_CONNECTOR);
         Log.d("CREATE NOTE", CREATE_TABLE_NOTE);
     }
 

@@ -139,6 +139,10 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
                 chosenPosition = getAdapterPosition();
                 exerciseToEdit.setValue(id);
             };
+            View.OnLongClickListener onExerciseLongClock = v -> {
+
+                return true;
+            };
         }
 
     }
