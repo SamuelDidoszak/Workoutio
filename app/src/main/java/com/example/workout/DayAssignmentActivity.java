@@ -20,6 +20,7 @@ import com.example.workout.data.DatabaseHandler;
 import com.example.workout.fragment.ExerciseMenuFragment;
 import com.example.workout.model.DayExerciseConnector;
 import com.example.workout.model.Exercise;
+import com.example.workout.model.QuantityAndReps;
 import com.example.workout.model.helper.SimpleItemTouchHelperCallback;
 import com.example.workout.ui.adapter.DayAssignmentRecyclerViewAdapter;
 
@@ -42,6 +43,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
     private DatabaseHandler DB;
 
     int dayId;
+    boolean startWorkout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,6 +54,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
         DB = new DatabaseHandler(this);
 
         dayId = getIntent().getIntExtra("dayId", -1);
+        startWorkout = getIntent().getBooleanExtra("startWorkout", false);
 
         addViews();
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(dayAssignmentRecyclerViewAdapter);
@@ -62,7 +65,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
     @Override
     protected void onStart() {
         super.onStart();
-        exerciseMenuFragment.getChosenExercise().observe(this, integer -> {
+        exerciseMenuFragment.getChosenExerciseObserver().observe(this, integerMutableLiveData -> integerMutableLiveData.observe(DayAssignmentActivity.this, integer -> {
             int position = dayExercises.size();
             dayExercises.add(DB.getExercise(integer));
             dayAssignmentRecyclerViewAdapter.notifyItemInserted(position);
@@ -72,7 +75,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             });
             dayAssignmentRecyclerViewAdapter.getDataChanged().setValue(Boolean.TRUE);
             dayExercisesRecyclerView.scrollToPosition(position);
-        });
+        }));
     }
 
     private void addViews() {
@@ -124,7 +127,6 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
         spaceBottom.setOnClickListener(clickHandler.onSpaceClick);
     }
 
-    //  I HAVE TO CHANGE IT INTO QUANTITYANDREPS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! =========================================================================================================================================================================================================================================================================================================
     private class ClickHandler {
         View.OnClickListener onBackButtonClick = v -> {
             if(dayAssignmentRecyclerViewAdapter.getDataChanged().getValue() != null) {
@@ -150,10 +152,9 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
                 finish();
         };
 
-        //  I HAVE TO CHANGE IT INTO QUANTITYANDREPS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! =========================================================================================================================================================================================================================================================================================================
         View.OnClickListener onSaveButtonClick = v -> {
             Intent intent = new Intent();
-            if(dayId != -1) {
+            if(dayId != -1 && !startWorkout) {
                 boolean saved = dayAssignmentRecyclerViewAdapter.saveChanges();
                 //  saved can be null. If it's initialized with the Boolean.FALSE value, it notifies observers upon its creation
                 if(saved)
@@ -162,9 +163,16 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
                     intent.putExtra("changeInDay", false);
             }
             else {
+                if(startWorkout)
+                    dayAssignmentRecyclerViewAdapter.saveChanges();
                 List<Exercise> exerciseList = dayAssignmentRecyclerViewAdapter.getExercisesList();
-                if(exerciseList.size() != 0)
-                    intent.putExtra("quantityAndReps", (Serializable)exerciseList);
+                if(exerciseList.size() != 0) {
+                    List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
+                    for(Exercise exercise : exerciseList) {
+                        quantityAndRepsList.add(new QuantityAndReps(exercise.getExerciseId(), context, null));
+                    }
+                    intent.putExtra("quantityAndReps", (Serializable)quantityAndRepsList);
+                }
                 else {
                     Toast.makeText(context, "Please choose some exercises", Toast.LENGTH_SHORT).show();
                     return;

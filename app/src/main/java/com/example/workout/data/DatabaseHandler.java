@@ -16,6 +16,7 @@ import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
 import com.example.workout.model.MuscleExerciseConnector;
 import com.example.workout.model.Note;
+import com.example.workout.model.QuantityAndReps;
 import com.example.workout.util.Constants;
 
 import java.text.SimpleDateFormat;
@@ -970,6 +971,42 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return noteList;
+    }
+
+    /**
+     * @param date String containing the date for which quantityAndRepsList should be returned.
+     *             If not set, method calculates list for a current day
+     * @return list of exercises, their quantity and repetitions
+     */
+    public List<QuantityAndReps> getQuantityAndRepsList(@Nullable String date) {
+        if(date == null) {
+            Date currentDate = Calendar.getInstance().getTime();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            date = dateFormat.format(currentDate);
+        }
+        List<Done> doneListByDate = getDonesByDate(date);
+        List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
+        for(Done done : doneListByDate) {
+            int doneExerciseId = done.getExerciseId();
+            Boolean isBreak = Boolean.FALSE;
+            for(int i = 0; i < quantityAndRepsList.size(); i++) {
+                if(quantityAndRepsList.get(i).getExerciseId() == doneExerciseId) {
+                    quantityAndRepsList.get(i).setQuantity(quantityAndRepsList.get(i).getQuantity() + done.getQuantity());
+                    quantityAndRepsList.get(i).setReps(quantityAndRepsList.get(i).getReps() + 1);
+                    if(done.isCanMore())
+                        quantityAndRepsList.get(i).setCanMore(true);
+                    isBreak = Boolean.TRUE;
+                    break;
+                }
+            }
+            if(!isBreak) {
+                quantityAndRepsList.add(new QuantityAndReps(done.getExerciseId(), getExercise(done.getExerciseId()).getExerciseName(), done.getQuantity(), done.isCanMore(), 1));
+            }
+        }
+        for(QuantityAndReps quantityAndReps : quantityAndRepsList) {
+            quantityAndReps.setQuantity(quantityAndReps.getQuantity() / quantityAndReps.getReps());
+        }
+        return quantityAndRepsList;
     }
 
         //  edit items

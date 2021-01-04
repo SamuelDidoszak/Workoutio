@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.workout.R;
 
 public class PickerSliderAdapter extends RecyclerView.Adapter<PickerSliderAdapter.ViewHolder> {
-    private int maximumRange = 50 + 1;
+    private int maximumRange = 500 + 1;
     private Context context;
     private PickerSliderAdapter thisAdapter = this;
     private MutableLiveData<Integer> clickedNumber;

@@ -11,8 +11,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TouchDelegate;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -24,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.data.DatabaseTesting;
+import com.example.workout.model.Day;
 import com.example.workout.model.Done;
 import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
@@ -57,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
     private List<Muscle> dayMuscleList;
     private List<MuscleDateTime> muscleDateTimeList;
 
-    private TextView noExercisesTextView;
+    private LinearLayout noExercisesContainer;
+    private Button addExercisesButton;
     private RecyclerView dayRecyclerView;
     private DayExerciseRecyclerViewAdapter dayExerciseRecyclerViewAdapter;
     private DayMuscleRecyclerViewAdapter dayMuscleRecyclerViewAdapter;
@@ -92,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         context = this;
         DB = new DatabaseHandler(this);
@@ -166,6 +170,13 @@ public class MainActivity extends AppCompatActivity {
             dayMuscleList = DB.getMusclesByCurrentDay();
             dayMuscleRecyclerViewAdapter.notifyDataSetChanged();
         }
+        else if(requestCode == 3) {
+            if(resultCode == RESULT_FIRST_USER) {
+                Intent intent = new Intent(context, WorkoutActivity.class);
+                intent.putExtra("quantityAndReps", data.getSerializableExtra("quantityAndReps"));
+                startActivityForResult(intent, 2);
+            }
+        }
     }
 
     /** checks value of {@code isDayRecyclerViewMuscle} <br/>
@@ -206,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
         for(int i = 0; i < maximumWeeksBefore; i++) {
                 //  subtracts a week in milliseconds from current date
             currentDate -= 604800000;
-            localQuantityAndRepsList = populateQuantityAndReps(dateFormat.format(currentDate));
+            localQuantityAndRepsList = DB.getQuantityAndRepsList(dateFormat.format(currentDate));
             if(localQuantityAndRepsList.size() != 0) {
                 dateOfDayExercisesShowing = dateFormat.format(currentDate);
                 break;
@@ -236,42 +247,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param date String containing the date for which quantityAndRepsList should be returned.
-     *             If not set, method calculates list for a current day
-     * @return list of exercises, their quantity and repetitions
-     */
-    private List<QuantityAndReps> populateQuantityAndReps(@Nullable String date) {
-        if(date == null) {
-            Date currentDate = Calendar.getInstance().getTime();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            date = dateFormat.format(currentDate);
-        }
-        List<Done> doneListByDate = DB.getDonesByDate(date);
-        List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
-        for(Done done : doneListByDate) {
-            int doneExerciseId = done.getExerciseId();
-            Boolean isBreak = Boolean.FALSE;
-            for(int i = 0; i < quantityAndRepsList.size(); i++) {
-                if(quantityAndRepsList.get(i).getExerciseId() == doneExerciseId) {
-                    quantityAndRepsList.get(i).setQuantity(quantityAndRepsList.get(i).getQuantity() + done.getQuantity());
-                    quantityAndRepsList.get(i).setReps(quantityAndRepsList.get(i).getReps() + 1);
-                    if(done.isCanMore())
-                        quantityAndRepsList.get(i).setCanMore(true);
-                    isBreak = Boolean.TRUE;
-                    break;
-                }
-            }
-            if(!isBreak) {
-                quantityAndRepsList.add(new QuantityAndReps(done.getExerciseId(), DB.getExercise(done.getExerciseId()).getExerciseName(), done.getQuantity(), done.isCanMore(), 1));
-            }
-        }
-        for(QuantityAndReps quantityAndReps : quantityAndRepsList) {
-            quantityAndReps.setQuantity(quantityAndReps.getQuantity() / quantityAndReps.getReps());
-        }
-        return quantityAndRepsList;
-    }
-
-    /**
      * Class for setting up everything necessary for MainActivity to work
      */
     private class SetUp {
@@ -291,7 +266,8 @@ public class MainActivity extends AppCompatActivity {
          *Sets up the necessary views
          */
         void setViews() {
-//            noExercisesTextView = findViewById(R.id.activity_main_no_exercises);
+            noExercisesContainer = findViewById(R.id.activity_main_no_exercises);
+            addExercisesButton = findViewById(R.id.main_activity_addExercisesButton);
             dayRecyclerView = findViewById(R.id.dayRecyclerView);
             historyRecyclerView = findViewById(R.id.historyRecyclerView);
             addButton = findViewById(R.id.app_toolbar_addButton);
@@ -370,10 +346,29 @@ public class MainActivity extends AppCompatActivity {
 
         private void refreshMuscles() {
             dayMuscleList = DB.getMusclesByCurrentDay();
-            Log.d(TAG, "refreshMuscles: size: " + dayMuscleList.size());
             if(dayMuscleList.size() == 0){
-                Log.d(TAG, "refreshMuscles: yeeeeah");
-//                noExercisesTextView.setVisibility(View.VISIBLE);
+                dayRecyclerView.setVisibility(View.GONE);
+                noExercisesContainer.setVisibility(View.VISIBLE);
+                addExercisesButton.setOnClickListener(v -> {
+                    Intent intent = new Intent(context, DayAssignmentActivity.class);
+
+                    Date currentDate = Calendar.getInstance().getTime();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE");
+                    String dayName = dateFormat.format(currentDate);
+                    List<Day> dayList = DB.getAllDays();
+                    for(Day day : dayList) {
+                        if(day.getDayName().equals(dayName)) {
+                            intent.putExtra("dayId", day.getDayId());
+                            break;
+                        }
+                    }
+                    intent.putExtra("startWorkout", true);
+                    startActivityForResult(intent, 3);
+                });
+            }
+            else if(noExercisesContainer.getVisibility() == View.VISIBLE) {
+                dayRecyclerView.setVisibility(View.VISIBLE);
+                noExercisesContainer.setVisibility(View.GONE);
             }
             
             // Bruteforce way
@@ -389,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void refreshDayExercise() {
-            populateQuantityAndReps(null);
+            DB.getQuantityAndRepsList(null);
             // Bruteforce way
             dayExerciseRecyclerViewAdapter = new DayExerciseRecyclerViewAdapter(context, quantityAndRepsList);
             if(!isDayRecyclerViewMuscle)
@@ -627,148 +622,30 @@ public class MainActivity extends AppCompatActivity {
                 }
                 previousEndIndex = muscleDateTimeList.get(i).getSortedDoneListEndIndex();
             }
-
-//            /** Adds the new done as the latest one */
-//            if(newDoneIndex == 0) {
-//                Log.d(TAG, "addDone: adding as the latest one");
-//                    // checks if the dates are different
-//                if(!newDone.getTrimmedDate().equals(muscleDateTimeList.get(0).getDate())) {
-//                    muscleDateTimeList.add(0, new MuscleDateTime(DB.getMusclesByExerciseDate(newDone.getTrimmedDate()),
-//                            newDone.getTrimmedDate(),
-//                            newDone.getTrimmedDateTime(),
-//                            0));
-//                }
-//                    //  if they are or are not, moves all indexes by one
-//                moveSortedDoneListEndIndexesByOne(0);
-//                Log.d(TAG, "addDone: latest one");
-//                Log.d(TAG, "adapterNotify: item inserted at 0");
-//                historyRecyclerViewFullAdapter.notifyItemInserted(0);
-//                return 0;
-//            }
-//
-//            for(int i = 0; i < muscleDateTimeList.size(); i ++) {
-//                if(newDoneIndex > muscleDateTimeList.get(i).getSortedDoneListEndIndex() &&
-//                        newDoneIndex <= muscleDateTimeList.get(i).getSortedDoneListEndIndex()) {
-//                }
-//
-//            }
-//            if(newDoneIndex < muscleDateTimeList.get(0).getSortedDoneListEndIndex())
-//
-//            /**
-//             * Adds the new done into the first muscleDateTime
-//             */
-//            if(newDoneIndex <= muscleDateTimeList.get(0).getSortedDoneListEndIndex()) {
-//                Log.d(TAG, "addDone: first muscledatetime");
-//                if((newDone.getTrimmedDate()).equals(muscleDateTimeList.get(0).getDate())) {
-//                    Log.d(TAG, "trimmedDate: " + newDone.getTrimmedDate());
-//                    Log.d(TAG, "date: " + muscleDateTimeList.get(0).getDate());
-//
-//                    Log.d(TAG, "addDone: added in the same date 0");
-//                }
-//                else {
-//                    if(newDoneIndex)
-//                    muscleDateTimeList.add(0, new MuscleDateTime(DB.getMusclesByExerciseDate(newDone.getTrimmedDate()),
-//                            newDone.getTrimmedDate(),
-//                            newDone.getTrimmedDateTime(),
-//                            newDoneIndex));
-//
-//                    historyRecyclerViewFullAdapter.notifyItemInserted(0);
-//                    Log.d(TAG, "addDone: added in another date 0");
-//                }
-//
-//                //  move the range of the next muscleDateTime endIndexes
-//                moveSortedDoneListEndIndexesByOne(0);
-//                Log.d(TAG, "adapterNotify: item inserted at 0");
-//                historyRecyclerViewFullAdapter.notifyDataSetChanged();
-//                return 0;
-//            }
-//
-//            /** Default: Adds the new done in the middle */
-//            Log.d(TAG, "addDone: default behavior");
-//            for(int i = 1; i < muscleDateTimeList.size(); i++) {
-//                    //  checks if new done is in the muscleDateTimeList[i] range of this particular muscleDateTime
-//                if(newDoneIndex >= muscleDateTimeList.get(i - 1).getSortedDoneListEndIndex() &&
-//                        newDoneIndex < muscleDateTimeList.get(i).getSortedDoneListEndIndex()) {
-//                        //  runs if the dates are different
-//                    if((newDone.getTrimmedDate()).equals(muscleDateTimeList.get(i).getDate())) {
-//                        Log.d(TAG, "addDone: they equal");
-//                        Log.d(TAG, "trimmedDate: " + newDone.getTrimmedDate());
-//                        Log.d(TAG, "date: " + muscleDateTimeList.get(i).getDate());
-//                        Log.d(TAG, "addDone: added in the same date");
-//
-//                        /**
-//                         * throws concurrentModificationException
-//                         */
-//                        historyRecyclerViewFullAdapter.notifyDataSetChanged();
-//                        historyRecyclerViewFullAdapter.notifyDataSetChanged();
-//                        historyRecyclerViewFullAdapter.notifyDataSetChanged();
-//                    }
-//                        //  checks if index is the last index of the previous muscleDateTime. If so, inserts it into its boundaries
-//                    else if(newDoneIndex == muscleDateTimeList.get(i - 1).getSortedDoneListEndIndex()) {
-//                        Log.d(TAG, "trimmedDate: " + newDone.getTrimmedDate());
-//                        Log.d(TAG, "date: " + muscleDateTimeList.get(i - 1).getDate());
-//                        moveSortedDoneListEndIndexesByOne(i - 1);
-//                        Log.d(TAG, "addDone: added done as a last index of the muscleDateTime");
-//                        return i - 1;
-//                    }
-//                        //  runs if the dates are different
-//                    else {
-//                        Log.d(TAG, "trimmedDate: " + newDone.getTrimmedDate());
-//                        Log.d(TAG, "date: " + muscleDateTimeList.get(i).getDate());
-//                        Log.d(TAG, "trimmedDate: " + dateIntoMillis(newDone.getTrimmedDate()));
-//                        Log.d(TAG, "date: " + dateIntoMillis(muscleDateTimeList.get(i).getDate()));
-//                        //  if the date is smaller that the date at i, inserts it after this date and not before
-//                        if (dateIntoMillis(newDone.getTrimmedDate()) < dateIntoMillis(muscleDateTimeList.get(i).getDate()))
-//                            i++;
-//                        muscleDateTimeList.add(i, new MuscleDateTime(DB.getMusclesByExerciseDate(newDone.getTrimmedDate()),
-//                                newDone.getTrimmedDate(),
-//                                newDone.getTrimmedDateTime(),
-//                                newDoneIndex));
-//                        historyRecyclerViewFullAdapter.notifyItemInserted(i);
-//                        Log.d(TAG, "addDone: added in another date");
-//                    }
-//
-//                    //  move the range of the next muscleDateTime endIndexes
-//                    moveSortedDoneListEndIndexesByOne(i);
-//                    Log.d(TAG, "adapterNotify: item inserted at " + i);
-//                    historyRecyclerViewFullAdapter.notifyDataSetChanged();
-//                    return i;
-//                }
-//            }
-//            Log.d(TAG, "addDone: nothing added");
-//            return 0;
         }
 
         void changeOverallExerciseTime(int newDoneIndex, int muscleDateTimeIndex) {
             long newDoneDate = dateIntoMillis(sortedDoneList.get(newDoneIndex).getTrimmedDate());
-            Log.d(TAG, "changeOverallExerciseTime: " + newDoneDate);
-            Log.d(TAG, newDoneIndex + "");
-            Log.d(TAG, sortedDoneList.size() + "");
                 //  change time newD, lastD
             if(newDoneIndex == 0 || dateIntoMillis(sortedDoneList.get(newDoneIndex - 1).getTrimmedDate()) > newDoneDate) {
-                Log.d(TAG, "changeOverallExerciseTime: smoler");
                 int i = newDoneIndex;
                 for(; i < sortedDoneList.size() - 1; i++) {
                     Log.d(TAG, sortedDoneList.get(i + 1).getTrimmedDate());
                     if(newDoneDate > dateIntoMillis(sortedDoneList.get(i + 1).getTrimmedDate())) {
-                        Log.d(TAG, "changeOverallExerciseTime: breaking at " + i);
                         break;
                     }
                 }
                 muscleDateTimeList.get(muscleDateTimeIndex).setTime(sortedDoneList.get(newDoneIndex).getTrimmedDateTimeInMinutes(), sortedDoneList.get(i).getTrimmedDateTimeInMinutes());
-                Log.d(TAG, "changeOverallExerciseTime: " + muscleDateTimeList.get(muscleDateTimeIndex).getTime());
             }
             //  change time lastD, newD
             else if(newDoneIndex == sortedDoneList.size() - 1 || dateIntoMillis(sortedDoneList.get(newDoneIndex + 1).getTrimmedDate()) < newDoneDate) {
                 int i = newDoneIndex;
-                Log.d(TAG, "changeOverallExerciseTime: biger");
                 for(; i > 0; i--) {
                     if(newDoneDate < dateIntoMillis(sortedDoneList.get(i - 1).getTrimmedDate())) {
                         break;
                     }
                 }
                 muscleDateTimeList.get(muscleDateTimeIndex).setTime(sortedDoneList.get(i).getTrimmedDateTimeInMinutes(), sortedDoneList.get(newDoneIndex).getTrimmedDateTimeInMinutes());
-                Log.d(TAG, "changeOverallExerciseTime: " + muscleDateTimeList.get(muscleDateTimeIndex).getTime());
             }
         }
 

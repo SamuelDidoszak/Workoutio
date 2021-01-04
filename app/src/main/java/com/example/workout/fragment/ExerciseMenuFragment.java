@@ -46,7 +46,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
 
     private ExerciseMenuRecyclerViewData[] recyclerViewList = {null, null, null};
     private int currentRecyclerViewType = MY_EXERCISE_RECYCLER_VIEW;
-    private MutableLiveData<Integer> chosenExercise;
+    private MutableLiveData<MutableLiveData<Integer>> chosenExercise;
     private MutableLiveData<Integer> editExercise;
     private int editPosition;
     /**
@@ -74,7 +74,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         return changesInExercises;
     }
 
-    public LiveData<Integer> getChosenExercise() {
+    public LiveData<MutableLiveData<Integer>> getChosenExerciseObserver() {
         return chosenExercise;
     }
 
@@ -95,6 +95,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         super.onViewCreated(view, savedInstanceState);
         DB = new DatabaseHandler(context);
         changesInExercises = 0;
+        chosenExercise = new MutableLiveData<>();
 
         addViews(view);
         addOnClickHandlers();
@@ -147,14 +148,17 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
      */
     private void setUpObservers() {
         ExerciseMenuRecyclerViewData recyclerView = recyclerViewList[currentRecyclerViewType - 1];
-        chosenExercise = recyclerView.getChosenExercise();
+        chosenExercise.setValue(recyclerView.getChosenExercise());
         recyclerView.resetExerciseToEdit();
         editExercise = recyclerView.getExerciseToEdit();
 
         //  start ExerciseMenuDayAdapter if edit imageButton is clicked
         editExercise.observe(getViewLifecycleOwner(), exerciseId -> {
             editPosition = recyclerView.getChosenPosition();
-            startActivityForResult(new Intent(context, EditExerciseMenuActivity.class).putExtra("exerciseId", exerciseId), Activity.RESULT_FIRST_USER);
+            Intent intent = new Intent(context, EditExerciseMenuActivity.class);
+            intent.putExtra("exerciseId", exerciseId);
+            intent.putExtra("startWorkout", false);
+            startActivityForResult(intent, Activity.RESULT_FIRST_USER);
         });
 
         if(currentRecyclerViewType == DAY_RECYCLER_VIEW) {

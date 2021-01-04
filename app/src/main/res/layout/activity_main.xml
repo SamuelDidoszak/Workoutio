@@ -51,16 +51,32 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 
-<!--            <TextView-->
-<!--                android:id="@+id/activity_main_no_exercises"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:text="No exercises for today"-->
-<!--                android:textColor="@color/white"-->
-<!--                android:textSize="24sp"-->
-<!--                android:layout_gravity="center"-->
-<!--                android:gravity="center"-->
-<!--                android:visibility="gone"/>-->
+            <LinearLayout
+                android:id="@+id/activity_main_no_exercises"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No exercises for today"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:layout_gravity="center_horizontal|top"
+                    android:gravity="center"/>
+
+                <Button
+                    android:id="@+id/main_activity_addExercisesButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|bottom"
+                    android:text="add exercises"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
+
 
         </LinearLayout>
 

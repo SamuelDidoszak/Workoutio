@@ -89,7 +89,7 @@ public class ChronometerFragment extends Fragment {
     /**
      * Rest time in seconds
      */
-    private int REST_TIME = 1;
+    private int REST_TIME = 60;
     private Boolean startExerciseAfterRest = Boolean.FALSE;
 
 

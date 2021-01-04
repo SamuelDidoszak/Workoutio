@@ -79,7 +79,6 @@ public class MuscleDateTime {
             Date formattedDate = new Date(time);
             dayAndDate[0] = new SimpleDateFormat("EEE")
                     .format(formattedDate);
-            dayAndDate[0] += dateIfDifferentYear();
             return dayAndDate;
         }
         catch (ParseException e) {

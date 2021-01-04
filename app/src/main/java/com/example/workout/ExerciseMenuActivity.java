@@ -29,13 +29,13 @@ public class ExerciseMenuActivity extends AppCompatActivity{
     protected void onStart() {
         super.onStart();
         //  wait for user to chose exercise in RecyclerViewAdapter and finish the activity passing exerciseId
-        exerciseMenuFragment.getChosenExercise().observe(this, exerciseId -> {
+        exerciseMenuFragment.getChosenExerciseObserver().observe(this, integerMutableLiveData -> integerMutableLiveData.observe(ExerciseMenuActivity.this, exerciseId -> {
             Intent intent = new Intent();
             intent.putExtra("ExerciseId", exerciseId);
             intent.putExtra("changesInExercises", exerciseMenuFragment.getChangesInExercises());
             setResult(Activity.RESULT_FIRST_USER, intent);
             finish();
-        });
+        }));
     }
 
     private void setUpViews() {

@@ -24,7 +24,6 @@ import com.example.workout.fragment.CurrentWorkoutFragment;
 import com.example.workout.fragment.DoneExercisesFragment;
 import com.example.workout.fragment.EditExerciseFragment;
 import com.example.workout.model.Done;
-import com.example.workout.model.Exercise;
 import com.example.workout.model.QuantityAndReps;
 import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
 
@@ -93,19 +92,7 @@ public class WorkoutActivity extends AppCompatActivity {
             if(exerciseId == -1)
                 return;
 
-            int quantity = -1;
-            boolean canMore = false;
-                //  Checks if this exercise was done today. If true, gives adequate quantity and canMore
-            List<QuantityAndReps> tempQuantityAndRepsList = (List<QuantityAndReps>) getIntent().getSerializableExtra("quantityAndReps");
-            for(QuantityAndReps quantityAndReps : tempQuantityAndRepsList) {
-                if(quantityAndReps.getExerciseId() == exerciseId) {
-                    quantity = quantityAndReps.getQuantity();
-                    canMore = quantityAndReps.isCanMore();
-                }
-            }
-            Exercise newExercise = DB.getExercise(exerciseId);
-            QuantityAndReps newQuantityAndReps = new QuantityAndReps(newExercise.getExerciseId(), newExercise.getExerciseName(), quantity, canMore, 1);
-            workoutRecyclerViewAdapter.addNewQAR(newQuantityAndReps, addAsCurrent);
+            workoutRecyclerViewAdapter.addNewQAR(new QuantityAndReps(exerciseId, context, null), addAsCurrent);
         }
     }
 
@@ -117,7 +104,6 @@ public class WorkoutActivity extends AppCompatActivity {
         if(overallTimeBase != 0) {
             chronometerFragment.initializeWorkoutTimeChronometer(overallTimeBase);
         }
-
     }
 
     //  add time is amount =======================================
