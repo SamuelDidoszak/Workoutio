@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/transparentBlack"
-        android:layout_weight="1.5"
+        android:layout_weight="1"
         android:orientation="horizontal" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -60,11 +60,46 @@
         android:padding="4dp"/>
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="10"
+        android:background="@color/hardDark"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/day_assignment_backButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="3"
+            android:textStyle="bold"
+            android:text="@string/back"
+            android:textAllCaps="false"/>
+
+        <Button
+            android:id="@+id/day_assignment_saveButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="3"
+            android:textStyle="bold"
+            android:text="@string/save"
+            android:textAllCaps="false"/>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/day_assignment_spaceBottom"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/transparentBlack"
-        android:layout_weight="1.5"
+        android:layout_weight="1"
         android:orientation="horizontal" />
 
 </LinearLayout>

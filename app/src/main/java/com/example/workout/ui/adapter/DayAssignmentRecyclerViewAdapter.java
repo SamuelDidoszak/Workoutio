@@ -1,7 +1,6 @@
 package com.example.workout.ui.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.R;
 import com.example.workout.data.DatabaseHandler;
+import com.example.workout.model.DayExerciseConnector;
 import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
 import com.example.workout.model.helper.ExerciseMenuRecyclerViewData;
@@ -43,7 +43,10 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
     private List<Exercise> exercisesList;
     private MutableLiveData<Integer> chosenExercise;
     private MutableLiveData<Integer> exerciseToEdit;
+    private MutableLiveData<Boolean> dataChanged;
     private List<List<Muscle>> listOfMuscleLists;
+    private List<Integer> listOfDeletedExercises;
+    private int dayId;
 
     private DatabaseHandler DB;
 
@@ -55,18 +58,29 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
     public MutableLiveData<Integer> getExerciseToEdit() {
         return exerciseToEdit;
     }
+    public MutableLiveData<Boolean> getDataChanged() {
+        return dataChanged;
+    }
     public void resetExerciseToEdit() {
         this.exerciseToEdit = new MutableLiveData<>();
     }
+    public void resetDataChanged() {
+        this.dataChanged = new MutableLiveData<>();
+    }
     private final OnStartDragListener dragStartListener;
 
-    public DayAssignmentRecyclerViewAdapter(Context context, List<Exercise> exercisesList, OnStartDragListener dragStartListener) {
+
+    public DayAssignmentRecyclerViewAdapter(Context context, List<Exercise> exercisesList, int dayId, OnStartDragListener dragStartListener) {
         this.context = context;
         this.exercisesList = exercisesList;
+        this.dayId = dayId;
         this.dragStartListener = dragStartListener;
+        listOfDeletedExercises = new ArrayList<>();
         chosenExercise = new MutableLiveData<>();
         exerciseToEdit = new MutableLiveData<>();
         editMode = false;
+        //  If it's initialized with the Boolean.FALSE value, it notifies observers upon its creation
+        dataChanged = new MutableLiveData<>();
 
         DB = new DatabaseHandler(context);
 
@@ -77,12 +91,41 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
         }
     }
 
+    public List<Exercise> getExercisesList() {
+        return exercisesList;
+    }
+
+    public boolean saveChanges() {
+        if(dataChanged.getValue() != null) {
+            for(int i = 0; i < exercisesList.size(); i++) {
+                DayExerciseConnector dayExerciseConnector = DB.getDayExerciseConnector(dayId, exercisesList.get(i).getExerciseId());
+                if(dayExerciseConnector.getDayId() != 0) {
+                    dayExerciseConnector.setPosition(i);
+                    DB.editDayExerciseConnector(dayExerciseConnector);
+                }
+                else {
+                    dayExerciseConnector = new DayExerciseConnector(dayId, exercisesList.get(i).getExerciseId(), i);
+                    DB.addDayExerciseConnector(dayExerciseConnector);
+                }
+            }
+            for(Integer deletedExerciseId : listOfDeletedExercises) {
+                DB.removeDayExerciseConnectorById(DB.getDayExerciseConnector(dayId, deletedExerciseId).getDayExerciseConnectorId());
+            }
+            return true;
+        }
+        else
+            return false;
+    }
+
     public int getChosenPosition() {
         return chosenPosition;
     }
 
     public void reSetListOfMuscleListsAtPosition(int position) {
-        listOfMuscleLists.set(position, DB.getMusclesByExerciseId(exercisesList.get(position).getExerciseId()));
+        if(position < listOfMuscleLists.size())
+            listOfMuscleLists.set(position, DB.getMusclesByExerciseId(exercisesList.get(position).getExerciseId()));
+        else
+            listOfMuscleLists.add(DB.getMusclesByExerciseId(exercisesList.get(position).getExerciseId()));
     }
 
     @NonNull
@@ -137,12 +180,15 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
         Exercise previousExercise = exercisesList.remove(fromPosition);
         exercisesList.add(toPosition > fromPosition ? toPosition - 1 : toPosition, previousExercise);
         notifyItemMoved(fromPosition, toPosition);
+        dataChanged.setValue(Boolean.TRUE);
     }
 
     @Override
     public void onItemDismiss(int position) {
-        exercisesList.remove(position);
+        //  Removes the exercise and adds its id to the deletedList
+        listOfDeletedExercises.add((exercisesList.remove(position)).getExerciseId());
         notifyItemRemoved(position);
+        dataChanged.setValue(Boolean.TRUE);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -176,7 +222,6 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
             View.OnLongClickListener onContainerLongClick = new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    Log.d("TAG", "longClick!!!!!!!111: ");
                     editMode = !editMode;
                     notifyDataSetChanged();
                     return false;

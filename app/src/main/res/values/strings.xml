@@ -11,4 +11,7 @@
     <string name="save">save</string>
     <string name="continue_workout">continue&#10;workout</string>
     <string name="custom">Custom</string>
+    <string name="undo">undo</string>
+    <string name="back">back</string>
+    <string name="start">start</string>
 </resources>

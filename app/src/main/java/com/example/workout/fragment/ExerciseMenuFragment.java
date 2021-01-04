@@ -161,7 +161,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
             exerciseMenuDayAdapter.getChosenDay().observe(getViewLifecycleOwner(), integer -> {
                 Intent intent = new Intent(context, DayAssignmentActivity.class);
                 intent.putExtra("dayId", integer);
-                startActivityForResult(intent, Activity.RESULT_FIRST_USER);
+                startActivityForResult(intent, 2);
             });
         }
     }
@@ -169,7 +169,19 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == Activity.RESULT_FIRST_USER) {
+        if(resultCode == Activity.RESULT_CANCELED)
+            return;
+        if(requestCode == 2) {
+            boolean changeInDay = data.getBooleanExtra("changeInDay", false);
+            if(changeInDay) {
+                dayExerciseDivision();
+                exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseList);
+                exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
+                recyclerViewList[0] = exerciseMenuDayAdapter;
+                resetDayAdapter = Boolean.FALSE;
+            }
+        }
+        else if(resultCode == Activity.RESULT_FIRST_USER) {
             int exerciseId = data.getIntExtra("exerciseId", -1);
             if(exerciseId == -1)
                 return;
@@ -234,7 +246,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
 
     /** changes the color of the recyclerView titles*/
     public void changeTypeVisually(int recyclerViewType) {
-        /** Resets the background */
+        //  Resets the background
         switch(currentRecyclerViewType) {
             case MY_EXERCISE_RECYCLER_VIEW:
                 myExercisesTextView.setBackgroundColor(getResources().getColor(R.color.mediumDark));
@@ -247,7 +259,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 break;
         }
 
-        /** Adds the new color */
+        //  Adds the new color
         switch(recyclerViewType) {
             case MY_EXERCISE_RECYCLER_VIEW:
                 myExercisesTextView.setBackgroundColor(getResources().getColor(R.color.hardDark));
@@ -329,15 +341,9 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
      */
     class ClickHandler {
         // TextView
-        public View.OnClickListener dayTextViewClick = v -> {
-            setUpRecyclerView(DAY_RECYCLER_VIEW);
-        };
-        public View.OnClickListener myExercisesTextViewClick = v -> {
-            setUpRecyclerView(MY_EXERCISE_RECYCLER_VIEW);
-        };
-        public View.OnClickListener exerciseTextViewClick = v -> {
-            setUpRecyclerView(AVAILABLE_EXERCISE_RECYCLER_VIEW);
-        };
+        public View.OnClickListener dayTextViewClick = v -> setUpRecyclerView(DAY_RECYCLER_VIEW);
+        public View.OnClickListener myExercisesTextViewClick = v -> setUpRecyclerView(MY_EXERCISE_RECYCLER_VIEW);
+        public View.OnClickListener exerciseTextViewClick = v -> setUpRecyclerView(AVAILABLE_EXERCISE_RECYCLER_VIEW);
     }
 }
 
