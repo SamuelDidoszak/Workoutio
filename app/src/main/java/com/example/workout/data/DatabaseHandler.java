@@ -29,6 +29,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     Context context;
 
+        //  Export it into the settings
+    private final boolean saveAsCustomAutomatically = false;
+
     public DatabaseHandler(@Nullable Context context) {
         super(context, Constants.DATABASE_NAME, null, Constants.DATABASE_VERSION);
         this.context = context;
@@ -84,7 +87,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void addCustomDone(Done done) {
         SQLiteDatabase db = this.getWritableDatabase();
+
         ContentValues values = new ContentValues();
+        //  Set exercise to be custom
+        if(saveAsCustomAutomatically && !getExercise(done.getExerciseId()).isCustomExercise())
+            transferExercise(done.getExerciseId());
+
         values.put(Constants.COLUMN_DATE, done.getDate());
         values.put(Constants.COLUMN_EXERCISE_ID, done.getExerciseId());
         values.put(Constants.COLUMN_QUANTITY, done.getQuantity());
@@ -98,17 +106,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         long id = db.insert(Constants.TABLE_DONE, null, values);
         done.setDoneId((int)id);
 
-        if(!getExercise(done.getExerciseId()).isCustomExercise()) {
-            db = this.getWritableDatabase();
-            ContentValues values1 = new ContentValues();
-            values1.put(Constants.COLUMN_CUSTOM_EXERCISE, 1);
-            db.update(Constants.TABLE_EXERCISE,
-                    values1,
-                    Constants.COLUMN_EXERCISE_ID + "=" + done.getExerciseId(),
-                    null);
-
-            getExercise(done.getExerciseId()).setCustomExercise(true);
-        }
         db.close();
     }
 
@@ -177,7 +174,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void addDayExerciseConnector(DayExerciseConnector dayExerciseConnector) {
-        SQLiteDatabase db = this.getWritableDatabase();
 
         if(dayExerciseConnector.getPosition() == null) {
             int position = 0;
@@ -190,26 +186,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         ContentValues values = new ContentValues();
-        values.put(Constants.COLUMN_DAY_ID, dayExerciseConnector.getDayId());
+        //  Set exercise to be custom
+        if(saveAsCustomAutomatically && !getExercise(dayExerciseConnector.getExerciseId()).isCustomExercise())
+            transferExercise(dayExerciseConnector.getExerciseId());
+
         values.put(Constants.COLUMN_EXERCISE_ID, dayExerciseConnector.getExerciseId());
+        values.put(Constants.COLUMN_DAY_ID, dayExerciseConnector.getDayId());
         values.put(Constants.COLUMN_DAY_EXERCISE_CONNECTOR_POSITION, dayExerciseConnector.getPosition());
 
-        long id = db.insert(Constants.TABLE_DAY_EXERCISE_CONNECTOR, null, values);
+        SQLiteDatabase DB = this.getWritableDatabase();
+        long id = DB.insert(Constants.TABLE_DAY_EXERCISE_CONNECTOR, null, values);
         dayExerciseConnector.setDayExerciseConnectorId((int)id);
 
-        if(!getExercise(dayExerciseConnector.getExerciseId()).isCustomExercise()) {
-            db = this.getWritableDatabase();
-            ContentValues values1 = new ContentValues();
-            values1.put(Constants.COLUMN_CUSTOM_EXERCISE, 1);
-            int updateCount = db.update(Constants.TABLE_EXERCISE,
-                    values1,
-                    Constants.COLUMN_EXERCISE_ID + "=" + dayExerciseConnector.getExerciseId(),
-                    null);
-
-            getExercise(dayExerciseConnector.getExerciseId()).setCustomExercise(true);
-        }
-
-        db.close();
+        DB.close();
     }
 
     public void addNote(Note note) {
@@ -1016,9 +1005,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(Constants.COLUMN_EXERCISE_NAME, exercise.getExerciseName());
-        values.put(Constants.COLUMN_CUSTOM_EXERCISE, exercise.isCustomExercise());
-        values.put(Constants.COLUMN_TIME_AS_AMOUNT, exercise.isTimeAsAmount());
-        values.put(Constants.COLUMN_DEFAULT_NEGATIVE, exercise.isDefaultNegative());
+        values.put(Constants.COLUMN_CUSTOM_EXERCISE, exercise.isCustomExercise() ? 1 : 0);
+        values.put(Constants.COLUMN_TIME_AS_AMOUNT, exercise.isTimeAsAmount() ? 1 : 0);
+        values.put(Constants.COLUMN_DEFAULT_NEGATIVE, exercise.isDefaultNegative() ? 1 : 0);
 
         DB.update(Constants.TABLE_EXERCISE, values, Constants.COLUMN_EXERCISE_ID + "=" + exercise.getExerciseId(), null);
         DB.close();
@@ -1051,6 +1040,28 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         DB.update(Constants.TABLE_DAY_EXERCISE_CONNECTOR, values, Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID + "=" + dayExerciseConnector.getDayExerciseConnectorId(), null);
         DB.close();
+    }
+
+    /**
+     * Copies the whole Exercise along with MuscleExerciseConnectors and DayExerciseConnectors. <br/>
+     * Creates a new one which replaces the old one
+     * @param fromExerciseId exerciseId from which the transfer should be performed
+     * @return id of new previous exercise
+     */
+    public int transferExercise(int fromExerciseId) {
+        //  Changes fromExercise into custom
+        Exercise exercise = getExercise(fromExerciseId);
+        exercise.setCustomExercise(true);
+        editExercise(exercise);
+
+        exercise.setCustomExercise(false);
+        addExercise(exercise);
+        //  Copies MuscleExerciseConnectors
+        List<MuscleExerciseConnector> muscleExerciseConnectorList = getMuscleExerciseConnectorByExercise(fromExerciseId);
+        for(MuscleExerciseConnector muscleExerciseConnector : muscleExerciseConnectorList) {
+            addMuscleExerciseConnector(new MuscleExerciseConnector(muscleExerciseConnector.getMuscleId(), exercise.getExerciseId()));
+        }
+        return exercise.getExerciseId();
     }
 
 

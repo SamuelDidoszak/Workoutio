@@ -70,7 +70,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             dayExercises.add(DB.getExercise(integer));
             dayAssignmentRecyclerViewAdapter.notifyItemInserted(position);
             DayAssignmentActivity.this.runOnUiThread(() -> {
-                dayAssignmentRecyclerViewAdapter.notifyDataSetChanged();
+                dayAssignmentRecyclerViewAdapter.notifyItemInserted(position);
                 dayAssignmentRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(position);
             });
             dayAssignmentRecyclerViewAdapter.getDataChanged().setValue(Boolean.TRUE);

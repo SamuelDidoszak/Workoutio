@@ -14,4 +14,6 @@
     <string name="undo">undo</string>
     <string name="back">back</string>
     <string name="start">start</string>
+    <string name="add">add</string>
+    <string name="exercise_name">exercise name</string>
 </resources>

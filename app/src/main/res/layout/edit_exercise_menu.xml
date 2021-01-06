@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/edit_exercise_menu_cardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/hardDark">
+    android:background="@color/hardDark" >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:weightSum="5"
-        android:background="@color/hardDark">
+        android:background="@color/hardDark"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true">
 
-        <TextView
-            android:id="@+id/edit_exercise_menu_exerciseNameTextView"
+        <EditText
+            android:id="@+id/edit_exercise_menu_exerciseNameEditText"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:layout_weight="1"
+            android:hint="@string/exercise_name"
+            android:maxLines="1"
+            android:inputType="text"
+            android:imeOptions="actionDone"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/white"
@@ -64,7 +71,7 @@
                 android:layout_marginRight="8dp"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/edit_exercise_menu_daysEditText"
+                android:id="@+id/edit_exercise_menu_defaultNegativeTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
@@ -137,7 +144,7 @@
                 android:id="@+id/edit_exercise_menu_saveButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/save"
+                android:text="@string/back"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:background="@color/mediumDark"/>

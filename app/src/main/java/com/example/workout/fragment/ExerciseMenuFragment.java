@@ -30,6 +30,7 @@ import com.example.workout.model.helper.ExerciseMenuRecyclerViewData;
 import com.example.workout.model.helper.ExerciseMenuRecyclerViewTypes;
 import com.example.workout.ui.adapter.ExerciseMenuDayAdapter;
 import com.example.workout.ui.adapter.ExerciseMenuExercisesRecyclerViewAdapter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
     private RecyclerView exerciseRecyclerView;
     private ExerciseMenuExercisesRecyclerViewAdapter myExercisesRecyclerViewAdapter, availableExercisesRecyclerViewAdapter;
     private ExerciseMenuDayAdapter exerciseMenuDayAdapter;
+    private FloatingActionButton floatingActionButton;
 
     private List<Exercise> myExercisesList, availableExercisesList;
     private List<DayExercise> dayExerciseList;
@@ -119,6 +121,8 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 }
                 exerciseRecyclerView.setAdapter(myExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+                if(!floatingActionButton.isShown())
+                    floatingActionButton.show();
                 break;
             case DAY_RECYCLER_VIEW:
                 if(resetDayAdapter) {
@@ -129,6 +133,8 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 }
                 exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+                if(!floatingActionButton.isShown())
+                    floatingActionButton.show();
                 break;
             case AVAILABLE_EXERCISE_RECYCLER_VIEW:
                 if(availableExercisesRecyclerViewAdapter == null) {
@@ -137,6 +143,8 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 }
                 exerciseRecyclerView.setAdapter(availableExercisesRecyclerViewAdapter);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+                if(floatingActionButton.isShown())
+                    floatingActionButton.hide();
                 break;
         }
         changeTypeVisually(recyclerViewType);
@@ -168,6 +176,22 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 startActivityForResult(intent, 2);
             });
         }
+        exerciseRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if(currentRecyclerViewType == ExerciseMenuRecyclerViewTypes.AVAILABLE_EXERCISE_RECYCLER_VIEW)
+                    return;
+                if(dy > 0) {
+                    if (floatingActionButton.isShown())
+                        floatingActionButton.hide();
+                }
+                else {
+                    if (!floatingActionButton.isShown())
+                        floatingActionButton.show();
+                }
+            }
+        });
     }
 
     @Override
@@ -189,8 +213,19 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
             int exerciseId = data.getIntExtra("exerciseId", -1);
             if(exerciseId == -1)
                 return;
+
             boolean[] changeList = data.getBooleanArrayExtra("changeList");
-            if(!changeList[0] && !changeList[1])
+
+            if(requestCode == 3) {
+                int position = myExercisesList.size();
+                myExercisesList.add(DB.getExercise(exerciseId));
+                myExercisesRecyclerViewAdapter.notifyItemInserted(position);
+                myExercisesRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(position);
+                exerciseRecyclerView.scrollToPosition(position);
+                floatingActionButton.hide();
+            }
+
+            if(!changeList[0] && !changeList[1] && !changeList[3])
                 return;
 
             if(changeList[0]) {
@@ -201,7 +236,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
 
             switch (currentRecyclerViewType) {
                 case ExerciseMenuRecyclerViewTypes.MY_EXERCISE_RECYCLER_VIEW:
-                    if(changeList[1]) {
+                    if(changeList[1] || changeList[3]) {
                         myExercisesList.set(editPosition, DB.getExercise(exerciseId));
                         myExercisesRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(editPosition);
                         myExercisesRecyclerViewAdapter.notifyItemChanged(editPosition);
@@ -209,7 +244,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                     }
                     break;
                 case ExerciseMenuRecyclerViewTypes.DAY_RECYCLER_VIEW:
-                    if(changeList[0]) {
+                    if(changeList[0] || changeList[3]) {
                         dayExerciseDivision();
                         exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseList);
                         exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
@@ -222,11 +257,16 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                     }
                     break;
                 case ExerciseMenuRecyclerViewTypes.AVAILABLE_EXERCISE_RECYCLER_VIEW:
-                    if(changeList[1]) {
-                        availableExercisesList.set(editPosition, DB.getExercise(exerciseId));
+                    if(changeList[1] || changeList[2] || changeList[3]) {
+                        int newExerciseId = data.getIntExtra("newExerciseId", -1);
+                        availableExercisesList.set(editPosition, DB.getExercise(newExerciseId));
                         availableExercisesRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(editPosition);
                         availableExercisesRecyclerViewAdapter.notifyItemChanged(editPosition);
                         setChangesInExercises(2);
+
+                        myExercisesList.add(DB.getExercise(exerciseId));
+                        myExercisesRecyclerViewAdapter.notifyItemInserted(myExercisesList.size() - 1);
+                        myExercisesRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(myExercisesList.size() - 1);
                     }
                     break;
             }
@@ -318,14 +358,16 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
      * Adds all of the necessary views
      */
     public void addViews(View view) {
-        // TextView
+        //  TextView
         dayTextView = view.findViewById(R.id.exercise_menuDayTextView);
         myExercisesTextView = view.findViewById(R.id.exercise_menuMyExercisesTextView);
         exerciseTextView = view.findViewById(R.id.exercise_menuExerciseTextView);
-        // RecyclerView
+        //  RecyclerView
         exerciseRecyclerView = view.findViewById(R.id.exercise_menuExerciseRecyclerView);
         if(!dayMenuAvailable)
             dayTextView.setVisibility(View.GONE);
+        //  FloatingActionButton
+        floatingActionButton = view.findViewById(R.id.floating_action_button);
     }
 
     /**
@@ -337,7 +379,8 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         dayTextView.setOnClickListener(clickHandler.dayTextViewClick);
         myExercisesTextView.setOnClickListener(clickHandler.myExercisesTextViewClick);
         exerciseTextView.setOnClickListener(clickHandler.exerciseTextViewClick);
-        // RecyclerView
+        //  FloatingActionButton
+        floatingActionButton.setOnClickListener(clickHandler.onFloatingActionButtonClick);
     }
 
     /**
@@ -348,6 +391,21 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         public View.OnClickListener dayTextViewClick = v -> setUpRecyclerView(DAY_RECYCLER_VIEW);
         public View.OnClickListener myExercisesTextViewClick = v -> setUpRecyclerView(MY_EXERCISE_RECYCLER_VIEW);
         public View.OnClickListener exerciseTextViewClick = v -> setUpRecyclerView(AVAILABLE_EXERCISE_RECYCLER_VIEW);
+        public View.OnClickListener onFloatingActionButtonClick = v -> {
+            if(currentRecyclerViewType == TYPE_DAY) {
+                Intent intent = new Intent(context, DayAssignmentActivity.class);
+                intent.putExtra("dayId", -1);
+                intent.putExtra("startWorkout", false);
+                startActivityForResult(intent, Activity.RESULT_FIRST_USER);
+
+            }
+            else {
+                Intent intent = new Intent(context, EditExerciseMenuActivity.class);
+                intent.putExtra("exerciseId", -1);
+                startActivityForResult(intent, 3);
+
+            }
+        };
     }
 }
 

@@ -64,7 +64,10 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
     }
 
     public void reSetListOfMuscleListsAtPosition(int position) {
-        listOfMuscleLists.set(position, DB.getMusclesByExerciseId(exercisesList.get(position).getExerciseId()));
+        if(position < listOfMuscleLists.size())
+            listOfMuscleLists.set(position, DB.getMusclesByExerciseId(exercisesList.get(position).getExerciseId()));
+        else
+            listOfMuscleLists.add(DB.getMusclesByExerciseId(exercisesList.get(position).getExerciseId()));
     }
 
     @NonNull

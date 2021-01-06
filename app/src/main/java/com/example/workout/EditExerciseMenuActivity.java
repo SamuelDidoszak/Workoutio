@@ -1,18 +1,24 @@
 package com.example.workout;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,7 +36,8 @@ import java.util.List;
 
 public class EditExerciseMenuActivity extends AppCompatActivity {
 
-    private TextView exerciseNameTextView;
+    private EditText exerciseNameEditText;
+    private CardView cardView;
     private RecyclerView daysRecyclerView, musclesRecyclerView;
     private CheckableImageView timeAsCountCheckbox, defaultNegativeCheckbox;
     private Button saveButton;
@@ -41,6 +48,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
      * 0: Change in Days <br/>
      * 1: Change in Muscles <br/>
      * 2: Change in CheckBoxes <br/>
+     * 3: Change in Name
      */
     private boolean[] changeList;
     /**
@@ -69,11 +77,12 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         timeAsCountCheckbox.setOnClickListener(clickHandler.onTimeAsCountClick);
         defaultNegativeCheckbox.setOnClickListener(clickHandler.onDefaultNegativeClick);
         saveButton.setOnClickListener(clickHandler.onSaveButtonClick);
+        cardView.setOnClickListener(clickHandler.onCardViewClick);
     }
 
     private void setViews() {
-            //  TextView
-        exerciseNameTextView = findViewById(R.id.edit_exercise_menu_exerciseNameTextView);
+            //  EditText
+        exerciseNameEditText = findViewById(R.id.edit_exercise_menu_exerciseNameEditText);
             //  RecyclerViews
         daysRecyclerView = findViewById(R.id.edit_exercise_menu_daysRecyclerView);
         musclesRecyclerView = findViewById(R.id.edit_exercise_menu_musclesRecyclerView);
@@ -82,13 +91,36 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         defaultNegativeCheckbox = findViewById(R.id.edit_exercise_menu_defaultNegativeCheckbox);
             //  Button
         saveButton = findViewById(R.id.edit_exercise_menu_saveButton);
+            //  CardView
+        cardView = findViewById(R.id.edit_exercise_menu_cardView);
     }
 
     /**
      * Checks if starting values are the same as the new ones
      */
     private void saveChanges() {
-        if(changeList[0]) {
+        Intent intent = new Intent();
+
+        if(saveButton.getText().equals(R.string.back)){
+            setResult(RESULT_CANCELED);
+            finish();
+        }
+        if(exerciseId == -1) {
+            Exercise exercise = new Exercise(exerciseNameEditText.getText().toString(), true, timeAsCountCheckbox.isChecked(), defaultNegativeCheckbox.isChecked());
+            DB.addExercise(exercise);
+            exerciseId = exercise.getExerciseId();
+            changeList[2] = false;
+        }
+        if(!DB.getExercise(exerciseId).isCustomExercise()) {
+            for(int i = 1; i < 4; i++) {
+                if(changeList[i]) {
+                    int newExerciseId = DB.transferExercise(exerciseId);
+                    intent.putExtra("newExerciseId", newExerciseId);
+                    break;
+                }
+            }
+        }
+        if (changeList[0]) {
             for (int i = 0; i < inDayInclusionList.length; i++) {
                 if (inDayInclusionList[i][0] != inDayInclusionList[i][1]) {
                     //  connector was deleted
@@ -100,11 +132,11 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
                 }
             }
         }
-        if(changeList[1]) {
-            for(int i = 0; i < inMuscleInclusionList.length; i++) {
-                if(inMuscleInclusionList[i][0] != inMuscleInclusionList[i][1]) {
+        if (changeList[1]) {
+            for (int i = 0; i < inMuscleInclusionList.length; i++) {
+                if (inMuscleInclusionList[i][0] != inMuscleInclusionList[i][1]) {
                     //  connector was deleted
-                    if(inMuscleInclusionList[i][0])
+                    if (inMuscleInclusionList[i][0])
                         DB.removeMuscleExerciseConnectorById(DB.getMuscleExerciseConnector(allMusclesList.get(i).getMuscleId(), exerciseId).getMuscleExerciseConnectorId());
                         //  connector was added
                     else
@@ -112,7 +144,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
                 }
             }
         }
-        if(changeList[2]) {
+        if (changeList[2]) {
             Boolean defaultNegative = defaultNegativeCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
             Boolean timeAsAmount = timeAsCountCheckbox.isChecked() ? Boolean.TRUE : Boolean.FALSE;
 
@@ -120,9 +152,13 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
             exercise.setDefaultNegative(defaultNegative);
             exercise.setTimeAsAmount(timeAsAmount);
             DB.editExercise(exercise);
-
         }
-        Intent intent = new Intent();
+        if (changeList[3]) {
+            Exercise exercise = DB.getExercise(exerciseId);
+            exercise.setExerciseName(exerciseNameEditText.getText().toString());
+            DB.editExercise(exercise);
+        }
+
         intent.putExtra("exerciseId", exerciseId);
         intent.putExtra("changeList", changeList);
         setResult(RESULT_FIRST_USER, intent);
@@ -132,26 +168,59 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
     private class ClickHandler {
         View.OnClickListener onTimeAsCountClick = v -> {
             changeList[2] = Boolean.TRUE;
+            saveButton.setText(R.string.save);
         };
         View.OnClickListener onDefaultNegativeClick = v -> {
             changeList[2] = Boolean.TRUE;
+            saveButton.setText(R.string.save);
         };
         View.OnClickListener onSaveButtonClick = v -> {
-            for(int i = 0; i < changeList.length; i++) {
-                if(changeList[i]) {
-                    saveChanges();
-                }
-            }
+            saveChanges();
+        };
+        //  CardView
+        public View.OnClickListener onCardViewClick = v -> {
+            cardView.requestFocus();
+            InputMethodManager inputMethodManager = (InputMethodManager)EditExerciseMenuActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(cardView.getWindowToken(), 0);
         };
     }
 
     private void fillViews(int exerciseId) {
         Exercise exercise = DB.getExercise(exerciseId);
 
-        exerciseNameTextView.setText(exercise.getExerciseName());
+        if(exerciseId != -1) {
+            exerciseNameEditText.setText(exercise.getExerciseName());
+            timeAsCountCheckbox.setChecked(exercise.isTimeAsAmount());
+            defaultNegativeCheckbox.setChecked(exercise.isDefaultNegative());
+        }
+        exerciseNameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(s.length() != 0)
+                    saveButton.setText(R.string.save);
+                else
+                    saveButton.setText(R.string.back);
 
-        timeAsCountCheckbox.setChecked(exercise.isTimeAsAmount());
-        defaultNegativeCheckbox.setChecked(exercise.isDefaultNegative());
+                if(exerciseId != -1) {
+                    if(!s.toString().equals(exercise.getExerciseName()))
+                        changeList[3] = true;
+                    else {
+                        changeList[3] = false;
+                        for(int i = 0; i < 3; i++) {
+                            if(changeList[i])
+                                return;
+                        }
+                        saveButton.setText(R.string.back);
+                    }
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
 
         DaysRecyclerViewAdapter daysRecyclerViewAdapter = new DaysRecyclerViewAdapter();
         daysRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -170,7 +239,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         List<Day> dayList = DB.getDaysByExerciseId(exerciseId);
         List<Muscle> muscleList = DB.getMusclesByExerciseId(exerciseId);
 
-        changeList = new boolean[3];
+        changeList = new boolean[4];
         Arrays.fill(changeList, Boolean.FALSE);
 
         inDayInclusionList = new Boolean[allDaysList.size()][2];
@@ -260,6 +329,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
                 inDayInclusionList[position][1] = !inDayInclusionList[position][1];
                 changeBackground(inDayInclusionList[position][1]);
                 changeList[0] = Boolean.TRUE;
+                saveButton.setText(R.string.save);
             };
         }
     }
@@ -311,8 +381,8 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
                 inMuscleInclusionList[position][1] = !inMuscleInclusionList[position][1];
                 changeBackground(inMuscleInclusionList[position][1]);
                 changeList[1] = Boolean.TRUE;
+                saveButton.setText(R.string.save);
             };
-
         }
     }
 }

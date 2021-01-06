@@ -18,6 +18,13 @@ public class Exercise {
         this.exerciseName = exerciseName;
     }
 
+    public Exercise(String exerciseName, boolean customExercise, boolean timeAsAmount, boolean defaultNegative) {
+        this.exerciseName = exerciseName;
+        this.customExercise = customExercise;
+        this.timeAsAmount = timeAsAmount;
+        this.defaultNegative = defaultNegative;
+    }
+
     public Exercise(int exerciseId, String exerciseName, boolean customExercise, boolean timeAsAmount, boolean defaultNegative) {
         this.exerciseId = exerciseId;
         this.exerciseName = exerciseName;

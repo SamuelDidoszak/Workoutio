@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: recreatin");
             new DatabaseTesting(context).recreateDatabase();
         }
+        new DatabaseTesting(context).recreateDatabase();
 
         new SetUp().setAll();
     }

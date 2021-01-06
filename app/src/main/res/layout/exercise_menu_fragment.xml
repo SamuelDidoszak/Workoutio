@@ -49,13 +49,29 @@
         app:layout_constraintStart_toEndOf="@id/exercise_menuMyExercisesTextView"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/exercise_menuExerciseRecyclerView"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/exercise_menuMyExercisesTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/exercise_menuMyExercisesTextView">
+
+        <include
+            layout="@layout/floating_action_button"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/exercise_menuExerciseRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </RelativeLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

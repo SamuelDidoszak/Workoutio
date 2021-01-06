@@ -2,6 +2,7 @@ package com.example.workout.util;
 
 public class Constants {
     public static final double APPLICATION_VERSION = 0.74;
+    public static final String TIMING_LOGGER_TAG = "timing";
         //  Database related constants
     public static final String DATABASE_NAME = "workoutDatabase";
     public static final int DATABASE_VERSION = 1;
