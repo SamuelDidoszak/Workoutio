@@ -3,6 +3,7 @@ package com.example.workout;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -65,7 +66,8 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
     @Override
     protected void onStart() {
         super.onStart();
-        exerciseMenuFragment.getChosenExerciseObserver().observe(this, integerMutableLiveData -> integerMutableLiveData.observe(DayAssignmentActivity.this, integer -> {
+        exerciseMenuFragment.getPickedExercise().observe(DayAssignmentActivity.this, integer -> {
+            Log.d("TAG", "onStart: called");
             int position = dayExercises.size();
             dayExercises.add(DB.getExercise(integer));
             dayAssignmentRecyclerViewAdapter.notifyItemInserted(position);
@@ -75,7 +77,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             });
             dayAssignmentRecyclerViewAdapter.getDataChanged().setValue(Boolean.TRUE);
             dayExercisesRecyclerView.scrollToPosition(position);
-        }));
+        });
     }
 
     private void addViews() {

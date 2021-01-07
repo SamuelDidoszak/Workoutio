@@ -43,6 +43,9 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
     public void resetExerciseToEdit() {
         this.exerciseToEdit = new MutableLiveData<>();
     }
+    public void resetChosenExercise() {
+        this.chosenExercise = new MutableLiveData<>();
+    }
 
     public ExerciseMenuExercisesRecyclerViewAdapter(Context context, List<Exercise> exercisesList) {
         this.context = context;

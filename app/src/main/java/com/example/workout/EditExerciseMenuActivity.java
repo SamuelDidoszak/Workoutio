@@ -101,12 +101,17 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
     private void saveChanges() {
         Intent intent = new Intent();
 
-        if(saveButton.getText().equals(R.string.back)){
+        if(saveButton.getText().toString().equals(getResources().getString(R.string.back))){
             setResult(RESULT_CANCELED);
             finish();
         }
         if(exerciseId == -1) {
-            Exercise exercise = new Exercise(exerciseNameEditText.getText().toString(), true, timeAsCountCheckbox.isChecked(), defaultNegativeCheckbox.isChecked());
+            String exerciseName = exerciseNameEditText.getText().toString();
+            if(exerciseName.length() == 0) {
+                exerciseNameEditText.setHintTextColor(getResources().getColor(R.color.mediumRed));
+                return;
+            }
+            Exercise exercise = new Exercise(exerciseName, true, timeAsCountCheckbox.isChecked(), defaultNegativeCheckbox.isChecked());
             DB.addExercise(exercise);
             exerciseId = exercise.getExerciseId();
             changeList[2] = false;

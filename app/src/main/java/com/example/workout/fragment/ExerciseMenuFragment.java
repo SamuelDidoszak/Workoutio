@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -48,8 +49,9 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
 
     private ExerciseMenuRecyclerViewData[] recyclerViewList = {null, null, null};
     private int currentRecyclerViewType = MY_EXERCISE_RECYCLER_VIEW;
-    private MutableLiveData<MutableLiveData<Integer>> chosenExercise;
+    private MutableLiveData<Integer> chosenExercise;
     private MutableLiveData<Integer> editExercise;
+    private MutableLiveData<Integer> pickedExercise;
     private int editPosition;
     /**
      * 0 = no changes <br/>
@@ -76,8 +78,8 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         return changesInExercises;
     }
 
-    public LiveData<MutableLiveData<Integer>> getChosenExerciseObserver() {
-        return chosenExercise;
+    public LiveData<Integer> getPickedExercise() {
+        return pickedExercise;
     }
 
     @Override
@@ -98,6 +100,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         DB = new DatabaseHandler(context);
         changesInExercises = 0;
         chosenExercise = new MutableLiveData<>();
+        pickedExercise = new MutableLiveData<>();
 
         addViews(view);
         addOnClickHandlers();
@@ -156,7 +159,17 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
      */
     private void setUpObservers() {
         ExerciseMenuRecyclerViewData recyclerView = recyclerViewList[currentRecyclerViewType - 1];
-        chosenExercise.setValue(recyclerView.getChosenExercise());
+        recyclerView.resetChosenExercise();
+        chosenExercise = recyclerView.getChosenExercise();
+
+        //  Notify observers that an exercise was picked
+        chosenExercise.observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                pickedExercise.setValue(integer);
+            }
+        });
+
         recyclerView.resetExerciseToEdit();
         editExercise = recyclerView.getExerciseToEdit();
 
@@ -222,7 +235,6 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 myExercisesRecyclerViewAdapter.notifyItemInserted(position);
                 myExercisesRecyclerViewAdapter.reSetListOfMuscleListsAtPosition(position);
                 exerciseRecyclerView.scrollToPosition(position);
-                floatingActionButton.hide();
             }
 
             if(!changeList[0] && !changeList[1] && !changeList[3])
@@ -232,6 +244,13 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 setChangesInExercises(1);
                 if(exerciseMenuDayAdapter != null)
                     resetDayAdapter = Boolean.TRUE;
+            }
+
+            //  If the exercise is newly added, then the upcoming switch statement is unnecessary
+            if(requestCode == 3) {
+                //  everything about the exercise is changed
+                changesInExercises = 3;
+                return;
             }
 
             switch (currentRecyclerViewType) {
@@ -397,13 +416,11 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 intent.putExtra("dayId", -1);
                 intent.putExtra("startWorkout", false);
                 startActivityForResult(intent, Activity.RESULT_FIRST_USER);
-
             }
             else {
                 Intent intent = new Intent(context, EditExerciseMenuActivity.class);
                 intent.putExtra("exerciseId", -1);
                 startActivityForResult(intent, 3);
-
             }
         };
     }

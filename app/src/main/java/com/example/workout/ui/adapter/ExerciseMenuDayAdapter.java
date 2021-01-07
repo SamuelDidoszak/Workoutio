@@ -61,6 +61,9 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public void resetExerciseToEdit() {
         this.exerciseToEdit = new MutableLiveData<>();
     }
+    public void resetChosenExercise() {
+        this.chosenExercise = new MutableLiveData<>();
+    }
 
     public ExerciseMenuDayAdapter(Context context, List<DayExercise> dayExerciseList) {
         this.context = context;

@@ -64,6 +64,8 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
     public void resetExerciseToEdit() {
         this.exerciseToEdit = new MutableLiveData<>();
     }
+    public void resetChosenExercise() {}
+
     public void resetDataChanged() {
         this.dataChanged = new MutableLiveData<>();
     }

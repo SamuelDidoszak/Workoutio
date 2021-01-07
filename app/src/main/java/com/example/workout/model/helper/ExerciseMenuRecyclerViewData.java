@@ -9,4 +9,5 @@ public interface ExerciseMenuRecyclerViewData {
     public MutableLiveData<Integer> getChosenExercise();
     public MutableLiveData<Integer> getExerciseToEdit();
     public void resetExerciseToEdit();
+    public void resetChosenExercise();
 }
