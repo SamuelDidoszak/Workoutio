@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -77,7 +78,12 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         timeAsCountCheckbox.setOnClickListener(clickHandler.onTimeAsCountClick);
         defaultNegativeCheckbox.setOnClickListener(clickHandler.onDefaultNegativeClick);
         saveButton.setOnClickListener(clickHandler.onSaveButtonClick);
+        //  ClickHandlers that hide keyboard
         cardView.setOnClickListener(clickHandler.onCardViewClick);
+        daysRecyclerView.setOnTouchListener(clickHandler.hideKeyboardOnTouch);
+        daysRecyclerView.addOnItemTouchListener(clickHandler.hideKeyboardOnItemTouch);
+        musclesRecyclerView.setOnTouchListener(clickHandler.hideKeyboardOnTouch);
+        musclesRecyclerView.addOnItemTouchListener(clickHandler.hideKeyboardOnItemTouch);
     }
 
     private void setViews() {
@@ -172,10 +178,12 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
     private class ClickHandler {
         View.OnClickListener onTimeAsCountClick = v -> {
+            hideKeyboard();
             changeList[2] = Boolean.TRUE;
             saveButton.setText(R.string.save);
         };
         View.OnClickListener onDefaultNegativeClick = v -> {
+            hideKeyboard();
             changeList[2] = Boolean.TRUE;
             saveButton.setText(R.string.save);
         };
@@ -184,10 +192,37 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         };
         //  CardView
         public View.OnClickListener onCardViewClick = v -> {
-            cardView.requestFocus();
-            InputMethodManager inputMethodManager = (InputMethodManager)EditExerciseMenuActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(cardView.getWindowToken(), 0);
+            hideKeyboard();
         };
+
+        View.OnTouchListener hideKeyboardOnTouch = (v, event) -> {
+            if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                hideKeyboard();
+            }
+            return false;
+        };
+
+        RecyclerView.OnItemTouchListener hideKeyboardOnItemTouch = new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                hideKeyboard();
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+            }
+        };
+
+        private void hideKeyboard() {
+            cardView.requestFocus();
+            InputMethodManager inputMethodManager = (InputMethodManager) EditExerciseMenuActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(cardView.getWindowToken(), 0);
+        }
     }
 
     private void fillViews(int exerciseId) {

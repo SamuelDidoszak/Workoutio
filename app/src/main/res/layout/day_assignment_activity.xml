@@ -17,12 +17,25 @@
         android:orientation="horizontal" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/day_assignment_constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="3.5"
         android:background="@color/hardDark"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
         android:orientation="vertical"
         android:paddingBottom="8dp">
+
+<!--        <androidx.constraintlayout.widget.Barrier-->
+<!--            android:id="@+id/barrier"-->
+<!--            app:barrierDirection="top"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:constraint_referenced_ids="day_assignment_dayName,day_assignment_dayNameEditText"/>-->
 
         <TextView
             android:id="@+id/day_assignment_dayName"
@@ -38,6 +51,22 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/day_assignment_dayExercisesRecyclerView"/>
+
+        <EditText
+            android:id="@+id/day_assignment_dayNameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="@string/exercise_group_name"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:padding="4dp"
+            android:textStyle="bold|italic"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/day_assignment_dayExercisesRecyclerView"
+            android:visibility="gone"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/day_assignment_dayExercisesRecyclerView"

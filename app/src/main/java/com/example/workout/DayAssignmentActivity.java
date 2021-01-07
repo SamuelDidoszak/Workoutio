@@ -1,17 +1,24 @@
 package com.example.workout;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.fragment.app.FragmentContainerView;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +38,7 @@ import java.util.List;
 
 public class DayAssignmentActivity extends AppCompatActivity implements DayAssignmentRecyclerViewAdapter.OnStartDragListener {
     private TextView dayName;
+    private EditText dayNameEditText;
     private LinearLayout spaceTop, spaceBottom;
     private Button backButton, saveButton;
     private RecyclerView dayExercisesRecyclerView;
@@ -67,7 +75,6 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
     protected void onStart() {
         super.onStart();
         exerciseMenuFragment.getPickedExercise().observe(DayAssignmentActivity.this, integer -> {
-            Log.d("TAG", "onStart: called");
             int position = dayExercises.size();
             dayExercises.add(DB.getExercise(integer));
             dayAssignmentRecyclerViewAdapter.notifyItemInserted(position);
@@ -78,11 +85,21 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             dayAssignmentRecyclerViewAdapter.getDataChanged().setValue(Boolean.TRUE);
             dayExercisesRecyclerView.scrollToPosition(position);
         });
+
+        if(dayId == -1) {
+            FragmentContainerView fragmentContainerView = findViewById(R.id.day_assignment_exerciseFragmentContainer);
+            fragmentContainerView.post(() -> {
+                exerciseMenuFragment.getExerciseRecyclerView().setOnTouchListener(new ClickHandler().hideKeyboardOnTouch);
+                exerciseMenuFragment.getExerciseRecyclerView().addOnItemTouchListener(new ClickHandler().hideKeyboardOnItemTouch);
+            });
+        }
     }
 
     private void addViews() {
         //  TextViews
         dayName = findViewById(R.id.day_assignment_dayName);
+        //  EditText
+        dayNameEditText = findViewById(R.id.day_assignment_dayNameEditText);
         //  Spaces
         spaceTop = findViewById(R.id.day_assignment_spaceTop);
         spaceBottom = findViewById(R.id.day_assignment_spaceBottom);
@@ -103,6 +120,15 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             }
         }
         else {
+            //  Changes the constraints in the constraint layout
+            dayName.setVisibility(View.GONE);
+            dayNameEditText.setVisibility(View.VISIBLE);
+            ConstraintLayout constraintLayout = findViewById(R.id.day_assignment_constraintLayout);
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(constraintLayout);
+            constraintSet.connect(R.id.day_assignment_dayExercisesRecyclerView, ConstraintSet.TOP,
+                    R.id.day_assignment_dayNameEditText, ConstraintSet.BOTTOM,0);
+            constraintSet.applyTo(constraintLayout);
             dayName.setText(R.string.custom);
         }
         dayAssignmentRecyclerViewAdapter = new DayAssignmentRecyclerViewAdapter(context, dayExercises, dayId, this);
@@ -127,6 +153,9 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
         saveButton.setOnClickListener(clickHandler.onSaveButtonClick);
         spaceTop.setOnClickListener(clickHandler.onSpaceClick);
         spaceBottom.setOnClickListener(clickHandler.onSpaceClick);
+
+        dayExercisesRecyclerView.setOnTouchListener(clickHandler.hideKeyboardOnTouch);
+        dayExercisesRecyclerView.addOnItemTouchListener(clickHandler.hideKeyboardOnItemTouch);
     }
 
     private class ClickHandler {
@@ -187,6 +216,33 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
         View.OnClickListener onSpaceClick = v -> {
             setResult(RESULT_CANCELED);
             finish();
+        };
+        
+        View.OnTouchListener hideKeyboardOnTouch = (v, event) -> {
+            if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                dayExercisesRecyclerView.requestFocus();
+                InputMethodManager inputMethodManager = (InputMethodManager) DayAssignmentActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(dayExercisesRecyclerView.getWindowToken(), 0);
+            }
+            return false;
+        };
+
+        RecyclerView.OnItemTouchListener hideKeyboardOnItemTouch = new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                dayExercisesRecyclerView.requestFocus();
+                InputMethodManager inputMethodManager = (InputMethodManager)DayAssignmentActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(dayExercisesRecyclerView.getWindowToken(), 0);
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+            }
         };
     }
 

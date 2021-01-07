@@ -16,4 +16,5 @@
     <string name="start">start</string>
     <string name="add">add</string>
     <string name="exercise_name">exercise name</string>
+    <string name="exercise_group_name">exercise group name</string>
 </resources>

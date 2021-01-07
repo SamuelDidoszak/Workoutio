@@ -183,12 +183,16 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
         exercisesList.add(toPosition > fromPosition ? toPosition - 1 : toPosition, previousExercise);
         notifyItemMoved(fromPosition, toPosition);
         dataChanged.setValue(Boolean.TRUE);
+        List<Muscle> toMuscleList = listOfMuscleLists.get(toPosition);
+        listOfMuscleLists.set(toPosition, listOfMuscleLists.get(fromPosition));
+        listOfMuscleLists.set(fromPosition, toMuscleList);
     }
 
     @Override
     public void onItemDismiss(int position) {
         //  Removes the exercise and adds its id to the deletedList
         listOfDeletedExercises.add((exercisesList.remove(position)).getExerciseId());
+        listOfMuscleLists.remove(position);
         notifyItemRemoved(position);
         dataChanged.setValue(Boolean.TRUE);
     }

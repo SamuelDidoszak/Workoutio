@@ -82,6 +82,10 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         return pickedExercise;
     }
 
+    public RecyclerView getExerciseRecyclerView() {
+        return exerciseRecyclerView;
+    }
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
