@@ -64,6 +64,9 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public void resetChosenExercise() {
         this.chosenExercise = new MutableLiveData<>();
     }
+    public void resetChosenDay() {
+        this.chosenDay = new MutableLiveData<>();
+    }
 
     public ExerciseMenuDayAdapter(Context context, List<DayExercise> dayExerciseList) {
         this.context = context;
@@ -158,7 +161,7 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 //                return 0;
             int n = 0;
             position++;
-            while(dayExerciseList.get(position).getDataType() == ExerciseMenuDayExerciseTypes.TYPE_EXERCISE &&
+            while(position < getItemCount() && dayExerciseList.get(position).getDataType() == ExerciseMenuDayExerciseTypes.TYPE_EXERCISE &&
                     dayExerciseList.get(position) != null) {
                 n++;
                 position++;
@@ -174,7 +177,7 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     return;
                 Boolean currentVisibility = exerciseVisibilityList.get(position + 1);
                 int exerciseAmount = exerciseAmountInDay(position);
-                for(int i = position + 1; i <= position + exerciseAmount + 1; i++) {
+                for(int i = position + 1; i < position + exerciseAmount + 1; i++) {
                     exerciseVisibilityList.set(i, !currentVisibility);
                 }
                 notifyItemRangeChanged(position + 1, exerciseAmount);

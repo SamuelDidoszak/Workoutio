@@ -28,6 +28,7 @@ public class Constants {
             //  day
     public static final String COLUMN_DAY_ID = "dayID";
     public static final String COLUMN_DAY_NAME = "dayName";
+    public static final String COLUMN_CUSTOM_DAY = "customDay";
             //  done
     public static final String COLUMN_DONE_ID = "doneID";
     public static final String COLUMN_DATE= "date";

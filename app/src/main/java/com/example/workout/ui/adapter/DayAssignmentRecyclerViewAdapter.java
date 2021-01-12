@@ -71,6 +71,9 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
     }
     private final OnStartDragListener dragStartListener;
 
+    public void setDayId(int dayId) {
+        this.dayId = dayId;
+    }
 
     public DayAssignmentRecyclerViewAdapter(Context context, List<Exercise> exercisesList, int dayId, OnStartDragListener dragStartListener) {
         this.context = context;

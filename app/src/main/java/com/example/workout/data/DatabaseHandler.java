@@ -46,7 +46,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String CREATE_TABLE_DONE = "CREATE TABLE " + Constants.TABLE_DONE + "(" + Constants.COLUMN_DONE_ID + " INTEGER PRIMARY KEY, " +
                 Constants.COLUMN_DATE + " TEXT, " + Constants.COLUMN_EXERCISE_ID + " INTEGER, " + Constants.COLUMN_QUANTITY + " INTEGER, " +
                 Constants.COLUMN_TIME + " INTEGER, " + Constants.COLUMN_NEGATIVE + " INTEGER, " + Constants.COLUMN_CAN_MORE + " INTEGER)";
-        String CREATE_TABLE_DAY = "CREATE TABLE " + Constants.TABLE_DAY + "(" + Constants.COLUMN_DAY_ID + " INTEGER PRIMARY KEY, " + Constants.COLUMN_DAY_NAME + " TEXT)";
+        String CREATE_TABLE_DAY = "CREATE TABLE " + Constants.TABLE_DAY + "(" + Constants.COLUMN_DAY_ID + " INTEGER PRIMARY KEY, " + Constants.COLUMN_DAY_NAME + " TEXT, " + Constants.COLUMN_CUSTOM_DAY + " INTEGER)";
         String CREATE_TABLE_MUSCLE_EXERCISE_CONNECTOR = "CREATE TABLE " + Constants.TABLE_MUSCLE_EXERCISE_CONNECTOR + "(" + Constants.COLUMN_MUSCLE_EXERCISE_CONNECTOR_ID
                 + " INTEGER PRIMARY KEY, " + Constants.COLUMN_MUSCLE_ID + " INTEGER, " + Constants.COLUMN_EXERCISE_ID + " INTEGER)";
         String CREATE_TABLE_DAY_EXERCISE_CONNECTOR = "CREATE TABLE " + Constants.TABLE_DAY_EXERCISE_CONNECTOR + "(" + Constants.COLUMN_DAY_EXERCISE_CONNECTOR_ID
@@ -79,6 +79,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(Constants.COLUMN_DAY_NAME, day.getDayName());
+        values.put(Constants.COLUMN_CUSTOM_DAY, day.isCustom() ? 1 : 0);
 
         long id = db.insert(Constants.TABLE_DAY, null, values);
         day.setDayId((int)id);
@@ -319,7 +320,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         Cursor cursor = db.query(Constants.TABLE_DAY,
                 new String[]{Constants.COLUMN_DAY_ID,
-                        Constants.COLUMN_DAY_NAME},
+                        Constants.COLUMN_DAY_NAME,
+                        Constants.COLUMN_CUSTOM_DAY},
                 Constants.COLUMN_DAY_ID + "=?",
                 new String[]{String.valueOf(dayId)},
                 null, null, null, null);
@@ -331,6 +333,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if(cursor.getCount() != 0) {
             day.setDayId(cursor.getInt(cursor.getColumnIndex(Constants.COLUMN_DAY_ID)));
             day.setDayName(cursor.getString(cursor.getColumnIndex(Constants.COLUMN_DAY_NAME)));
+            day.setCustom(cursor.getInt(cursor.getColumnIndex(Constants.COLUMN_CUSTOM_DAY)) == 1);
         }
 
         cursor.close();
@@ -845,7 +848,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         if(cursor.moveToFirst()) {
             do {
-                dayList.add(new Day(cursor.getInt(0), cursor.getString(1)));
+                dayList.add(new Day(cursor.getInt(0), cursor.getString(1), cursor.getInt(2) == 1));
             }
             while (cursor.moveToNext());
         }

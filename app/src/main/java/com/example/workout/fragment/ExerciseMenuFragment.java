@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,11 +42,10 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
     private TextView dayTextView, myExercisesTextView, exerciseTextView;
     private RecyclerView exerciseRecyclerView;
     private ExerciseMenuExercisesRecyclerViewAdapter myExercisesRecyclerViewAdapter, availableExercisesRecyclerViewAdapter;
-    private ExerciseMenuDayAdapter exerciseMenuDayAdapter;
+    private ExerciseMenuDayAdapter exerciseMenuDayAdapter, customExerciseMenuDayAdapter;
     private FloatingActionButton floatingActionButton;
 
     private List<Exercise> myExercisesList, availableExercisesList;
-    private List<DayExercise> dayExerciseList;
 
     private ExerciseMenuRecyclerViewData[] recyclerViewList = {null, null, null};
     private int currentRecyclerViewType = MY_EXERCISE_RECYCLER_VIEW;
@@ -62,7 +62,12 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
     private int changesInExercises;
     private boolean dayMenuAvailable;
 
-    private Boolean resetDayAdapter = Boolean.TRUE;
+    /**
+     * 0: !customDayAdapter
+     * 1: customDayAdapter
+     */
+    private boolean[] resetDayAdapter;
+    private boolean isDayAdapterCustom;
 
     private DatabaseHandler DB;
     private Context context;
@@ -106,6 +111,9 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         chosenExercise = new MutableLiveData<>();
         pickedExercise = new MutableLiveData<>();
 
+        resetDayAdapter = new boolean[] {true, true};
+        isDayAdapterCustom = false;
+
         addViews(view);
         addOnClickHandlers();
 
@@ -132,15 +140,23 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                     floatingActionButton.show();
                 break;
             case DAY_RECYCLER_VIEW:
-                if(resetDayAdapter) {
-                    dayExerciseDivision();
-                    exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseList);
+                if(!isDayAdapterCustom) {
+                    if (resetDayAdapter[0]) {
+                        exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseDivision(false));
+                        resetDayAdapter[0] = false;
+                    }
                     recyclerViewList[0] = exerciseMenuDayAdapter;
-                    resetDayAdapter = Boolean.FALSE;
                 }
-                exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
+                else {
+                    if (resetDayAdapter[1]) {
+                        customExerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseDivision(true));
+                        resetDayAdapter[1] = false;
+                    }
+                    recyclerViewList[0] = customExerciseMenuDayAdapter;
+                }
+                exerciseRecyclerView.setAdapter((ExerciseMenuDayAdapter)recyclerViewList[0]);
                 exerciseRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-                if(!floatingActionButton.isShown())
+                if (!floatingActionButton.isShown())
                     floatingActionButton.show();
                 break;
             case AVAILABLE_EXERCISE_RECYCLER_VIEW:
@@ -187,7 +203,9 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         });
 
         if(currentRecyclerViewType == DAY_RECYCLER_VIEW) {
-            exerciseMenuDayAdapter.getChosenDay().observe(getViewLifecycleOwner(), integer -> {
+            ((ExerciseMenuDayAdapter)recyclerViewList[0]).resetChosenDay();
+            ((ExerciseMenuDayAdapter)recyclerViewList[0]).getChosenDay().observe(getViewLifecycleOwner(), integer -> {
+                Log.d(TAG, "setUpObservers: " + DB.getDay(integer).getDayName());
                 Intent intent = new Intent(context, DayAssignmentActivity.class);
                 intent.putExtra("dayId", integer);
                 startActivityForResult(intent, 2);
@@ -217,13 +235,25 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
         if(resultCode == Activity.RESULT_CANCELED)
             return;
         if(requestCode == 2) {
-            boolean changeInDay = data.getBooleanExtra("changeInDay", false);
-            if(changeInDay) {
-                dayExerciseDivision();
-                exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseList);
-                exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
-                recyclerViewList[0] = exerciseMenuDayAdapter;
-                resetDayAdapter = Boolean.FALSE;
+            int changeInDay = data.getIntExtra("changeInDay", 0);
+            exerciseRecyclerView.setAdapter(null);
+            if(changeInDay == 1) {
+                exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseDivision(false));
+                if(!isDayAdapterCustom) {
+                    exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
+                    recyclerViewList[0] = exerciseMenuDayAdapter;
+                }
+                resetDayAdapter[0] = false;
+            }
+            else if(changeInDay == 2) {
+                List<DayExercise> dayExerciseList = dayExerciseDivision(true);
+                customExerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseList);
+                exerciseRecyclerView.setAdapter(customExerciseMenuDayAdapter);
+                if(data.getBooleanExtra("newDay", false))
+                    exerciseRecyclerView.scrollToPosition(customExerciseMenuDayAdapter.getItemCount() - 1);
+                recyclerViewList[0] = customExerciseMenuDayAdapter;
+                resetDayAdapter[1] = false;
+                setUpObservers();
             }
         }
         else if(resultCode == Activity.RESULT_FIRST_USER) {
@@ -246,8 +276,8 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
 
             if(changeList[0]) {
                 setChangesInExercises(1);
-                if(exerciseMenuDayAdapter != null)
-                    resetDayAdapter = Boolean.TRUE;
+                resetDayAdapter[0] = true;
+                resetDayAdapter[1] = true;
             }
 
             //  If the exercise is newly added, then the upcoming switch statement is unnecessary
@@ -268,11 +298,17 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                     break;
                 case ExerciseMenuRecyclerViewTypes.DAY_RECYCLER_VIEW:
                     if(changeList[0] || changeList[3]) {
-                        dayExerciseDivision();
-                        exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseList);
-                        exerciseRecyclerView.setAdapter(exerciseMenuDayAdapter);
-                        recyclerViewList[0] = exerciseMenuDayAdapter;
-                        resetDayAdapter = Boolean.FALSE;
+                        if(isDayAdapterCustom) {
+                            customExerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseDivision(true));
+                            recyclerViewList[0] = customExerciseMenuDayAdapter;
+                            resetDayAdapter[0] = false;
+                        }
+                        else {
+                            exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseDivision(false));
+                            recyclerViewList[0] = exerciseMenuDayAdapter;
+                            resetDayAdapter[0] = false;
+                        }
+                        exerciseRecyclerView.setAdapter((ExerciseMenuDayAdapter)recyclerViewList[0]);
                     }
                     else {
                         exerciseMenuDayAdapter.reSetMuscleListForImagesAtPosition(editPosition);
@@ -342,12 +378,21 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
     }
 
     /**
-     * Creates a dayExerciseList which contains sorted days and exercises for this day
+     * Creates a dayExerciseList which contains sorted days and exercises for days or groups
+     * @Param: true when return list should contain custom exercises, false if they shouldn't be custom
+     * @Return: dayExerciseList with divided exercises for days
      */
-    public void dayExerciseDivision() {
+    public List<DayExercise> dayExerciseDivision(boolean custom) {
+        //  Optimizations: when user added a day/group or an exercise, i can remove its DayExercise, add new DayExercise and then notifyItemRangeInserted
         List<Day> dayList = DB.getAllDays();
+        for(int i = 0; i < dayList.size(); i ++) {
+            if(dayList.get(i).isCustom() != custom) {
+                dayList.remove(i);
+                i--;
+            }
+        }
         List<DayExerciseConnector> dayExerciseConnectorList;
-        dayExerciseList = new ArrayList<>();
+        List<DayExercise> dayExerciseList = new ArrayList<>();
         for(Day day : dayList) {
             dayExerciseList.add(new DayExercise(day.getDayId(), day.getDayName(), TYPE_DAY));
             dayExerciseConnectorList = DB.getDayExerciseConnectorByDay(day.getDayId());
@@ -360,6 +405,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                         TYPE_EXERCISE));
             }
         }
+        return dayExerciseList;
     }
 
     /**
@@ -411,7 +457,11 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
      */
     class ClickHandler {
         // TextView
-        public View.OnClickListener dayTextViewClick = v -> setUpRecyclerView(DAY_RECYCLER_VIEW);
+        public View.OnClickListener dayTextViewClick = v -> {
+            if(currentRecyclerViewType == TYPE_DAY)
+                isDayAdapterCustom = !isDayAdapterCustom;
+            setUpRecyclerView(DAY_RECYCLER_VIEW);
+        };
         public View.OnClickListener myExercisesTextViewClick = v -> setUpRecyclerView(MY_EXERCISE_RECYCLER_VIEW);
         public View.OnClickListener exerciseTextViewClick = v -> setUpRecyclerView(AVAILABLE_EXERCISE_RECYCLER_VIEW);
         public View.OnClickListener onFloatingActionButtonClick = v -> {
@@ -419,7 +469,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 Intent intent = new Intent(context, DayAssignmentActivity.class);
                 intent.putExtra("dayId", -1);
                 intent.putExtra("startWorkout", false);
-                startActivityForResult(intent, Activity.RESULT_FIRST_USER);
+                startActivityForResult(intent, 2);
             }
             else {
                 Intent intent = new Intent(context, EditExerciseMenuActivity.class);

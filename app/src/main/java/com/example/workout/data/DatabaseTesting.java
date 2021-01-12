@@ -158,13 +158,13 @@ public class DatabaseTesting {
     }
 
     private void addDays() {
-        DB.addDay(new Day("Monday"));
-        DB.addDay(new Day("Tuesday"));
-        DB.addDay(new Day("Wednesday"));
-        DB.addDay(new Day("Thursday"));
-        DB.addDay(new Day("Friday"));
-        DB.addDay(new Day("Saturday"));
-        DB.addDay(new Day("Sunday"));
+        DB.addDay(new Day("Monday", false));
+        DB.addDay(new Day("Tuesday", false));
+        DB.addDay(new Day("Wednesday", false));
+        DB.addDay(new Day("Thursday", false));
+        DB.addDay(new Day("Friday", false));
+        DB.addDay(new Day("Saturday", false));
+        DB.addDay(new Day("Sunday", false));
     }
 
     private void addExercises() {

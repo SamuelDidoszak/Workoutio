@@ -274,6 +274,12 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
 
     private void assignItems() {
         allDaysList = DB.getAllDays();
+        for(int i = 0; i < allDaysList.size(); i ++) {
+            if(allDaysList.get(i).isCustom()) {
+                allDaysList.remove(i);
+                i--;
+            }
+        }
         allMusclesList = DB.getAllMuscles();
 
         List<Day> dayList = DB.getDaysByExerciseId(exerciseId);

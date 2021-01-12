@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -26,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.fragment.ExerciseMenuFragment;
+import com.example.workout.model.Day;
 import com.example.workout.model.DayExerciseConnector;
 import com.example.workout.model.Exercise;
 import com.example.workout.model.QuantityAndReps;
@@ -75,6 +77,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
     protected void onStart() {
         super.onStart();
         exerciseMenuFragment.getPickedExercise().observe(DayAssignmentActivity.this, integer -> {
+            Log.d("TAG", "onStart: " + DB.getExercise(integer).getExerciseName());
             int position = dayExercises.size();
             dayExercises.add(DB.getExercise(integer));
             dayAssignmentRecyclerViewAdapter.notifyItemInserted(position);
@@ -112,14 +115,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
 
         List<DayExerciseConnector> dayExerciseConnectorList;
         dayExercises = new ArrayList<>();
-        if(dayId != -1) {
-            dayName.setText(DB.getDay(dayId).getDayName());
-            dayExerciseConnectorList = DB.getDayExerciseConnectorByDay(dayId);
-            for(DayExerciseConnector dayExerciseConnector : dayExerciseConnectorList) {
-                dayExercises.add(DB.getExercise(dayExerciseConnector.getExerciseId()));
-            }
-        }
-        else {
+        if(dayId == -1 || DB.getDay(dayId).isCustom()) {
             //  Changes the constraints in the constraint layout
             dayName.setVisibility(View.GONE);
             dayNameEditText.setVisibility(View.VISIBLE);
@@ -129,8 +125,18 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             constraintSet.connect(R.id.day_assignment_dayExercisesRecyclerView, ConstraintSet.TOP,
                     R.id.day_assignment_dayNameEditText, ConstraintSet.BOTTOM,0);
             constraintSet.applyTo(constraintLayout);
-            dayName.setText(R.string.custom);
+            if(dayId != -1)
+                dayNameEditText.setText(DB.getDay(dayId).getDayName());
         }
+        if(dayId != -1) {
+            if(!DB.getDay(dayId).isCustom())
+                dayName.setText(DB.getDay(dayId).getDayName());
+            dayExerciseConnectorList = DB.getDayExerciseConnectorByDay(dayId);
+            for(DayExerciseConnector dayExerciseConnector : dayExerciseConnectorList) {
+                dayExercises.add(DB.getExercise(dayExerciseConnector.getExerciseId()));
+            }
+        }
+
         dayAssignmentRecyclerViewAdapter = new DayAssignmentRecyclerViewAdapter(context, dayExercises, dayId, this);
         dayExercisesRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
         dayExercisesRecyclerView.setAdapter(dayAssignmentRecyclerViewAdapter);
@@ -150,7 +156,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
 
         ClickHandler clickHandler = new ClickHandler();
         backButton.setOnClickListener(clickHandler.onBackButtonClick);
-        saveButton.setOnClickListener(clickHandler.onSaveButtonClick);
+        saveButton.setOnClickListener(clickHandler.save);
         spaceTop.setOnClickListener(clickHandler.onSpaceClick);
         spaceBottom.setOnClickListener(clickHandler.onSpaceClick);
 
@@ -183,19 +189,9 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
                 finish();
         };
 
-        View.OnClickListener onSaveButtonClick = v -> {
+        View.OnClickListener save = v -> {
             Intent intent = new Intent();
-            if(dayId != -1 && !startWorkout) {
-                boolean saved = dayAssignmentRecyclerViewAdapter.saveChanges();
-                //  saved can be null. If it's initialized with the Boolean.FALSE value, it notifies observers upon its creation
-                if(saved)
-                    intent.putExtra("changeInDay", true);
-                else
-                    intent.putExtra("changeInDay", false);
-            }
-            else {
-                if(startWorkout)
-                    dayAssignmentRecyclerViewAdapter.saveChanges();
+            if(startWorkout) {
                 List<Exercise> exerciseList = dayAssignmentRecyclerViewAdapter.getExercisesList();
                 if(exerciseList.size() != 0) {
                     List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
@@ -209,9 +205,70 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
                     return;
                 }
             }
+            else if((dayNameEditText.getVisibility() == View.VISIBLE && dayNameEditText.getText().length() == 0)) {
+                dayNameEditText.setHintTextColor(getResources().getColor(R.color.mediumRed));
+                return;
+            }
+
+            boolean newDay = false;
+            if(dayId == -1) {
+                Day day = new Day(dayNameEditText.getText().toString(), true);
+                DB.addDay(day);
+                dayId = day.getDayId();
+                dayAssignmentRecyclerViewAdapter.setDayId(dayId);
+                newDay = true;
+            }
+            intent.putExtra("newDay", newDay);
+            boolean saved = dayAssignmentRecyclerViewAdapter.saveChanges();
+            if(!startWorkout) {
+                Log.d("TAG", "okay lesgo: ");
+                if(!saved)
+                    intent.putExtra("changeInDay", 0);
+                if(DB.getDay(dayId).isCustom())
+                    intent.putExtra("changeInDay", 2);
+                else
+                    intent.putExtra("changeInDay", 1);
+            }
             setResult(RESULT_FIRST_USER, intent);
             finish();
         };
+
+//        View.OnClickListener onSaveButtonClick = v -> {
+//            Intent intent = new Intent();
+//            if(dayId != -1 && !startWorkout) {
+//                boolean saved = dayAssignmentRecyclerViewAdapter.saveChanges();
+//                //  saved can be null. If it's initialized with the Boolean.FALSE value, it notifies observers upon its creation
+//                if(saved)
+//                    intent.putExtra("changeInDay", true);
+//                else
+//                    intent.putExtra("changeInDay", false);
+//            }
+//            else {
+//                if(dayNameEditText.getText().length() != 0) {
+//                    Day day = new Day(dayNameEditText.getText().toString(), true);
+//                    DB.addDay(day);
+//                    dayId = day.getDayId();
+//                    dayAssignmentRecyclerViewAdapter.setDayId(dayId);
+//                }
+//                if(startWorkout)
+//                    dayAssignmentRecyclerViewAdapter.saveChanges();
+//
+//                List<Exercise> exerciseList = dayAssignmentRecyclerViewAdapter.getExercisesList();
+//                if(exerciseList.size() != 0) {
+//                    List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
+//                    for(Exercise exercise : exerciseList) {
+//                        quantityAndRepsList.add(new QuantityAndReps(exercise.getExerciseId(), context, null));
+//                    }
+//                    intent.putExtra("quantityAndReps", (Serializable)quantityAndRepsList);
+//                }
+//                else {
+//                    Toast.makeText(context, "Please choose some exercises", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
+//            }
+//            setResult(RESULT_FIRST_USER, intent);
+//            finish();
+//        };
 
         View.OnClickListener onSpaceClick = v -> {
             setResult(RESULT_CANCELED);

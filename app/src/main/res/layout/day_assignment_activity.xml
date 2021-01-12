@@ -27,16 +27,6 @@
         android:orientation="vertical"
         android:paddingBottom="8dp">
 
-<!--        <androidx.constraintlayout.widget.Barrier-->
-<!--            android:id="@+id/barrier"-->
-<!--            app:barrierDirection="top"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            app:layout_constraintTop_toTopOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:constraint_referenced_ids="day_assignment_dayName,day_assignment_dayNameEditText"/>-->
-
         <TextView
             android:id="@+id/day_assignment_dayName"
             android:layout_width="match_parent"
