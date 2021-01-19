@@ -10,7 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -95,7 +94,8 @@ public class DoneExercisesFragment extends Fragment {
             noExercises.setVisibility(View.VISIBLE);
 
             noExercises.setOnTouchListener((v, event) -> {
-                getParentFragmentManager().popBackStack("chronometerBackStack", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//                getParentFragmentManager().popBackStack("chronometerBackStack", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                fragmentFinished.setValue(Boolean.TRUE);
                 return false;
             });
         } else {

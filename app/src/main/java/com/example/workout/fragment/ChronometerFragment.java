@@ -50,7 +50,8 @@ public class ChronometerFragment extends Fragment {
     private MutableLiveData<Boolean> showDoneExercises;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
 
-    private long pauseTimeBase = 0, overallTimeBase = 0;
+    private long pauseTimeBase = 0, pauseExerciseTime = 0, overallTimeBase = 0;
+    private boolean isWorkoutChronoVisible = false;
 
 
         //  getters and setters
@@ -107,26 +108,46 @@ public class ChronometerFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if(chronometer.isBackwards())
+        if(chronometer.isBackwards()) {
             pauseTimeBase = chronometer.getBase();
+            if(chronometer.getAnimation() != null)
+                pauseExerciseTime = chronometer.getTimeElapsed() * (-1);
+        }
+        else if(chronometer.getTimeElapsed() != 0) {
+            pauseChronometer();
+            pauseExerciseTime = chronometer.getTimeElapsed() * (-1);
+        }
         if(workoutTimeChronometer.isStarted())
             overallTimeBase = workoutTimeChronometer.getBase();
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if(pauseTimeBase != 0) {
-            chronometer.setBase(pauseTimeBase);
-            chronometer.setBackwards(true);
-            chronometer.start();
+            if(pauseExerciseTime == 0) {
+                chronometer.setBase(pauseTimeBase);
+                chronometer.setBackwards(true);
+                chronometer.start();
+            }
+            else {
+                chronometer.setBaseWithCurrentTime(pauseExerciseTime);
+                chronometer.setBackwards(true);
+                pauseChronometer();
+            }
+        }
+        else if(pauseExerciseTime != 0) {
+            chronometer.setBaseWithCurrentTime(pauseExerciseTime);
+            pauseChronometer();
         }
         if(overallTimeBase != 0) {
             workoutTimeChronometer.setBase(overallTimeBase);
             workoutTimeChronometer.start();
-            workoutTimeChronometer.setVisibility(View.VISIBLE);
+            setWorkoutChronometerVisibility();
         }
         pauseTimeBase = 0;
+        pauseExerciseTime = 0;
     }
 
 
@@ -153,18 +174,32 @@ public class ChronometerFragment extends Fragment {
 
     private void pauseOrStart() {
         if(chronometer.isStarted()) {
-            chronometer.stop();
-            Animation blinking = new AlphaAnimation(0.0f, 1.0f);
-            blinking.setDuration(500);
-            blinking.setRepeatMode(Animation.REVERSE);
-            blinking.setRepeatCount(Animation.INFINITE);
-            chronometer.startAnimation(blinking);
+            pauseChronometer();
         }
         else {
             chronometer.clearAnimation();
-            chronometer.setBaseWithCurrentTime(chronometer.getTimeElapsed() * (-1));
+            if(chronometer.isBackwards())
+                chronometer.setBaseWithCurrentTime(chronometer.getTimeElapsed());
+            else
+                chronometer.setBaseWithCurrentTime(chronometer.getTimeElapsed() * (-1));
             chronometer.start();
         }
+    }
+
+    private void pauseChronometer() {
+        chronometer.stop();
+        Animation blinking = new AlphaAnimation(0.0f, 1.0f);
+        blinking.setDuration(500);
+        blinking.setRepeatMode(Animation.REVERSE);
+        blinking.setRepeatCount(Animation.INFINITE);
+        chronometer.startAnimation(blinking);
+    }
+
+    private void setWorkoutChronometerVisibility() {
+        if(isWorkoutChronoVisible)
+            workoutTimeChronometer.setVisibility(View.VISIBLE);
+        else
+            workoutTimeChronometer.setVisibility(View.INVISIBLE);
     }
 
     public void initializeWorkoutTimeChronometer(@Nullable Long baseTime) {
@@ -175,6 +210,7 @@ public class ChronometerFragment extends Fragment {
         workoutTimeChronometer.start();
         workoutTimeChronometer.setVisibility(View.VISIBLE);
         firstExercise = Boolean.FALSE;
+        isWorkoutChronoVisible = true;
     }
 
     private void countTime() {
@@ -255,7 +291,6 @@ public class ChronometerFragment extends Fragment {
 
     private void setOnClickAndSwipeListeners() {
         ClickHandler clickHandler = new ClickHandler();
-        circleImageView.setOnClickListener(clickHandler.onCircleClick);
         workoutTimeContainer.setOnClickListener(clickHandler.onWorkoutTimeClick);
         //  onSwipeListeners
         SwipeDetection textSwipeDetection = new SwipeDetection(context);
@@ -280,6 +315,10 @@ public class ChronometerFragment extends Fragment {
                     showDoneExercises.setValue(Boolean.TRUE);
                     break;
                 case "tap":
+                    if(chronometer.getAnimation() != null) {
+                        pauseOrStart();
+                        return;
+                    }
                     countTime();
                     break;
             }
@@ -287,14 +326,9 @@ public class ChronometerFragment extends Fragment {
     }
 
     private class ClickHandler {
-        View.OnClickListener onCircleClick = v -> {
-            countTime();
-        };
         View.OnClickListener onWorkoutTimeClick = v -> {
-            if(workoutTimeChronometer.getVisibility() == View.VISIBLE)
-                workoutTimeChronometer.setVisibility(View.INVISIBLE);
-            else
-                workoutTimeChronometer.setVisibility(View.VISIBLE);
+            isWorkoutChronoVisible = !isWorkoutChronoVisible;
+            setWorkoutChronometerVisibility();
         };
         //  Button
         View.OnClickListener onFinishButtonClick = v -> {

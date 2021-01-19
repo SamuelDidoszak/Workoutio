@@ -169,6 +169,7 @@ public class WorkoutActivity extends AppCompatActivity {
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 7f);
                     primaryFragmentContainer.setLayoutParams(params);
 
+                    //  Pops up the secondaryFragment with the exercise data in it
                     if(doneExercisesFragment.getChosenDone() != null) {
                         doneExercisesFragment.getChosenDone().observe(this, done -> {
                             doneExercisesFragment.getChosenDone();

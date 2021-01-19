@@ -145,6 +145,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                         exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseDivision(false));
                         resetDayAdapter[0] = false;
                     }
+                    dayTextView.setText("Day");
                     recyclerViewList[0] = exerciseMenuDayAdapter;
                 }
                 else {
@@ -152,6 +153,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                         customExerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseDivision(true));
                         resetDayAdapter[1] = false;
                     }
+                    dayTextView.setText("Groups");
                     recyclerViewList[0] = customExerciseMenuDayAdapter;
                 }
                 exerciseRecyclerView.setAdapter((ExerciseMenuDayAdapter)recyclerViewList[0]);
@@ -252,6 +254,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 if(data.getBooleanExtra("newDay", false))
                     exerciseRecyclerView.scrollToPosition(customExerciseMenuDayAdapter.getItemCount() - 1);
                 recyclerViewList[0] = customExerciseMenuDayAdapter;
+                dayTextView.setText("Groups");
                 resetDayAdapter[1] = false;
                 setUpObservers();
             }
