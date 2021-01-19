@@ -59,6 +59,10 @@ public class ChronometerFragment extends Fragment {
             return chronometer;
         }
 
+        public Chronometer getWorkoutTimeChronometer() {
+            return workoutTimeChronometer;
+        }
+
     public Boolean getCanSaveInExerciseClick() {
         return canSaveInExerciseClick;
     }
@@ -202,7 +206,7 @@ public class ChronometerFragment extends Fragment {
             workoutTimeChronometer.setVisibility(View.INVISIBLE);
     }
 
-    public void initializeWorkoutTimeChronometer(@Nullable Long baseTime) {
+    public void initiateWorkoutTimeChronometer(@Nullable Long baseTime) {
         if(baseTime == null)
             baseTime = chronometer.getBase();
         workoutTimeChronometer.setDelayMillis(1000);
@@ -228,7 +232,7 @@ public class ChronometerFragment extends Fragment {
             exerciseTime = chronometer.getTimeElapsed();
 
             if(firstExercise) {
-                initializeWorkoutTimeChronometer(null);
+                initiateWorkoutTimeChronometer(null);
             }
 
             if(!lastOfStartExerciseAfterRest) {
@@ -332,7 +336,6 @@ public class ChronometerFragment extends Fragment {
         };
         //  Button
         View.OnClickListener onFinishButtonClick = v -> {
-            Log.d(TAG, "finish: ");
             getActivity().finish();
             Intent intent = new Intent(context, WorkoutOverviewActivity.class);
             intent.putExtra("overallTime", workoutTimeChronometer.getText().toString());

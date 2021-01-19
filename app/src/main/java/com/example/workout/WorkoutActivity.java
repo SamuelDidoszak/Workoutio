@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LifecycleOwner;
@@ -25,8 +28,10 @@ import com.example.workout.fragment.DoneExercisesFragment;
 import com.example.workout.fragment.EditExerciseFragment;
 import com.example.workout.model.Done;
 import com.example.workout.model.QuantityAndReps;
+import com.example.workout.model.helper.Chronometer;
 import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class WorkoutActivity extends AppCompatActivity {
@@ -43,6 +48,11 @@ public class WorkoutActivity extends AppCompatActivity {
     private RecyclerView workoutRecyclerView;
     private WorkoutRecyclerViewAdapter workoutRecyclerViewAdapter;
     private ImageButton addButton;
+
+    private ConstraintLayout doneExercises_bottomContainer;
+    private TextView doneExercises_remainingExercisesNumber;
+    private Button doneExercises_continueButton, doneExercises_finishButton;
+    private Chronometer doneExercises_workoutTimeChronometer;
 
     private boolean lastExercise = false;
 
@@ -102,7 +112,7 @@ public class WorkoutActivity extends AppCompatActivity {
 
         long overallTimeBase = getIntent().getLongExtra("overallTimeBase", 0);
         if(overallTimeBase != 0) {
-            chronometerFragment.initializeWorkoutTimeChronometer(overallTimeBase);
+            chronometerFragment.initiateWorkoutTimeChronometer(overallTimeBase);
         }
     }
 
@@ -140,6 +150,13 @@ public class WorkoutActivity extends AppCompatActivity {
         secondaryFragmentContainer = findViewById(R.id.workout_activity_secondaryFragmentContainer);
             //  ImageButtons
         addButton = findViewById(R.id.app_toolbar_addButton);
+
+            //  DoneExercises
+        doneExercises_bottomContainer = findViewById(R.id.workout_activity_doneExercises_bottomContainer);
+        doneExercises_remainingExercisesNumber = findViewById(R.id.workout_activity_doneExercises_remainingExercisesNumberTextView);
+        doneExercises_workoutTimeChronometer = findViewById(R.id.workout_activity_doneExercises_workoutTimeChronometer);
+        doneExercises_continueButton = findViewById(R.id.workout_activity_doneExercises_continueButton);
+        doneExercises_finishButton = findViewById(R.id.workout_activity_doneExercises_finishButton);
     }
 
     private void setUpFragments() {
@@ -166,8 +183,24 @@ public class WorkoutActivity extends AppCompatActivity {
                     doneExercisesFragment = (DoneExercisesFragment) getSupportFragmentManager().findFragmentByTag("doneExercises");
 
                     secondaryFragmentContainer.setVisibility(View.GONE);
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 7f);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 8f);
                     primaryFragmentContainer.setLayoutParams(params);
+
+                    workoutRecyclerView.setVisibility(View.GONE);
+                    doneExercises_bottomContainer.setVisibility(View.VISIBLE);
+
+                    doneExercises_remainingExercisesNumber.setText(String.valueOf(workoutRecyclerViewAdapter.getItemCount() + (chronometerFragment.getChronometer().isBackwards() ? 0 : 1)));
+                    doneExercises_workoutTimeChronometer.setBase(chronometerFragment.getWorkoutTimeChronometer().getBase());
+                    doneExercises_workoutTimeChronometer.start();
+                    doneExercises_continueButton.setOnClickListener(v -> doneExercisesFragment.getFragmentFinished().setValue(Boolean.TRUE));
+                    doneExercises_finishButton.setOnClickListener(v -> {
+                        Intent intent = new Intent(context, WorkoutOverviewActivity.class);
+                        intent.putExtra("overallTime", chronometerFragment.getWorkoutTimeChronometer().getText().toString());
+                        intent.putExtra("overallTimeBase", chronometerFragment.getWorkoutTimeChronometer().getBase());
+                        intent.putExtra("remainingQuantityAndReps", (Serializable)workoutRecyclerViewAdapter.getQuantityAndRepsList());
+                        finish();
+                        startActivity(intent);
+                    });
 
                     //  Pops up the secondaryFragment with the exercise data in it
                     if(doneExercisesFragment.getChosenDone() != null) {
@@ -194,6 +227,9 @@ public class WorkoutActivity extends AppCompatActivity {
             getSupportFragmentManager().executePendingTransactions();
             secondaryFragmentContainer.setVisibility(View.VISIBLE);
 
+            workoutRecyclerView.setVisibility(View.VISIBLE);
+            doneExercises_bottomContainer.setVisibility(View.GONE);
+
             currentWorkoutFragment = (CurrentWorkoutFragment)getSupportFragmentManager().findFragmentByTag("currentWorkout");
         }
     }
@@ -204,7 +240,7 @@ public class WorkoutActivity extends AppCompatActivity {
         getSupportFragmentManager().executePendingTransactions();
         editExerciseFragment = (EditExerciseFragment) getSupportFragmentManager().findFragmentByTag("editExercise");
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 5f);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 6f);
         primaryFragmentContainer.setLayoutParams(params);
 
         secondaryFragmentContainer.setVisibility(View.VISIBLE);

@@ -35,7 +35,7 @@ public class DoneExercisesFragment extends Fragment {
     private List<Integer> editedDoneList;
     private MutableLiveData<Boolean> fragmentFinished;
 
-    public LiveData<Boolean> getFragmentFinished() {
+    public MutableLiveData<Boolean> getFragmentFinished() {
         if(fragmentFinished == null)
             fragmentFinished = new MutableLiveData<>();
         return fragmentFinished;

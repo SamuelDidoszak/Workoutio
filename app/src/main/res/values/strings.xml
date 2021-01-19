@@ -17,4 +17,6 @@
     <string name="add">add</string>
     <string name="exercise_name">exercise name</string>
     <string name="exercise_group_name">exercise group name</string>
+    <string name="finish">finish</string>
+    <string name="workout_time">Workout time</string>
 </resources>
