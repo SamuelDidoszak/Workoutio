@@ -23,6 +23,7 @@ import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.workout.controller.SwipeDetection;
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.data.DatabaseTesting;
 import com.example.workout.model.Day;
@@ -59,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
     private List<Muscle> dayMuscleList;
     private List<MuscleDateTime> muscleDateTimeList;
 
-    private LinearLayout noExercisesContainer;
-    private Button addExercisesButton;
+    private LinearLayout noExercisesContainer, startWorkoutContainer;
+    private Button addExercisesButton, startWorkoutButton, customWorkoutButton, editWorkoutButton;
     private RecyclerView dayRecyclerView;
     private DayExerciseRecyclerViewAdapter dayExerciseRecyclerViewAdapter;
     private DayMuscleRecyclerViewAdapter dayMuscleRecyclerViewAdapter;
@@ -192,11 +193,14 @@ public class MainActivity extends AppCompatActivity {
 //            getExercisesForThisDay();
             if(workoutIsDone)
                 dayRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
-            else
+            else {
                 dayRecyclerView.setAdapter(dayExerciseRecyclerViewAdapter);
+                startWorkoutContainer.setVisibility(View.VISIBLE);
+            }
         }
         else {
             dayRecyclerView.setAdapter(dayMuscleRecyclerViewAdapter);
+            startWorkoutContainer.setVisibility(View.GONE);
         }
         isDayRecyclerViewMuscle = !isDayRecyclerViewMuscle;
     }
@@ -272,6 +276,10 @@ public class MainActivity extends AppCompatActivity {
             historyRecyclerView = findViewById(R.id.historyRecyclerView);
             addButton = findViewById(R.id.app_toolbar_addButton);
             accountButton = findViewById(R.id.app_toolbar_accountButton);
+            startWorkoutContainer = findViewById(R.id.activity_main_startWorkoutContainer);
+            startWorkoutButton = findViewById(R.id.activity_main_startWorkoutButton);
+            customWorkoutButton = findViewById(R.id.activity_main_customWorkoutButton);
+            editWorkoutButton = findViewById(R.id.activity_main_editWorkoutButton);
         }
 
         /**
@@ -293,6 +301,96 @@ public class MainActivity extends AppCompatActivity {
 
             //buttonHandler.expandTouchableArea(accountButton, null);
             accountButton.setOnClickListener(buttonHandler.accountButtonOnClickListener);
+
+            startWorkoutButton.setOnLongClickListener(buttonHandler.onStartWorkoutLongClick);
+            startWorkoutButton.setOnClickListener(buttonHandler.onStartWorkoutButtonClick);
+            customWorkoutButton.setOnClickListener(buttonHandler.onCustomWorkoutButtonClick);
+            editWorkoutButton.setOnClickListener(buttonHandler.onEditWorkoutButtonClick);
+
+            SwipeDetection startWorkoutContainerSwipeDetection = new SwipeDetection(context);
+            startWorkoutContainer.setOnTouchListener((v, event) -> startWorkoutContainerSwipeDetection.onTouch(startWorkoutContainer, event));
+
+            SwipeDetection customWorkoutSwipeDetection = new SwipeDetection(context);
+            customWorkoutButton.setOnTouchListener((v, event) -> customWorkoutSwipeDetection.onTouch(customWorkoutButton, event));
+
+            SwipeDetection editWorkoutSwipeDetection = new SwipeDetection(context);
+            editWorkoutButton.setOnTouchListener((v, event) -> editWorkoutSwipeDetection.onTouch(editWorkoutButton, event));
+
+            SwipeDetection startWorkoutSwipeDetection = new SwipeDetection(context);
+            startWorkoutButton.setOnTouchListener((v, event) -> startWorkoutSwipeDetection.onTouch(startWorkoutButton, event));
+
+            startWorkoutContainerSwipeDetection.getSwipeDirection().observe(MainActivity.this, s -> {
+                switch(s) {
+                    case "left":
+                    case "right":
+                        if(customWorkoutButton.getVisibility() == View.INVISIBLE) {
+                            customWorkoutButton.setVisibility(View.VISIBLE);
+                            editWorkoutButton.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            customWorkoutButton.setVisibility(View.INVISIBLE);
+                            editWorkoutButton.setVisibility(View.INVISIBLE);
+                        }
+                        break;
+                }
+            });
+
+            customWorkoutSwipeDetection.getSwipeDirection().observe(MainActivity.this, s -> {
+                switch(s) {
+                    case "left":
+                    case "right":
+                        if(customWorkoutButton.getVisibility() == View.INVISIBLE) {
+                            customWorkoutButton.setVisibility(View.VISIBLE);
+                            editWorkoutButton.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            customWorkoutButton.setVisibility(View.INVISIBLE);
+                            editWorkoutButton.setVisibility(View.INVISIBLE);
+                        }
+                        break;
+                    case "tap":
+                        customWorkoutButton.performClick();
+                        break;
+                }
+            });
+
+            editWorkoutSwipeDetection.getSwipeDirection().observe(MainActivity.this, s -> {
+                switch(s) {
+                    case "left":
+                    case "right":
+                        if(customWorkoutButton.getVisibility() == View.INVISIBLE) {
+                            customWorkoutButton.setVisibility(View.VISIBLE);
+                            editWorkoutButton.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            customWorkoutButton.setVisibility(View.INVISIBLE);
+                            editWorkoutButton.setVisibility(View.INVISIBLE);
+                        }
+                        break;
+                    case "tap":
+                        editWorkoutButton.performClick();
+                        break;
+                }
+            });
+
+            startWorkoutSwipeDetection.getSwipeDirection().observe(MainActivity.this, s -> {
+                switch(s) {
+                    case "left":
+                    case "right":
+                        if(customWorkoutButton.getVisibility() == View.INVISIBLE) {
+                            customWorkoutButton.setVisibility(View.VISIBLE);
+                            editWorkoutButton.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            customWorkoutButton.setVisibility(View.INVISIBLE);
+                            editWorkoutButton.setVisibility(View.INVISIBLE);
+                        }
+                        break;
+                    case "tap":
+                        startWorkoutButton.performClick();
+                        break;
+                }
+            });
         }
 
         /**
@@ -430,6 +528,38 @@ public class MainActivity extends AppCompatActivity {
                     parent.setTouchDelegate(new TouchDelegate(area, view));
                 });
             }
+
+            private View.OnClickListener onStartWorkoutButtonClick = v -> {
+                Intent intent = new Intent(context, WorkoutActivity.class);
+                intent.putExtra("quantityAndReps", (Serializable) quantityAndRepsList);
+                startActivityForResult(intent, 2);
+            };
+
+            private View.OnClickListener onCustomWorkoutButtonClick = v -> {
+                Intent intent = new Intent(context, DayAssignmentActivity.class);
+                intent.putExtra("dayId", -1);
+                intent.putExtra("startWorkout", true);
+                startActivityForResult(intent, 3);
+            };
+
+            private View.OnClickListener onEditWorkoutButtonClick = v -> {
+                Intent intent = new Intent(context, DayAssignmentActivity.class);
+                intent.putExtra("dayId", DB.getCurrentDay().getDayId());
+                intent.putExtra("startWorkout", true);
+                startActivityForResult(intent, 3);
+            };
+
+            private View.OnLongClickListener onStartWorkoutLongClick = v -> {
+                if(customWorkoutButton.getVisibility() == View.INVISIBLE) {
+                    customWorkoutButton.setVisibility(View.VISIBLE);
+                    editWorkoutButton.setVisibility(View.VISIBLE);
+                }
+                else {
+                    customWorkoutButton.setVisibility(View.INVISIBLE);
+                    editWorkoutButton.setVisibility(View.INVISIBLE);
+                }
+                return true;
+            };
         }
     }
 

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -55,6 +57,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
 
     int dayId;
     boolean startWorkout;
+    String initialName;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -125,8 +128,32 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             constraintSet.connect(R.id.day_assignment_dayExercisesRecyclerView, ConstraintSet.TOP,
                     R.id.day_assignment_dayNameEditText, ConstraintSet.BOTTOM,0);
             constraintSet.applyTo(constraintLayout);
-            if(dayId != -1)
-                dayNameEditText.setText(DB.getDay(dayId).getDayName());
+            initialName = "";
+            if(dayId != -1) {
+                initialName = DB.getDay(dayId).getDayName();
+                dayNameEditText.setText(initialName);
+            }
+
+            dayNameEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if(dayId == -1 || !s.toString().equals(initialName)) {
+                        if(startWorkout) {
+                            String buttonText = "";
+                            if(s.length() != 0)
+                                buttonText = "save & ";
+                            buttonText += "start";
+                            saveButton.setText(buttonText);
+                        }
+                    }
+                }
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+            });
         }
         if(dayId != -1) {
             if(!DB.getDay(dayId).isCustom())
@@ -135,6 +162,14 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             for(DayExerciseConnector dayExerciseConnector : dayExerciseConnectorList) {
                 dayExercises.add(DB.getExercise(dayExerciseConnector.getExerciseId()));
             }
+        }
+
+        if(startWorkout) {
+            String buttonText = "";
+            if(dayId != -1)
+                buttonText = "save & ";
+            buttonText += "start";
+            saveButton.setText(buttonText);
         }
 
         dayAssignmentRecyclerViewAdapter = new DayAssignmentRecyclerViewAdapter(context, dayExercises, dayId, this);
@@ -211,7 +246,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             }
 
             boolean newDay = false;
-            if(dayId == -1) {
+            if(dayId == -1 && dayNameEditText.getText().length() != 0) {
                 Day day = new Day(dayNameEditText.getText().toString(), true);
                 DB.addDay(day);
                 dayId = day.getDayId();

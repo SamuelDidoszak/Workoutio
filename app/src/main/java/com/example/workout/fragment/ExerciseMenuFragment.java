@@ -210,6 +210,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 Log.d(TAG, "setUpObservers: " + DB.getDay(integer).getDayName());
                 Intent intent = new Intent(context, DayAssignmentActivity.class);
                 intent.putExtra("dayId", integer);
+                intent.putExtra("startWorkout", false);
                 startActivityForResult(intent, 2);
             });
         }

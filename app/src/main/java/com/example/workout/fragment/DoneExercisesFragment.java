@@ -94,7 +94,6 @@ public class DoneExercisesFragment extends Fragment {
             noExercises.setVisibility(View.VISIBLE);
 
             noExercises.setOnTouchListener((v, event) -> {
-//                getParentFragmentManager().popBackStack("chronometerBackStack", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 fragmentFinished.setValue(Boolean.TRUE);
                 return false;
             });

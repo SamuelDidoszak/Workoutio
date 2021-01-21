@@ -212,9 +212,6 @@ public class ChronometerFragment extends Fragment {
         workoutTimeChronometer.setDelayMillis(1000);
         workoutTimeChronometer.setBase(baseTime);
         workoutTimeChronometer.start();
-        workoutTimeChronometer.setVisibility(View.VISIBLE);
-        firstExercise = Boolean.FALSE;
-        isWorkoutChronoVisible = true;
     }
 
     private void countTime() {
@@ -232,7 +229,9 @@ public class ChronometerFragment extends Fragment {
             exerciseTime = chronometer.getTimeElapsed();
 
             if(firstExercise) {
-                initiateWorkoutTimeChronometer(null);
+                workoutTimeChronometer.setVisibility(View.VISIBLE);
+                firstExercise = Boolean.FALSE;
+                isWorkoutChronoVisible = true;
             }
 
             if(!lastOfStartExerciseAfterRest) {
@@ -274,6 +273,8 @@ public class ChronometerFragment extends Fragment {
             }
             chronometer.init();
             chronometer.start();
+            if(firstExercise)
+                initiateWorkoutTimeChronometer(null);
             workoutRecyclerViewAdapter.setDuringRest(Boolean.FALSE);
         }
         saved = Boolean.FALSE;

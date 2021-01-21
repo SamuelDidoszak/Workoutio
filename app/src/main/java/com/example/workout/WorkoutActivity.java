@@ -190,8 +190,10 @@ public class WorkoutActivity extends AppCompatActivity {
                     doneExercises_bottomContainer.setVisibility(View.VISIBLE);
 
                     doneExercises_remainingExercisesNumber.setText(String.valueOf(workoutRecyclerViewAdapter.getItemCount() + (chronometerFragment.getChronometer().isBackwards() ? 0 : 1)));
-                    doneExercises_workoutTimeChronometer.setBase(chronometerFragment.getWorkoutTimeChronometer().getBase());
-                    doneExercises_workoutTimeChronometer.start();
+                    if(chronometerFragment.getWorkoutTimeChronometer().isStarted()) {
+                        doneExercises_workoutTimeChronometer.setBase(chronometerFragment.getWorkoutTimeChronometer().getBase());
+                        doneExercises_workoutTimeChronometer.start();
+                    }
                     doneExercises_continueButton.setOnClickListener(v -> doneExercisesFragment.getFragmentFinished().setValue(Boolean.TRUE));
                     doneExercises_finishButton.setOnClickListener(v -> {
                         Intent intent = new Intent(context, WorkoutOverviewActivity.class);

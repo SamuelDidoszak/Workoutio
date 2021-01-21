@@ -341,6 +341,35 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return day;
     }
 
+        public Day getCurrentDay() {
+            SQLiteDatabase db = this.getReadableDatabase();
+            Day currentDay;
+
+            //  Gets the current day and parses it into day name
+            Date currentDate = Calendar.getInstance().getTime();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE");
+            String date = dateFormat.format(currentDate);
+
+            //  Fetches the day from Database using current dayName
+            Cursor dayCursor = db.query(Constants.TABLE_DAY,
+                    new String[]{Constants.COLUMN_DAY_ID,
+                            Constants.COLUMN_DAY_NAME,
+                            Constants.COLUMN_CUSTOM_DAY},
+                    Constants.COLUMN_DAY_NAME + "='" + date +"'",
+                    null, null, null, null);
+
+            if(dayCursor.getCount() == 0) {
+                db.close();
+                return new Day();
+            }
+
+            dayCursor.moveToFirst();
+            currentDay = new Day(dayCursor.getInt(0), dayCursor.getString(1), dayCursor.getInt(2) == 1);
+            dayCursor.close();
+            db.close();
+            return currentDay;
+        }
+
     /**
      * Returns all of the days in which an exercise is performed
      * @param exerciseId identifier of an exercise for which days should be returned
