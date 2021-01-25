@@ -31,6 +31,9 @@ import com.example.workout.model.QuantityAndReps;
 import com.example.workout.model.helper.Chronometer;
 import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -116,6 +119,36 @@ public class WorkoutActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        writeRemainingExercisesToAFile();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        writeRemainingExercisesToAFile();
+    }
+
+    private void writeRemainingExercisesToAFile() {
+        try {
+            FileOutputStream outputStream = new FileOutputStream(new File(context.getFilesDir(), "exercisesToday.txt"));
+
+            if(!chronometerFragment.getChronometer().isBackwards())
+                quantityAndRepsList.add(workoutRecyclerViewAdapter.getPreviousExerciseIndex(), workoutRecyclerViewAdapter.getPreviousExercise());
+
+            for(QuantityAndReps quantityAndReps : quantityAndRepsList) {
+                String QARText = quantityAndReps.getExerciseId() + ";" + quantityAndReps.getExerciseName() + ";" + quantityAndReps.getQuantity()
+                        + ";" + quantityAndReps.isCanMore() + ";" + quantityAndReps.getReps() + "\n";
+                outputStream.write(QARText.getBytes());
+            }
+            outputStream.close();
+            quantityAndRepsList.remove(workoutRecyclerViewAdapter.getPreviousExerciseIndex());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     //  add time is amount =======================================
     private void setUpRecyclerView() {
         workoutRecyclerViewAdapter = new WorkoutRecyclerViewAdapter(context, quantityAndRepsList);

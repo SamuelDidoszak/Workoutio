@@ -38,6 +38,10 @@ import com.example.workout.ui.adapter.DayMuscleRecyclerViewAdapter;
 import com.example.workout.ui.adapter.DoneExercisesRecyclerViewAdapter;
 import com.example.workout.ui.adapter.HistoryRecyclerViewFullAdapter;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -69,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView historyRecyclerView;
     private HistoryRecyclerViewFullAdapter historyRecyclerViewFullAdapter;
     private boolean workoutIsDone;
+    private File workoutExercises;
 
     private ImageButton addButton, accountButton;
 
@@ -97,8 +102,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         context = this;
+        workoutExercises = new File(context.getFilesDir(), "exercisesToday.txt");
         DB = new DatabaseHandler(this);
         if(DB.getAllDays().size() == 0) {
             Log.d(TAG, "onCreate: recreatin");
@@ -136,7 +141,8 @@ public class MainActivity extends AppCompatActivity {
                     new SetUp().refreshMuscles();
                     break;
                 case 2:
-                    new SetUp().refreshDayExercise();
+                    if(DB.getDonesByDate(null).size() != 0)
+                        new SetUp().refreshDayExercise();
                     break;
                 case 3:
                     new SetUp().refreshMuscles();
@@ -152,7 +158,11 @@ public class MainActivity extends AppCompatActivity {
                      * Refreshes the dayExerciseRecyclerView if the done had a date that's already showing
                      */
                     if ((DB.getDone(doneId).getTrimmedDate()).equals(dateOfDayExercisesShowing)) {
-                        quantityAndRepsList = getExercisesForThisDay();
+                        try {
+                            quantityAndRepsList = exercisesForThisDay();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         dayExerciseRecyclerViewAdapter = new DayExerciseRecyclerViewAdapter(context, quantityAndRepsList);
                         dayRecyclerView.setAdapter(dayExerciseRecyclerViewAdapter);
                     }
@@ -166,6 +176,11 @@ public class MainActivity extends AppCompatActivity {
             dayRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
             workoutIsDone = true;
             isDayRecyclerViewMuscle = false;
+            try {
+                quantityAndRepsList = exercisesForThisDay();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             //  refreshes muscles for a current day
             dayMuscleList = DB.getMusclesByCurrentDay();
@@ -206,46 +221,92 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Gets proper exercises for this day. Tries to populate them with amount.
-     * @return list of exercises, their quantity and repetitions
+     * If there was no workout today, gets proper exercises for this day and tries to populate them with amount. <br/>
+     * If there were, populates quantityAndRepsList with remaining exercises
+     * @Return: list of exercises with amount
      */
-    private List<QuantityAndReps> getExercisesForThisDay() {
-        List<Exercise> todayExercises = DB.getExercisesByCurrentDay();
+    private List<QuantityAndReps> exercisesForThisDay() throws IOException {
+        List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
+        if(DB.getDonesByDate(null).size() == 0) {
+            List<Exercise> todayExercises = DB.getExercisesByCurrentDay();
 
             //  Gets the last time that exercises were performed in that day
-        List<QuantityAndReps> localQuantityAndRepsList = new ArrayList<>();
-        List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
-        Long currentDate = Calendar.getInstance().getTimeInMillis();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            List<QuantityAndReps> localQuantityAndRepsList = new ArrayList<>();
+            Long currentDate = Calendar.getInstance().getTimeInMillis();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             //  find the latest exercises for this day
-        for(int i = 0; i < maximumWeeksBefore; i++) {
+            for(int i = 0; i < maximumWeeksBefore; i++) {
                 //  subtracts a week in milliseconds from current date
-            currentDate -= 604800000;
-            localQuantityAndRepsList = DB.getQuantityAndRepsList(dateFormat.format(currentDate));
-            if(localQuantityAndRepsList.size() != 0) {
-                dateOfDayExercisesShowing = dateFormat.format(currentDate);
-                break;
-            }
-        }
-
-        /**
-         * Checks if there were done exercises and populates quatityAndRepsList
-         */
-        for(Exercise exercise : todayExercises) {
-            Boolean isBreak = Boolean.FALSE;
-            for(QuantityAndReps quantityAndReps : localQuantityAndRepsList) {
-                if(quantityAndReps.getExerciseId() == exercise.getExerciseId()) {
-                    quantityAndRepsList.add(quantityAndReps);
-                    localQuantityAndRepsList.remove(quantityAndReps);
-                    isBreak = Boolean.TRUE;
+                currentDate -= 604800000;
+                localQuantityAndRepsList = DB.getQuantityAndRepsList(dateFormat.format(currentDate));
+                if(localQuantityAndRepsList.size() != 0) {
+                    dateOfDayExercisesShowing = dateFormat.format(currentDate);
                     break;
                 }
             }
-            if(!isBreak) {
-                quantityAndRepsList.add(new QuantityAndReps(exercise.getExerciseId(),
-                        exercise.getExerciseName(),
-                        -1, Boolean.FALSE, defaultRepCount));
+
+            /**
+             * Checks if there were done exercises and populates quantityAndRepsList
+             */
+            for(Exercise exercise : todayExercises) {
+                Boolean isBreak = Boolean.FALSE;
+                for(QuantityAndReps quantityAndReps : localQuantityAndRepsList) {
+                    if(quantityAndReps.getExerciseId() == exercise.getExerciseId()) {
+                        quantityAndRepsList.add(quantityAndReps);
+                        localQuantityAndRepsList.remove(quantityAndReps);
+                        isBreak = Boolean.TRUE;
+                        break;
+                    }
+                }
+                if(!isBreak) {
+                    quantityAndRepsList.add(new QuantityAndReps(exercise.getExerciseId(),
+                            exercise.getExerciseName(),
+                            -1, Boolean.FALSE, defaultRepCount));
+                }
             }
+
+            float meanReps = 0;
+            FileOutputStream outputStream = new FileOutputStream(workoutExercises);
+            for(QuantityAndReps quantityAndReps : quantityAndRepsList) {
+                String QARText = quantityAndReps.getExerciseId() + ";" + quantityAndReps.getExerciseName() + ";" + quantityAndReps.getQuantity()
+                        + ";" + quantityAndReps.isCanMore() + ";" + quantityAndReps.getReps() + "\n";
+                outputStream.write(QARText.getBytes());
+                meanReps += quantityAndReps.getReps();
+            }
+            outputStream.close();
+
+            List<QuantityAndReps> quantityAndRepsListCopy = quantityAndRepsList;
+            for(int i = 0; i < Math.round(meanReps / quantityAndRepsList.size()); i++) {
+                quantityAndRepsList.addAll(quantityAndRepsListCopy);
+            }
+        }
+        else {
+            FileInputStream inputStream = new FileInputStream(workoutExercises);
+            byte[] bytes = new byte[(int) workoutExercises.length()];
+            try {
+                inputStream.read(bytes);
+            } finally {
+                inputStream.close();
+            }
+            String QARText = new String(bytes);
+            int newLine;
+            for(int i = -1; true; i = newLine) {
+                newLine = QARText.indexOf('\n', i + 1);
+                if(newLine == -1)
+                    break;
+                String QARSubText = QARText.substring(i + 1, newLine);
+                String[] QARTextDivided = new String[5];
+                int dividerIndex = 0;
+                for(int n = 0; n < 4; n++) {
+                    QARTextDivided[n] = QARSubText.substring(dividerIndex,
+                            dividerIndex = QARSubText.indexOf(';', dividerIndex));
+                    dividerIndex++;
+                }
+                QARTextDivided[4] = QARSubText.substring(dividerIndex);
+                QuantityAndReps quantityAndReps = new QuantityAndReps(Integer.parseInt(QARTextDivided[0]), QARTextDivided[1], Integer.parseInt(QARTextDivided[2]), Boolean.parseBoolean(QARTextDivided[3]), Integer.parseInt(QARTextDivided[4]));
+                quantityAndRepsList.add(quantityAndReps);
+            }
+            inputStream.close();
         }
         return quantityAndRepsList;
     }
@@ -403,8 +464,13 @@ public class MainActivity extends AppCompatActivity {
                 doneExercisesRecyclerViewAdapter = new DoneExercisesRecyclerViewAdapter(todaysDoneList, context);
                 workoutIsDone = true;
             }
-
-                //  Create RecyclerViews
+            quantityAndRepsList = new ArrayList<>();
+            try {
+                quantityAndRepsList = exercisesForThisDay();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //  Create RecyclerViews
                     //  HistoryRecyclerView
             historyRecyclerView.setHasFixedSize(true);
             historyRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -434,8 +500,6 @@ public class MainActivity extends AppCompatActivity {
         private void refreshHistory() {
             doneList = DB.getAllDones();
             sortedDoneList = new DoneOperations().sortDoneListByDateGroup();
-            quantityAndRepsList = getExercisesForThisDay();
-
             if(historyRecyclerViewFullAdapter == null)
                 historyRecyclerViewFullAdapter = new HistoryRecyclerViewFullAdapter(context, sortedDoneList, muscleDateTimeList);
             else

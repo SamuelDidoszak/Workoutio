@@ -19,6 +19,9 @@ public class QuantityAndReps implements Serializable {
     boolean canMore;
     int reps;
 
+    public QuantityAndReps() {
+    }
+
     public QuantityAndReps(int exerciseId, String exerciseName, int quantity, boolean canMore, int reps) {
         this.exerciseId = exerciseId;
         this.exerciseName = exerciseName;

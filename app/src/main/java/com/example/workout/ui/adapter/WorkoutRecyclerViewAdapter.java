@@ -1,7 +1,6 @@
 package com.example.workout.ui.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,7 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
 
     private Boolean duringRest = Boolean.FALSE;
 
-    private int chosenExerciseIndex;
+    private int previousExerciseIndex;
     private QuantityAndReps previousExercise;
 
     public void setDuringRest(Boolean duringRest) {
@@ -41,16 +40,23 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
         return quantityAndRepsList;
     }
 
+    public QuantityAndReps getPreviousExercise() {
+        return previousExercise;
+    }
+
+    public int getPreviousExerciseIndex() {
+        return previousExerciseIndex;
+    }
+
     public WorkoutRecyclerViewAdapter(Context context, List<QuantityAndReps> quantityAndRepsList) {
         this.quantityAndRepsList = quantityAndRepsList;
         this.context = context;
         DB = new DatabaseHandler(context);
-        this.quantityAndRepsList.addAll(quantityAndRepsList);
         chosenExercise = new MutableLiveData<>();
 
         if(quantityAndRepsList.size() != 0) {
             previousExercise = this.quantityAndRepsList.get(0);
-            chosenExerciseIndex = 0;
+            previousExerciseIndex = 0;
             chosenExercise.setValue(previousExercise);
             this.quantityAndRepsList.remove(0);
         }
@@ -120,10 +126,10 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
 
                 //  if clicked during rest time, current exercise shouldn't be added again
             if(!duringRest) {
-                quantityAndRepsList.add(chosenExerciseIndex, previousExercise);
-                notifyItemInserted(chosenExerciseIndex);
+                quantityAndRepsList.add(previousExerciseIndex, previousExercise);
+                notifyItemInserted(previousExerciseIndex);
 
-                if(position >= chosenExerciseIndex)
+                if(position >= previousExerciseIndex)
                     position ++;
             }
             else
@@ -134,7 +140,7 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
             quantityAndRepsList.remove(position);
             notifyItemRemoved(position);
 
-            chosenExerciseIndex = position;
+            previousExerciseIndex = position;
             previousExercise = quantityAndReps;
         };
     }
@@ -142,17 +148,17 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
     public void addNewQAR(QuantityAndReps quantityAndReps, boolean addAsCurrent) {
         if(addAsCurrent) {
             if(!duringRest) {
-                quantityAndRepsList.add(chosenExerciseIndex, previousExercise);
-                notifyItemInserted(chosenExerciseIndex);
+                quantityAndRepsList.add(previousExerciseIndex, previousExercise);
+                notifyItemInserted(previousExerciseIndex);
             }
             chosenExercise.setValue(quantityAndReps);
 
-            chosenExerciseIndex = 0;
+            previousExerciseIndex = 0;
             previousExercise = quantityAndReps;
         }
         else {
             quantityAndRepsList.add(0, quantityAndReps);
-            chosenExerciseIndex++;
+            previousExerciseIndex++;
             notifyItemInserted(0);
         }
     }
@@ -166,7 +172,7 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
         quantityAndRepsList.remove(0);
         this.notifyItemRemoved(0);
 
-        chosenExerciseIndex = 0;
+        previousExerciseIndex = 0;
         previousExercise = quantityAndReps;
     }
 }
