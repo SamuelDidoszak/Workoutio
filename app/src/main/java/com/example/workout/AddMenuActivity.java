@@ -39,7 +39,7 @@ public class AddMenuActivity extends AppCompatActivity {
     private String TAG = "AddMenuActivity";
 
     private TextView exerciseTextView;
-    private EditText dateEditText, quantityEditText, timeEditText, hourEditText;
+    private com.google.android.material.textfield.TextInputEditText dateEditText, quantityEditText, timeEditText, hourEditText;
     private CheckableImageView negativeCheckBox, canMoreCheckBox;
     private Button addButton;
     private CardView cardView;

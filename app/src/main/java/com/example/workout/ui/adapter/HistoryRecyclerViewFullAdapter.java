@@ -209,7 +209,7 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
                 exerciseDetailsTimeTextView = itemView.findViewById(R.id.history_row_exercise_details_timeTextView);
                 exerciseDetailsExerciseNameTextView = itemView.findViewById(R.id.history_row_exercise_details_exerciseNameTextView);
 
-                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(exerciseDetailsExerciseNameTextView, 12, 18, 1, TypedValue.COMPLEX_UNIT_SP);
+                TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(exerciseDetailsExerciseNameTextView, 12, 18, 6, TypedValue.COMPLEX_UNIT_SP);
             }
         }
     }

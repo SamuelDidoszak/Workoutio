@@ -58,7 +58,7 @@ public class DayMuscleRecyclerViewAdapter extends RecyclerView.Adapter<DayMuscle
             muscleIconImageView = itemView.findViewById(R.id.day_row_muscle_muscleIconImageView);
             muscleNameTextView = itemView.findViewById(R.id.day_row_muscle_muscleNameTextView);
 
-            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(muscleNameTextView, 16, 24, 1, TypedValue.COMPLEX_UNIT_SP);
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(muscleNameTextView, 16, 24, 6, TypedValue.COMPLEX_UNIT_SP);
         }
     }
 }

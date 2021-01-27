@@ -48,6 +48,7 @@
                 android:layout_marginLeft="12dp"
                 android:textStyle="italic"
                 android:text="muscle"
+                android:maxLines="1"
                 android:textColor="@android:color/white"
                 android:layout_gravity="center_vertical"/>
         </LinearLayout>

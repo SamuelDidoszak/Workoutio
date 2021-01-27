@@ -66,7 +66,7 @@ public class DayExerciseRecyclerViewAdapter extends RecyclerView.Adapter<DayExer
             amountTextView = itemView.findViewById(R.id.day_row_exercise_quantityTextView);
             repsTextView = itemView.findViewById(R.id.day_row_exercise_repsTextView);
 
-            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(exerciseNameTextView, 12, 18, 1, TypedValue.COMPLEX_UNIT_SP);
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(exerciseNameTextView, 12, 18, 6, TypedValue.COMPLEX_UNIT_SP);
         }
     }
 }

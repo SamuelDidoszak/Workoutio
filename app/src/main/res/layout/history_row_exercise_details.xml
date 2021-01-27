@@ -10,15 +10,13 @@
         android:layout_height="wrap_content"
         app:cardBackgroundColor="@color/hardDark"
         android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         android:layout_marginBottom="6dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/hardDark"
+            android:background="@color/mediumDark"
             android:orientation="horizontal"
-            android:paddingLeft="8dp"
             android:paddingTop="4dp"
             android:paddingBottom="4dp">
 
@@ -26,7 +24,6 @@
                 android:id="@+id/history_row_exercise_details_exerciseNameTextView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginRight="12dp"
                 android:layout_weight="4"
                 android:text="exercise"
                 android:textColor="@android:color/white"/>
@@ -35,7 +32,6 @@
                 android:id="@+id/history_row_exercise_details_quantityTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="12dp"
                 android:layout_weight="1"
                 android:text="6"
                 android:textColor="@android:color/white"
@@ -50,6 +46,7 @@
                 android:layout_weight="1.5"
                 android:text="1:04"
                 android:textColor="@android:color/white"
+                android:background="@color/littleDark"
                 android:textAlignment="center"
                 android:textSize="18sp"
                 android:textStyle="italic" />

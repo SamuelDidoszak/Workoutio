@@ -1062,6 +1062,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         DB.close();
     }
 
+    public void editDay(Day day) {
+        SQLiteDatabase DB = this.getWritableDatabase();
+
+        if(!day.isCustom()) {
+            Log.e("DatabaseHandler", "editDay: day is not custom");
+            DB.close();
+            return;
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(Constants.COLUMN_DAY_NAME, day.getDayName());
+
+        DB.update(Constants.TABLE_DAY, values, Constants.COLUMN_DAY_ID + "=" + day.getDayId(), null);
+        DB.close();
+    }
+
     public void editDayExerciseConnector(DayExerciseConnector dayExerciseConnector) {
         SQLiteDatabase DB = this.getWritableDatabase();
 

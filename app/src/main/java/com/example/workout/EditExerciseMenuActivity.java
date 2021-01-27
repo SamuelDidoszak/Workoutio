@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,7 +36,7 @@ import java.util.List;
 
 public class EditExerciseMenuActivity extends AppCompatActivity {
 
-    private EditText exerciseNameEditText;
+    private com.google.android.material.textfield.TextInputLayout exerciseNameEditText;
     private CardView cardView;
     private RecyclerView daysRecyclerView, musclesRecyclerView;
     private CheckableImageView timeAsCountCheckbox, defaultNegativeCheckbox;
@@ -110,13 +109,14 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         if(saveButton.getText().toString().equals(getResources().getString(R.string.back))){
             setResult(RESULT_CANCELED);
             finish();
+            return;
+        }
+        String exerciseName = exerciseNameEditText.getEditText().getText().toString();
+        if(exerciseName.length() == 0 || exerciseName.length() > exerciseNameEditText.getCounterMaxLength()) {
+            exerciseNameEditText.setError(" ");
+            return;
         }
         if(exerciseId == -1) {
-            String exerciseName = exerciseNameEditText.getText().toString();
-            if(exerciseName.length() == 0) {
-                exerciseNameEditText.setHintTextColor(getResources().getColor(R.color.mediumRed));
-                return;
-            }
             Exercise exercise = new Exercise(exerciseName, true, timeAsCountCheckbox.isChecked(), defaultNegativeCheckbox.isChecked());
             DB.addExercise(exercise);
             exerciseId = exercise.getExerciseId();
@@ -166,7 +166,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         }
         if (changeList[3]) {
             Exercise exercise = DB.getExercise(exerciseId);
-            exercise.setExerciseName(exerciseNameEditText.getText().toString());
+            exercise.setExerciseName(exerciseName);
             DB.editExercise(exercise);
         }
 
@@ -229,18 +229,22 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         Exercise exercise = DB.getExercise(exerciseId);
 
         if(exerciseId != -1) {
-            exerciseNameEditText.setText(exercise.getExerciseName());
+            exerciseNameEditText.getEditText().setText(exercise.getExerciseName());
             timeAsCountCheckbox.setChecked(exercise.isTimeAsAmount());
             defaultNegativeCheckbox.setChecked(exercise.isDefaultNegative());
         }
-        exerciseNameEditText.addTextChangedListener(new TextWatcher() {
+        exerciseNameEditText.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s.length() != 0)
-                    saveButton.setText(R.string.save);
+                if(s.length() != 0) {
+                    if(s.length() <= exerciseNameEditText.getCounterMaxLength()) {
+                        exerciseNameEditText.setError(null);
+                        saveButton.setText(R.string.save);
+                    }
+                }
                 else
                     saveButton.setText(R.string.back);
 
@@ -406,7 +410,6 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder{
-
             ImageView dynamicMuscle;
 
             public ViewHolder(@NonNull View itemView) {

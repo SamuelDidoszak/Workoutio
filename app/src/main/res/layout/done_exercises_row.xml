@@ -18,6 +18,7 @@
             android:layout_weight="2"
             android:gravity="center"
             android:text="@string/exercise"
+            android:maxLines="1"
             android:textSize="20sp"
             android:textStyle="bold"/>
 

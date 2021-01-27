@@ -30,6 +30,7 @@
                 android:layout_marginRight="12dp"
                 android:layout_weight="5"
                 android:text="exercise"
+                android:maxLines="1"
                 android:textColor="@android:color/white"
                 android:layout_gravity="center_vertical"/>
 

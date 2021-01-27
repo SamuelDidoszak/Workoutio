@@ -31,6 +31,7 @@
                 android:text="DAY"
                 android:textColor="@android:color/white"
                 android:textSize="18dp"
+                android:maxLines="1"
                 android:textStyle="bold"
                 android:layout_gravity="center_vertical"/>
 

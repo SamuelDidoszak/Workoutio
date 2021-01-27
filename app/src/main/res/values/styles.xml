@@ -1,6 +1,6 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -8,7 +8,7 @@
     </style>
 
 
-    <style name="emptyPopup" parent="Theme.AppCompat.Dialog.Alert">
+    <style name="emptyPopup" parent="Theme.MaterialComponents.Dialog.Alert">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -20,7 +20,7 @@
         <item name="android:title">0px</item>
     </style>
 
-    <style name="emptyPopupFullScreen" parent="Theme.AppCompat.Dialog.Alert">
+    <style name="emptyPopupFullScreen" parent="Theme.MaterialComponents.Dialog.Alert">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -40,14 +40,14 @@
         <item name="android:layout_height">match_parent</item>
     </style>
 
-    <style name="calendarPopup" parent="Theme.AppCompat.Dialog">
+    <style name="calendarPopup" parent="Theme.MaterialComponents.Dialog">
         <item name="android:windowIsFloating">true</item>
         <item name="windowNoTitle">true</item>
         <item name="android:layout_margin">0px</item>
         <item name="android:title">0px</item>
     </style>
 
-    <style name="timePicker" parent="Theme.AppCompat.Dialog">
+    <style name="timePicker" parent="Theme.MaterialComponents.Dialog">
         <item name="android:background">@color/hardDark</item>
         <item name="actionBarTheme">@style/Theme.AppCompat.NoActionBar</item>
         <item name="android:actionBarSize">0dp</item>

@@ -11,7 +11,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +34,7 @@ import com.example.workout.model.Exercise;
 import com.example.workout.model.QuantityAndReps;
 import com.example.workout.model.helper.SimpleItemTouchHelperCallback;
 import com.example.workout.ui.adapter.DayAssignmentRecyclerViewAdapter;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ import java.util.List;
 
 public class DayAssignmentActivity extends AppCompatActivity implements DayAssignmentRecyclerViewAdapter.OnStartDragListener {
     private TextView dayName;
-    private EditText dayNameEditText;
+    private TextInputLayout dayNameEditText;
     private LinearLayout spaceTop, spaceBottom;
     private Button backButton, saveButton;
     private RecyclerView dayExercisesRecyclerView;
@@ -131,15 +131,17 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
             initialName = "";
             if(dayId != -1) {
                 initialName = DB.getDay(dayId).getDayName();
-                dayNameEditText.setText(initialName);
+                dayNameEditText.getEditText().setText(initialName);
             }
 
-            dayNameEditText.addTextChangedListener(new TextWatcher() {
+            dayNameEditText.getEditText().addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 }
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if(!startWorkout && s.toString().length() != 0)
+                        dayNameEditText.setError(null);
                     if(dayId == -1 || !s.toString().equals(initialName)) {
                         if(startWorkout) {
                             String buttonText = "";
@@ -240,70 +242,42 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
                     return;
                 }
             }
-            else if((dayNameEditText.getVisibility() == View.VISIBLE && dayNameEditText.getText().length() == 0)) {
-                dayNameEditText.setHintTextColor(getResources().getColor(R.color.mediumRed));
+            else if((dayNameEditText.getVisibility() == View.VISIBLE && dayNameEditText.getEditText().getText().length() == 0)) {
+                dayNameEditText.setError(" ");
                 return;
             }
 
-            boolean newDay = false;
-            if(dayId == -1 && dayNameEditText.getText().length() != 0) {
-                Day day = new Day(dayNameEditText.getText().toString(), true);
-                DB.addDay(day);
-                dayId = day.getDayId();
-                dayAssignmentRecyclerViewAdapter.setDayId(dayId);
-                newDay = true;
+            boolean newDay = false, saved = false;
+            if(startWorkout || dayNameEditText.getEditText().getText().length() != 0) {
+                Day day = new Day(dayNameEditText.getEditText().getText().toString(), true);
+                if(dayId == -1) {
+                    DB.addDay(day);
+                    dayId = day.getDayId();
+                    dayAssignmentRecyclerViewAdapter.setDayId(dayId);
+                    newDay = true;
+                }
+                else {
+                    day.setDayId(dayId);
+                    DB.editDay(day);
+                    saved = true;
+                }
             }
             intent.putExtra("newDay", newDay);
-            boolean saved = dayAssignmentRecyclerViewAdapter.saveChanges();
+            if(dayAssignmentRecyclerViewAdapter.saveChanges())
+                saved = true;
             if(!startWorkout) {
-                Log.d("TAG", "okay lesgo: ");
                 if(!saved)
                     intent.putExtra("changeInDay", 0);
-                if(DB.getDay(dayId).isCustom())
-                    intent.putExtra("changeInDay", 2);
-                else
-                    intent.putExtra("changeInDay", 1);
+                else {
+                    if (DB.getDay(dayId).isCustom())
+                        intent.putExtra("changeInDay", 2);
+                    else
+                        intent.putExtra("changeInDay", 1);
+                }
             }
             setResult(RESULT_FIRST_USER, intent);
             finish();
         };
-
-//        View.OnClickListener onSaveButtonClick = v -> {
-//            Intent intent = new Intent();
-//            if(dayId != -1 && !startWorkout) {
-//                boolean saved = dayAssignmentRecyclerViewAdapter.saveChanges();
-//                //  saved can be null. If it's initialized with the Boolean.FALSE value, it notifies observers upon its creation
-//                if(saved)
-//                    intent.putExtra("changeInDay", true);
-//                else
-//                    intent.putExtra("changeInDay", false);
-//            }
-//            else {
-//                if(dayNameEditText.getText().length() != 0) {
-//                    Day day = new Day(dayNameEditText.getText().toString(), true);
-//                    DB.addDay(day);
-//                    dayId = day.getDayId();
-//                    dayAssignmentRecyclerViewAdapter.setDayId(dayId);
-//                }
-//                if(startWorkout)
-//                    dayAssignmentRecyclerViewAdapter.saveChanges();
-//
-//                List<Exercise> exerciseList = dayAssignmentRecyclerViewAdapter.getExercisesList();
-//                if(exerciseList.size() != 0) {
-//                    List<QuantityAndReps> quantityAndRepsList = new ArrayList<>();
-//                    for(Exercise exercise : exerciseList) {
-//                        quantityAndRepsList.add(new QuantityAndReps(exercise.getExerciseId(), context, null));
-//                    }
-//                    intent.putExtra("quantityAndReps", (Serializable)quantityAndRepsList);
-//                }
-//                else {
-//                    Toast.makeText(context, "Please choose some exercises", Toast.LENGTH_SHORT).show();
-//                    return;
-//                }
-//            }
-//            setResult(RESULT_FIRST_USER, intent);
-//            finish();
-//        };
 
         View.OnClickListener onSpaceClick = v -> {
             setResult(RESULT_CANCELED);
