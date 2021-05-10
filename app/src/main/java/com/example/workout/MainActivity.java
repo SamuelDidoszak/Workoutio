@@ -21,17 +21,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workout.controller.SwipeDetection;
 import com.example.workout.data.DatabaseHandler;
 import com.example.workout.data.DatabaseTesting;
+import com.example.workout.interfaces.HorizontalSwipe;
 import com.example.workout.model.Day;
 import com.example.workout.model.Done;
 import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
 import com.example.workout.model.QuantityAndReps;
+import com.example.workout.model.helper.GridLayoutManagerHorizontalSwipe;
 import com.example.workout.model.helper.LinearLayoutManagerHorizontalSwipe;
 import com.example.workout.model.helper.MuscleDateTime;
 import com.example.workout.ui.adapter.DayExerciseRecyclerViewAdapter;
@@ -68,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout noExercisesContainer, startWorkoutContainer;
     private Button addExercisesButton, startWorkoutButton, customWorkoutButton, editWorkoutButton;
     private RecyclerView dayRecyclerView;
+    private LinearLayoutManagerHorizontalSwipe linearLayoutManagerHorizontalSwipe;
+    private GridLayoutManagerHorizontalSwipe gridLayoutManagerHorizontalSwipe;
 
     private DayExerciseRecyclerViewAdapter dayExerciseRecyclerViewAdapter;
     private DayMuscleRecyclerViewAdapter dayMuscleRecyclerViewAdapter;
@@ -120,11 +125,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        LinearLayoutManagerHorizontalSwipe layoutManager = (LinearLayoutManagerHorizontalSwipe)dayRecyclerView.getLayoutManager();
-        layoutManager.isSwipeHorizontal().observe(MainActivity.this, new Observer<Boolean>() {
+        LinearLayoutManager layoutManager;
+        if(isDayRecyclerViewMuscle) {
+            layoutManager = (GridLayoutManagerHorizontalSwipe)dayRecyclerView.getLayoutManager();
+        }
+        else {
+            layoutManager = (LinearLayoutManagerHorizontalSwipe)dayRecyclerView.getLayoutManager();
+        }
+        ((HorizontalSwipe)layoutManager).isSwipeHorizontal().observe(MainActivity.this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                layoutManager.isSwipeHorizontal().removeObserver(this);
+                ((HorizontalSwipe)layoutManager).isSwipeHorizontal().removeObserver(this);
                 Intent intent = new Intent(context, WorkoutActivity.class);
                 intent.putExtra("quantityAndReps", (Serializable) quantityAndRepsList);
                 startActivityForResult(intent, 2);
@@ -213,11 +224,13 @@ public class MainActivity extends AppCompatActivity {
             if(workoutIsDone)
                 dayRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
             else {
+                dayRecyclerView.setLayoutManager(linearLayoutManagerHorizontalSwipe);
                 dayRecyclerView.setAdapter(dayExerciseRecyclerViewAdapter);
                 startWorkoutContainer.setVisibility(View.VISIBLE);
             }
         }
         else {
+            dayRecyclerView.setLayoutManager(gridLayoutManagerHorizontalSwipe);
             dayRecyclerView.setAdapter(dayMuscleRecyclerViewAdapter);
             startWorkoutContainer.setVisibility(View.GONE);
         }
@@ -483,22 +496,23 @@ public class MainActivity extends AppCompatActivity {
 
                     //  DayRecyclerView
             dayRecyclerView.setHasFixedSize(true);
-            LinearLayoutManagerHorizontalSwipe layoutManager = new LinearLayoutManagerHorizontalSwipe(context, LinearLayoutManager.VERTICAL, false);
-            dayRecyclerView.setLayoutManager(layoutManager);
-
             isDayRecyclerViewMuscle = Boolean.TRUE;
+            gridLayoutManagerHorizontalSwipe = new GridLayoutManagerHorizontalSwipe(context, 2, GridLayoutManager.VERTICAL, false);
+            linearLayoutManagerHorizontalSwipe = new LinearLayoutManagerHorizontalSwipe(context, LinearLayoutManager.VERTICAL, false);
+            dayRecyclerView.setLayoutManager(gridLayoutManagerHorizontalSwipe);
+
             refreshMuscles();
             refreshDayExercise();
             dayRecyclerView.setAdapter(dayMuscleRecyclerViewAdapter);
 
-            dayRecyclerView.setOnTouchListener((v, event) -> {
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    dayRecyclerViewSetAdapter();
-                    return true;
-                }
-                else
-                    return false;
-            });
+//            dayRecyclerView.setOnTouchListener((v, event) -> {
+//                if(event.getAction() == MotionEvent.ACTION_UP) {
+//                    dayRecyclerViewSetAdapter();
+//                    return true;
+//                }
+//                else
+//                    return false;
+//            });
         }
 
         private void refreshHistory() {

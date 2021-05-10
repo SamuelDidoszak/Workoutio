@@ -1,13 +1,16 @@
 package com.example.workout.model.helper;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class LinearLayoutManagerHorizontalSwipe extends LinearLayoutManager {
+import com.example.workout.interfaces.HorizontalSwipe;
+
+public class LinearLayoutManagerHorizontalSwipe extends LinearLayoutManager implements HorizontalSwipe {
 
     private MutableLiveData<Boolean> horizontalSwipe;
 
@@ -28,8 +31,6 @@ public class LinearLayoutManagerHorizontalSwipe extends LinearLayoutManager {
     public boolean canScrollHorizontally() {
         return true;
     }
-
-
 
     @Override
     public int scrollHorizontallyBy(int dx, RecyclerView.Recycler recycler, RecyclerView.State state) {
