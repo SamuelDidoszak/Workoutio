@@ -68,8 +68,10 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout noExercisesContainer, startWorkoutContainer;
     private Button addExercisesButton, startWorkoutButton, customWorkoutButton, editWorkoutButton;
     private RecyclerView dayRecyclerView;
+
     private DayExerciseRecyclerViewAdapter dayExerciseRecyclerViewAdapter;
     private DayMuscleRecyclerViewAdapter dayMuscleRecyclerViewAdapter;
+
     private DoneExercisesRecyclerViewAdapter doneExercisesRecyclerViewAdapter;
     private RecyclerView historyRecyclerView;
     private HistoryRecyclerViewFullAdapter historyRecyclerViewFullAdapter;

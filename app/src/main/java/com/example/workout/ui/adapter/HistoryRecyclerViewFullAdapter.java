@@ -53,7 +53,7 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
     @Override
     public HistoryRecyclerViewFullAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.history_row_muscle, parent, false);
+                .inflate(R.layout.row_history_muscle, parent, false);
 
         return new HistoryRecyclerViewFullAdapter.ViewHolder(view, context);
     }
@@ -94,7 +94,7 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
             super(itemView);
             this.context = context;
             historyRowDay = itemView.findViewById(R.id.history_row_day);
-            historyRowDate = itemView.findViewById(R.id.history_row_dat);
+            historyRowDate = itemView.findViewById(R.id.history_row_date);
             historyRowTime = itemView.findViewById(R.id.history_row_time);
             muscleIconContainer = itemView.findViewById(R.id.history_row_muscle_container);
             exerciseDetailsRecyclerView = itemView.findViewById(R.id.history_row_details_recyclerView);
@@ -106,18 +106,18 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
          * Method is necessary for correct behavior, otherwise content is recycled and shows in multiple rows <br/>
          * Somehow, this method takes 0-2ms on a lower end device */
         public void showOrHideExerciseDetails(int position) {
-//            if(exerciseDetailsRecyclerView.getAdapter() != null)
-//                exerciseDetailsRecyclerView.getAdapter().notifyDataSetChanged();
-//            exerciseDetailsRecyclerView.removeAllViews();
-//            exerciseDetailsRecyclerView.removeAllViewsInLayout();
-//            exerciseDetailsRecyclerView.swapAdapter(null, Boolean.TRUE);
-//            exerciseDetailsRecyclerView.setAdapter(null);
+            if(exerciseDetailsRecyclerView.getAdapter() != null)
+                exerciseDetailsRecyclerView.getAdapter().notifyDataSetChanged();
+            exerciseDetailsRecyclerView.removeAllViews();
+            exerciseDetailsRecyclerView.removeAllViewsInLayout();
+            exerciseDetailsRecyclerView.swapAdapter(null, Boolean.TRUE);
+            exerciseDetailsRecyclerView.setAdapter(null);
             exerciseDetailsRecyclerView.setVisibility(View.GONE);
 
             if(subListVisibleList.get(position))
                 createAndSetExerciseDetailsRVA(position);
-//            else
-//                exerciseDetailsRecyclerView.setAdapter(null);
+            else
+                exerciseDetailsRecyclerView.setAdapter(null);
         }
 
         /** Resets the exerciseDetailsRecyclerViewAdapter and its content */
@@ -171,7 +171,7 @@ public class HistoryRecyclerViewFullAdapter extends RecyclerView.Adapter<History
         @Override
         public ExerciseDetailsRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.history_row_exercise_details, parent, false);
+                    .inflate(R.layout.row_history_exercise_details, parent, false);
             return new ExerciseDetailsRecyclerViewAdapter.ViewHolder(view);
         }
 

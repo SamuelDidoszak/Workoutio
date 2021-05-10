@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/exercise_menu_row_exercise_itemLinearLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="6dp"
+        app:cardBackgroundColor="@color/colorSurfaceElevation0dp"
+        app:cardElevation="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <HorizontalScrollView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="4.5"
+                android:paddingEnd="2dp"
+                android:scrollbars="none">
+
+                <TextView
+                    android:id="@+id/exercise_menu_row_exercise_exerciseNameTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="4.5"
+                    android:alpha="0.87"
+                    android:maxLines="1"
+                    android:text="exercise"
+                    android:textColor="@color/white"
+                    android:textSize="16.0sp" />
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:id="@+id/exercise_menu_row_exercise_muscleIconContainer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4.5"
+                android:gravity="left"
+                android:orientation="horizontal"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:weightSum="4.0" />
+
+            <ImageButton
+                android:id="@+id/exercise_menu_row_exercise_editImageButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:alpha="0.6"
+                android:background="@color/transparentBlack"
+                android:src="@drawable/ic_baseline_edit_24" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

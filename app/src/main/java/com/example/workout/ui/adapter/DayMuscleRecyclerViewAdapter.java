@@ -30,7 +30,7 @@ public class DayMuscleRecyclerViewAdapter extends RecyclerView.Adapter<DayMuscle
     @Override
     public DayMuscleRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.day_row_muscle, parent, false);
+                .inflate(R.layout.row_day_muscle, parent, false);
 
         return new ViewHolder(view, context);
     }

@@ -1,85 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/done_exercises_row_containerCardView"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="?colorSurface"
+    app:cardElevation="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:background="@color/hardDark">
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/done_exercises_row_exerciseNameTextView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="2"
+            android:layout_weight="2.0"
+            android:alpha="0.87"
             android:gravity="center"
-            android:text="@string/exercise"
             android:maxLines="1"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
+            android:text="@string/exercise"
+            android:textColor="@color/white"
+            android:textSize="20.0sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/done_exercises_row_amountTextView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="1.0"
+            android:alpha="0.87"
             android:gravity="center"
             android:text="@string/quantity"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
+            android:textColor="@color/white"
+            android:textSize="20.0sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/done_exercises_row_timeTextView"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="1.0"
+            android:alpha="0.87"
             android:gravity="center"
             android:text="@string/time"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
+            android:textColor="@color/white"
+            android:textSize="20.0sp"
+            android:textStyle="bold" />
 
         <com.example.workout.model.helper.CheckableImageView
             android:id="@+id/done_exercises_row_negativeCheckbox"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
+            android:alpha="0.6"
             android:gravity="center"
-            android:src="@drawable/toggle_button_checkbox_style"/>
+            android:src="@drawable/toggle_button_checkbox_style" />
 
         <com.example.workout.model.helper.CheckableImageView
             android:id="@+id/done_exercises_row_canMoreCheckbox"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
+            android:alpha="0.6"
             android:gravity="center"
-            android:src="@drawable/toggle_button_checkbox_style"/>
+            android:src="@drawable/toggle_button_checkbox_style" />
 
         <ImageButton
             android:id="@+id/done_exercises_row_restoreButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
+            android:alpha="0.6"
             android:gravity="center"
             android:src="@drawable/ic_baseline_restore_24"
-            android:background="@color/hardDark"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/done_exercises_row_deleteButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
+            android:alpha="0.6"
             android:gravity="center"
             android:src="@drawable/ic_baseline_delete_24"
-            android:background="@color/hardDark"
-            android:visibility="gone"/>
-
-
-
+            android:visibility="gone" />
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>

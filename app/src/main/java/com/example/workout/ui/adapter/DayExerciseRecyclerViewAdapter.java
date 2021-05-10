@@ -29,7 +29,7 @@ public class DayExerciseRecyclerViewAdapter extends RecyclerView.Adapter<DayExer
     @Override
     public DayExerciseRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.day_row_exercise, parent, false);
+                .inflate(R.layout.row_day_exercise, parent, false);
 
         return new ViewHolder(view, context);
     }

@@ -99,7 +99,7 @@ public class ChronometerFragment extends Fragment {
 
 
     public ChronometerFragment() {
-        super(R.layout.chronometer_fragment);
+        super(R.layout.fragment_chronometer);
     }
 
     @Override
@@ -159,7 +159,7 @@ public class ChronometerFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.chronometer_fragment, container, false);
+        return inflater.inflate(R.layout.fragment_chronometer, container, false);
     }
 
     @Override

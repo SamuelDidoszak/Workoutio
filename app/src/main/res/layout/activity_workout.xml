@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?colorSurface"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:weightSum="10.0">
+
+    <include
+        android:id="@+id/appToolbar"
+        layout="@layout/app_toolbar" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/workout_activity_primaryFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5.0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/workout_activity_secondaryFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2.0"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:weightSum="2.0" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/workout_activity_workoutRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:layout_weight="3.0" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/workout_activity_doneExercises_bottomContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2.0"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/workout_activity_doneExercises_remainingExercisesTextView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:alpha="0.87"
+            android:gravity="center"
+            android:text="Remaining exercises"
+            android:textColor="@color/white"
+            android:textSize="16.0sp"
+            app:layout_constraintBottom_toTopOf="@id/workout_activity_doneExercises_remainingExercisesNumberTextView"
+            app:layout_constraintEnd_toStartOf="@id/workout_activity_doneExercises_workoutTimeTextView"
+            app:layout_constraintHorizontal_weight="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_weight="1.0" />
+
+        <TextView
+            android:id="@+id/workout_activity_doneExercises_remainingExercisesNumberTextView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:alpha="0.6"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="24.0sp"
+            app:layout_constraintBottom_toTopOf="@id/workout_activity_doneExercises_continueButton"
+            app:layout_constraintEnd_toStartOf="@id/workout_activity_doneExercises_workoutTimeChronometer"
+            app:layout_constraintHorizontal_weight="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/workout_activity_doneExercises_remainingExercisesTextView"
+            app:layout_constraintVertical_weight="1.0" />
+
+        <TextView
+            android:id="@+id/workout_activity_doneExercises_workoutTimeTextView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:alpha="0.87"
+            android:gravity="center"
+            android:text="@string/workout_time"
+            android:textColor="@color/white"
+            android:textSize="16.0sp"
+            app:layout_constraintBottom_toTopOf="@id/workout_activity_doneExercises_workoutTimeChronometer"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="1.0"
+            app:layout_constraintStart_toEndOf="@id/workout_activity_doneExercises_remainingExercisesTextView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_weight="1.0" />
+
+        <com.example.workout.model.helper.Chronometer
+            android:id="@+id/workout_activity_doneExercises_workoutTimeChronometer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:alpha="0.6"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="24.0sp"
+            app:layout_constraintBottom_toTopOf="@id/workout_activity_doneExercises_finishButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="1.0"
+            app:layout_constraintStart_toEndOf="@id/workout_activity_doneExercises_remainingExercisesNumberTextView"
+            app:layout_constraintTop_toBottomOf="@id/workout_activity_doneExercises_workoutTimeTextView"
+            app:layout_constraintVertical_weight="1.0" />
+
+        <Button
+            android:id="@+id/workout_activity_doneExercises_continueButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="4dp"
+            android:text="@string/continue_workout"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/workout_activity_doneExercises_finishButton"
+            app:layout_constraintHorizontal_weight="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/workout_activity_doneExercises_remainingExercisesNumberTextView"
+            app:layout_constraintVertical_weight="2.0" />
+
+        <Button
+            android:id="@+id/workout_activity_doneExercises_finishButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:text="@string/finish"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="1.0"
+            app:layout_constraintStart_toEndOf="@id/workout_activity_doneExercises_continueButton"
+            app:layout_constraintTop_toBottomOf="@id/workout_activity_doneExercises_workoutTimeChronometer"
+            app:layout_constraintVertical_weight="2.0" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

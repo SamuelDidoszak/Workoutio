@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="ring"
-    android:thickness="3dp"
-    android:useLevel="false">
-
-    <stroke
-        android:color="@color/white"
-        android:width="3dp"/>
-
-    <size
-        android:width="@dimen/match_parent"
-        android:height="@dimen/match_parent"/>
+<shape android:shape="ring" android:useLevel="false" android:thickness="3.0dip"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <stroke android:width="3.0dip" android:color="@color/white" />
+    <size android:height="@dimen/match_parent" android:width="@dimen/match_parent" />
 </shape>

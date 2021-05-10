@@ -62,7 +62,7 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.day_assignment_activity);
+        setContentView(R.layout.activity_day_assignment);
 
         context = getApplicationContext();
         DB = new DatabaseHandler(this);
@@ -149,6 +149,14 @@ public class DayAssignmentActivity extends AppCompatActivity implements DayAssig
                                 buttonText = "save & ";
                             buttonText += "start";
                             saveButton.setText(buttonText);
+                        }
+                    }
+                    if(s.length() != 0) {
+                        int semicolonPos = s.toString().indexOf(';');
+                        if(semicolonPos != -1) {
+                            s = s.toString().substring(0, semicolonPos) + (semicolonPos != s.length() - 1 ? s.toString().substring(semicolonPos + 1, s.length()) : "");
+                            dayNameEditText.getEditText().setText(s);
+                            dayNameEditText.getEditText().setSelection(semicolonPos);
                         }
                     }
                 }

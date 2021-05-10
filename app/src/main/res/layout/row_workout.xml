@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="2dp"
+    android:layout_marginBottom="2dp"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
+    app:cardBackgroundColor="?colorSurface"
+    app:cardElevation="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="5.0">
+
+        <LinearLayout
+            android:id="@+id/workout_row_muscleContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="3.0" />
+
+        <TextView
+            android:id="@+id/workout_row_exerciseName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.5"
+            android:alpha="0.87"
+            android:gravity="center"
+            android:text="@string/exercise"
+            android:textColor="@color/white"
+            android:textSize="24.0sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/workout_row_exerciseAmount"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:alpha="0.87"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="20.0sp" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?colorSurface">
+
+    <TextView
+        android:id="@+id/exercise_menu_dayTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:alpha="0.87"
+        android:background="@color/colorSurfaceElevation1dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="Day"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="18.0sp"
+        android:textStyle="bold|italic"
+        app:layout_constraintEnd_toStartOf="@id/exercise_menu_myExercisesTextView"
+        app:layout_constraintHorizontal_weight="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/exercise_menu_myExercisesTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:alpha="0.87"
+        android:background="@drawable/back_line_bottom"
+        android:maxLines="1"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="My Exercises"
+        android:textAlignment="center"
+        android:textColor="?colorPrimary"
+        android:textSize="18.0sp"
+        android:textStyle="bold|italic"
+        app:layout_constraintEnd_toStartOf="@id/exercise_menu_exerciseTextView"
+        app:layout_constraintHorizontal_weight="1.0"
+        app:layout_constraintStart_toEndOf="@id/exercise_menu_dayTextView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/exercise_menu_exerciseTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:alpha="0.87"
+        android:background="@color/colorSurfaceElevation1dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="Exercises"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="18.0sp"
+        android:textStyle="bold|italic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1.0"
+        app:layout_constraintStart_toEndOf="@id/exercise_menu_myExercisesTextView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/exercise_menu_myExercisesTextView">
+
+        <include
+            layout="@layout/floating_action_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/exercise_menuExerciseRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

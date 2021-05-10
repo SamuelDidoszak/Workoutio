@@ -80,7 +80,7 @@ public class DoneExercisesRecyclerViewAdapter extends RecyclerView.Adapter<DoneE
     @NonNull
     @Override
     public DoneExercisesRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.done_exercises_row, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_done_exercises, parent, false);
         return new ViewHolder(view);
     }
 

@@ -77,7 +77,7 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.exercise_menu_row_exercise, parent, false);
+                .inflate(R.layout.row_exercise_menu_exercise, parent, false);
 
         return new ViewHolder(view, context);
     }

@@ -97,11 +97,11 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
         if(viewType == ExerciseMenuDayExerciseTypes.TYPE_DAY) {
-            view = LayoutInflater.from(context).inflate(R.layout.exercise_menu_row_day, parent, false);
+            view = LayoutInflater.from(context).inflate(R.layout.row_exercise_menu_day, parent, false);
             return new DayViewHolder(view);
         }
         else {
-            view = LayoutInflater.from(context).inflate(R.layout.exercise_menu_row_exercise, parent, false);
+            view = LayoutInflater.from(context).inflate(R.layout.row_exercise_menu_exercise, parent, false);
             return new ExerciseViewHolder(view);
         }
     }

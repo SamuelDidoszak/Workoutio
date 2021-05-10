@@ -72,7 +72,7 @@ public class WorkoutActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.workout_activity);
+        setContentView(R.layout.activity_workout);
 
         context = this;
         DB = new DatabaseHandler(context);

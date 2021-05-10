@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,6 +37,8 @@ import java.util.List;
 
 public class EditExerciseMenuActivity extends AppCompatActivity {
 
+    private String TAG = "EditExerciseMenuActivity";
+
     private com.google.android.material.textfield.TextInputLayout exerciseNameEditText;
     private CardView cardView;
     private RecyclerView daysRecyclerView, musclesRecyclerView;
@@ -63,7 +66,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.edit_exercise_menu);
+        setContentView(R.layout.activity_edit_exercise_menu);
 
         exerciseId = getIntent().getIntExtra("exerciseId", -1);
         this.context = getApplicationContext();
@@ -240,6 +243,13 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if(s.length() != 0) {
+                    int semicolonPos = s.toString().indexOf(';');
+                    if(semicolonPos != -1) {
+                        s = s.toString().substring(0, semicolonPos) + (semicolonPos != s.length() - 1 ? s.toString().substring(semicolonPos + 1, s.length()) : "");
+                        exerciseNameEditText.getEditText().setText(s);
+                        exerciseNameEditText.getEditText().setSelection(semicolonPos);
+                    }
+
                     if(s.length() <= exerciseNameEditText.getCounterMaxLength()) {
                         exerciseNameEditText.setError(null);
                         saveButton.setText(R.string.save);
@@ -337,7 +347,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         @Override
         public DaysRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.edit_exercise_menu_day_row, parent, false);
+                    .inflate(R.layout.row_edit_exercise_menu_day, parent, false);
 
             return new ViewHolder(view);
         }
@@ -390,7 +400,7 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
         @Override
         public MusclesRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.edit_exercise_menu_muscle_row, parent, false);
+                    .inflate(R.layout.row_edit_exercise_menu_muscle, parent, false);
 
             return new ViewHolder(view);
         }

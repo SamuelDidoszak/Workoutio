@@ -137,7 +137,7 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.day_assignment_row, parent, false);
+                .inflate(R.layout.row_day_assignment, parent, false);
 
         return new ViewHolder(view, context);
     }

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
     android:orientation="vertical"
-    android:weightSum="10">
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:weightSum="10.0">
 
     <LinearLayout
         android:id="@+id/day_assignment_spaceTop"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1.0"
         android:background="@color/transparentBlack"
-        android:layout_weight="1"
         android:orientation="horizontal" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="3.5"
-        android:background="@color/hardDark"
+        android:background="?colorSurface"
         android:descendantFocusability="beforeDescendants"
         android:focusableInTouchMode="true"
         android:orientation="vertical"
@@ -31,52 +31,60 @@
             android:id="@+id/day_assignment_dayName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:alpha="0.87"
+            android:background="@color/colorSurfaceElevation3dp"
             android:gravity="center"
+            android:padding="4dp"
             android:text="@string/day"
             android:textColor="@color/white"
-            android:textSize="24sp"
-            android:padding="4dp"
+            android:textSize="24.0sp"
             android:textStyle="bold|italic"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/day_assignment_dayExercisesRecyclerView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/day_assignment_dayExercisesRecyclerView"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/day_assignment_dayNameEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="-24dp"
             android:gravity="center"
             android:hint="@string/exercise_group_name"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:maxLines="1"
             android:textColor="@color/white"
-            android:textSize="24sp"
-            android:padding="4dp"
+            android:textSize="24.0sp"
             android:textStyle="bold|italic"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/day_assignment_dayExercisesRecyclerView"
             android:visibility="gone"
-            app:endIconMode="clear_text"
             app:counterEnabled="true"
-            app:counterMaxLength="30">
+            app:counterMaxLength="30"
+            app:counterTextColor="@color/transparentBlack"
+            app:endIconDrawable="@drawable/text_layout_clear_with_background"
+            app:endIconMode="clear_text"
+            app:endIconTint="@color/transparentBlack"
+            app:endIconTintMode="src_over"
+            app:layout_constraintBottom_toTopOf="@id/day_assignment_dayExercisesRecyclerView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textNoSuggestions"/>
-
+                android:background="@color/colorSurfaceElevation3dp"
+                android:inputType="textNoSuggestions" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/day_assignment_dayExercisesRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/day_assignment_dayName"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/day_assignment_dayName" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.fragment.app.FragmentContainerView
@@ -84,52 +92,49 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="3.5"
-        android:background="@color/hardDark"
-        android:paddingTop="4dp"
-        android:padding="4dp"/>
+        android:background="?colorSurface" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="1.0"
+        android:background="?colorSurface"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:weightSum="10"
-        android:gravity="center">
+        android:weightSum="10.0">
 
         <Button
             android:id="@+id/day_assignment_backButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_weight="3.0"
             android:background="@color/littleDark"
-            android:layout_weight="3"
-            android:textStyle="bold"
             android:text="@string/back"
-            android:textAllCaps="false"/>
+            android:textAllCaps="false"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/day_assignment_saveButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_weight="3"
+            android:layout_weight="3.0"
             android:background="@color/littleDark"
-            android:textStyle="bold"
             android:text="@string/save"
-            android:textAllCaps="false"/>
-
+            android:textAllCaps="false"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/day_assignment_spaceBottom"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1.0"
         android:background="@color/transparentBlack"
-        android:layout_weight="1"
         android:orientation="horizontal" />
-
 </LinearLayout>

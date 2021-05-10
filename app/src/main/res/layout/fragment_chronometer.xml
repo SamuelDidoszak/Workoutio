@@ -1,73 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/workout_activity_containerCardView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/circle"
-    android:backgroundTint="@color/transparentBlack"
-    android:outlineSpotShadowColor="@color/transparentBlack">
+    android:background="@drawable/circle">
 
     <ImageView
         android:id="@+id/workout_activity_circleImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/circle"/>
+        android:alpha="0.87"
+        android:background="@drawable/circle" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_gravity="center">
+        android:layout_gravity="center"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/workout_activity_finishTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:translationY="16dp"
             android:text="Workout time:"
-            android:textSize="32sp"
+            android:textSize="32.0sp"
             android:textStyle="bold"
+            android:translationY="16dp"
+            android:visibility="invisible"
             app:layout_constraintBottom_toTopOf="@id/workout_activity_Chronometer"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            android:visibility="invisible"/>
+            app:layout_constraintRight_toRightOf="parent" />
 
         <com.example.workout.model.helper.Chronometer
             android:id="@+id/workout_activity_Chronometer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="64sp"
             android:layout_gravity="center"
-            app:layout_constraintTop_toTopOf="parent"
+            android:alpha="0.87"
+            android:textColor="@color/white"
+            android:textSize="64.0sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/workout_activity_finishButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="32sp"
             android:text="@string/finish"
             android:textAllCaps="false"
+            android:textSize="32.0sp"
             android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/workout_activity_Chronometer"
+            android:visibility="invisible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            android:visibility="invisible"/>
-
-
+            app:layout_constraintTop_toBottomOf="@id/workout_activity_Chronometer" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
     <LinearLayout
         android:id="@+id/workout_activity_workoutTimeContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|right"
+        android:layout_gravity="center|right|top"
         android:layout_marginTop="8dp"
         android:layout_marginRight="32dp"
         android:padding="4dp">
@@ -76,9 +72,9 @@
             android:id="@+id/workout_activity_workoutTimeChronometer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="24sp"
-            android:visibility="invisible"/>
-
+            android:alpha="0.6"
+            android:textColor="@color/white"
+            android:textSize="24.0sp"
+            android:visibility="invisible" />
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>

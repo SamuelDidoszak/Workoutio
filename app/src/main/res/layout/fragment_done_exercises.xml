@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/hardDark">
+    app:cardBackgroundColor="?colorSurface">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/done_exercises_fragment_doneRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/hardDark" />
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/done_exercises_fragment_noExercisesTextView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="no exercises yet"
-        android:textSize="40sp"
-        android:textStyle="bold"
-        android:textColor="@color/white"
         android:layout_gravity="center"
+        android:alpha="0.87"
         android:gravity="center"
-        android:visibility="gone"/>
-
+        android:text="no exercises yet"
+        android:textColor="@color/white"
+        android:textSize="40.0sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 </androidx.cardview.widget.CardView>

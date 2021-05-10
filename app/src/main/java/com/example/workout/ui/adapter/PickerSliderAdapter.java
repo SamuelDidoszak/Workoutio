@@ -40,7 +40,7 @@ public class PickerSliderAdapter extends RecyclerView.Adapter<PickerSliderAdapte
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.picker_slider_row, parent, Boolean.FALSE);
+        View view = LayoutInflater.from(context).inflate(R.layout.row_picker_slider, parent, Boolean.FALSE);
         return new ViewHolder(view);
     }
 

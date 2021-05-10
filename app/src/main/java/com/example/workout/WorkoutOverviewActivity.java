@@ -37,7 +37,7 @@ public class WorkoutOverviewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.workout_overview_activity);
+        setContentView(R.layout.activity_workout_overview);
 
         overallExerciseTime = getIntent().getStringExtra("overallTime");
 

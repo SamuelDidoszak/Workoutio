@@ -1,56 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:background="@color/hardDark">
-    
+    android:background="?colorSurface">
+
     <include
         android:id="@+id/appToolbar"
         layout="@layout/app_toolbar"
-
-        app:layout_constraintStart_toStartOf="parent"
+        android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+        app:layout_constraintBottom_toTopOf="@id/containerLinearLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/containerLinearLayout"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/containerLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_margin="8dp"
         android:orientation="vertical"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appToolbar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appToolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="1.0"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/dayTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:alpha="0.87"
                 android:text="@string/day"
-                android:textSize="20sp"
                 android:textColor="@android:color/white"
-                android:textStyle="bold"/>
+                android:textSize="24.0sp"
+                android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/dayRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="4"/>
+                android:layout_weight="4.0" />
 
             <LinearLayout
                 android:id="@+id/activity_main_no_exercises"
@@ -62,85 +57,80 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center|top"
+                    android:gravity="center"
                     android:text="No exercises for today"
                     android:textColor="@color/white"
-                    android:textSize="24sp"
-                    android:layout_gravity="center_horizontal|top"
-                    android:gravity="center"/>
+                    android:textSize="24.0sp" />
 
                 <Button
                     android:id="@+id/main_activity_addExercisesButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal|bottom"
+                    android:layout_gravity="bottom|center"
                     android:text="add exercises"
                     android:textAllCaps="false" />
-
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/activity_main_startWorkoutContainer"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:weightSum="3"
-                android:orientation="horizontal"
+                android:layout_weight="1.0"
                 android:gravity="right"
-                android:visibility="gone">
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:weightSum="3.0">
 
                 <Button
                     android:id="@+id/activity_main_editWorkoutButton"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_weight="1.0"
                     android:text="@string/edit"
                     android:textAllCaps="false"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible" />
 
                 <Button
                     android:id="@+id/activity_main_customWorkoutButton"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_weight="1.0"
                     android:text="@string/custom"
                     android:textAllCaps="false"
-                    android:visibility="invisible"/>
+                    android:visibility="invisible" />
 
                 <Button
                     android:id="@+id/activity_main_startWorkoutButton"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_weight="1.0"
                     android:text="@string/start"
-                    android:textAllCaps="false"/>
-
+                    android:textAllCaps="false" />
             </LinearLayout>
-
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:layout_weight="1.0"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:alpha="0.87"
                 android:text="@string/history"
-                android:textSize="20sp"
                 android:textColor="@android:color/white"
-                android:textStyle="bold"/>
+                android:textSize="24.0sp"
+                android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/historyRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"/>
-
+                android:layout_weight="1.0" />
         </LinearLayout>
-
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

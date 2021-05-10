@@ -4,161 +4,162 @@
     android:id="@+id/edit_exercise_menu_cardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/hardDark">
+    app:cardBackgroundColor="@color/colorSurfaceElevation1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:weightSum="5"
-        android:background="@color/hardDark"
         android:descendantFocusability="beforeDescendants"
-        android:focusableInTouchMode="true">
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        android:weightSum="10.0">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/edit_exercise_menu_exerciseNameEditText"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
             android:layout_gravity="center"
-            android:hint="@string/exercise_name"
-            android:maxLines="1"
-            android:inputType="text"
-            android:imeOptions="actionDone"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
+            android:layout_weight="2.0"
             android:gravity="top"
-            app:endIconMode="clear_text"
+            android:hint="@string/exercise_name"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textColor="@color/textColor"
+            android:textSize="24.0sp"
+            android:textStyle="bold"
             app:counterEnabled="true"
             app:counterMaxLength="30"
+            app:counterTextColor="@color/transparentBlack"
+            app:endIconMode="clear_text"
+            app:endIconTint="@color/transparentBlack"
+            app:endIconTintMode="src_over"
             app:errorEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textNoSuggestions"
-                android:layout_gravity="top" />
-
+                android:background="@color/colorSurfaceElevation3dp"
+                android:inputType="textNoSuggestions" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:background="@color/hardDark"
-            android:weightSum="10"
             android:layout_marginBottom="8dp"
-            android:gravity="center"
-            android:layout_weight="1">
+            android:layout_weight="1.0"
+            android:gravity="top"
+            android:orientation="horizontal"
+            android:weightSum="10.0">
 
             <TextView
                 android:id="@+id/edit_exercise_menu_daysTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="Days"
-                android:textSize="14sp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
-                android:gravity="center"/>
+                android:layout_weight="3.0"
+                android:gravity="center"
+                android:text="Days"
+                android:textSize="14.0sp" />
+
             <TextView
                 android:id="@+id/edit_exercise_menu_musclesTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="5"
-                android:text="Muscles"
-                android:textSize="14sp"
                 android:layout_marginRight="8dp"
-                android:gravity="center"/>
+                android:layout_weight="5.0"
+                android:gravity="center"
+                android:text="Muscles"
+                android:textSize="14.0sp" />
 
             <TextView
                 android:id="@+id/edit_exercise_menu_timeAsCountTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="Time as Count"
-                android:textSize="14sp"
                 android:layout_marginRight="8dp"
-                android:gravity="center"/>
-
-
+                android:layout_weight="2.0"
+                android:gravity="center"
+                android:text="Time as Count"
+                android:textSize="14.0sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:weightSum="10"
             android:layout_marginBottom="16dp"
+            android:layout_weight="5.0"
             android:gravity="center"
-            android:layout_weight="2">
+            android:orientation="horizontal"
+            android:weightSum="10.0">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/edit_exercise_menu_daysRecyclerView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="3"
+                android:layout_weight="3.0"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
                 android:text="Days"
-                android:textSize="18sp"
-                android:layout_marginRight="8dp"
-                android:layout_marginLeft="8dp"
-                android:gravity="center"/>
+                android:textSize="18.0sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/edit_exercise_menu_musclesRecyclerView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="5"
-                android:layout_marginRight="8dp"
-                android:gravity="center"/>
+                android:layout_weight="5.0"
+                android:gravity="center"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:orientation="vertical">
+                android:layout_weight="2.0"
+                android:orientation="vertical"
+                android:weightSum="5.0">
 
                 <com.example.workout.model.helper.CheckableImageView
                     android:id="@+id/edit_exercise_menu_timeAsCountCheckbox"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginRight="8dp"
-                    android:src="@drawable/toggle_button_checkbox_style"
-                    android:scaleType="center"
-                    android:layout_weight="0.5"
+                    android:layout_marginBottom="8dp"
+                    android:layout_weight="1.0"
+                    android:clickable="true"
                     android:focusable="true"
-                    android:clickable="true"/>
+                    android:scaleType="center"
+                    android:src="@drawable/toggle_button_checkbox_style" />
 
                 <TextView
                     android:id="@+id/edit_exercise_menu_defaultNegativeTextView"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="Default negative"
-                    android:textSize="14sp"
                     android:layout_marginRight="8dp"
-                    android:gravity="center"/>
+                    android:layout_marginBottom="8dp"
+                    android:layout_weight="1.3"
+                    android:gravity="center"
+                    android:text="Default negative"
+                    android:textSize="14.0sp" />
 
                 <com.example.workout.model.helper.CheckableImageView
                     android:id="@+id/edit_exercise_menu_defaultNegativeCheckbox"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:scaleType="center"
                     android:layout_marginRight="8dp"
-                    android:src="@drawable/toggle_button_checkbox_style"
-                    android:layout_weight="0.5"/>
-
+                    android:layout_marginBottom="8dp"
+                    android:layout_weight="1.0"
+                    android:scaleType="center"
+                    android:src="@drawable/toggle_button_checkbox_style" />
             </LinearLayout>
-
-
-
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="2.0"
             android:gravity="center">
 
             <Button
@@ -167,12 +168,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/back"
                 android:textAllCaps="false"
-                android:textStyle="bold"
-                android:background="@color/mediumDark"/>
-
+                android:textStyle="bold" />
         </LinearLayout>
-
-
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>

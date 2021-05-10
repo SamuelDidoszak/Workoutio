@@ -7,54 +7,46 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.NoActionBar">
+        android:theme="@style/Theme.MyApp">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".AddMenuActivity"
             android:theme="@style/emptyPopup"
-            android:banner="@style/Theme.AppCompat.NoActionBar"
-            android:launchMode="standard">
-        </activity>
+            android:banner="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:launchMode="standard" />
         <activity
             android:name=".ExerciseMenuActivity"
             android:theme="@style/emptyPopupFullScreen"
-            android:banner="@style/Theme.AppCompat.NoActionBar"
-            android:launchMode="standard">
-        </activity>
+            android:banner="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:launchMode="standard" />
         <activity
             android:name=".CalendarActivity"
             android:theme="@style/calendarPopup"
-            android:banner="@style/Theme.AppCompat.NoActionBar"
-            android:launchMode="standard">
-        </activity>
+            android:banner="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:launchMode="standard" />
         <activity
             android:name=".EditExerciseMenuActivity"
             android:theme="@style/emptyPopup"
-            android:banner="@style/Theme.AppCompat.NoActionBar"
-            android:launchMode="standard">
-        </activity>
+            android:banner="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:launchMode="standard" />
         <activity
             android:name=".WorkoutActivity"
-            android:banner="@style/Theme.AppCompat.NoActionBar"
-            android:launchMode="standard">
-        </activity>
+            android:banner="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:launchMode="standard" />
         <activity
             android:name=".WorkoutOverviewActivity"
-            android:banner="@style/Theme.AppCompat.NoActionBar"
-            android:launchMode="standard">
-        </activity>
+            android:banner="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:launchMode="standard" />
         <activity
             android:name=".DayAssignmentActivity"
             android:theme="@style/emptyPopupFullScreen"
-            android:banner="@style/Theme.AppCompat.NoActionBar"
-            android:launchMode="standard">
-        </activity>
+            android:banner="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:launchMode="standard" />
     </application>
 
 </manifest>
