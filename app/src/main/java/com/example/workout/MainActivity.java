@@ -35,6 +35,7 @@ import com.example.workout.model.Exercise;
 import com.example.workout.model.Muscle;
 import com.example.workout.model.QuantityAndReps;
 import com.example.workout.model.helper.GridLayoutManagerHorizontalSwipe;
+import com.example.workout.model.helper.InterceptTouchFrameLayout;
 import com.example.workout.model.helper.LinearLayoutManagerHorizontalSwipe;
 import com.example.workout.model.helper.MuscleDateTime;
 import com.example.workout.ui.adapter.DayExerciseRecyclerViewAdapter;
@@ -73,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView dayRecyclerView;
     private LinearLayoutManagerHorizontalSwipe linearLayoutManagerHorizontalSwipe;
     private GridLayoutManagerHorizontalSwipe gridLayoutManagerHorizontalSwipe;
+    private boolean dayRecyclerViewClickHandler;
+    private InterceptTouchFrameLayout interceptTouchFrameLayout;
 
     private DayExerciseRecyclerViewAdapter dayExerciseRecyclerViewAdapter;
     private DayMuscleRecyclerViewAdapter dayMuscleRecyclerViewAdapter;
@@ -351,6 +354,7 @@ public class MainActivity extends AppCompatActivity {
             noExercisesContainer = findViewById(R.id.activity_main_no_exercises);
             addExercisesButton = findViewById(R.id.main_activity_addExercisesButton);
             dayRecyclerView = findViewById(R.id.dayRecyclerView);
+            interceptTouchFrameLayout = findViewById(R.id.interceptTouchFrameLayout);
             historyRecyclerView = findViewById(R.id.historyRecyclerView);
             addButton = findViewById(R.id.app_toolbar_addButton);
             accountButton = findViewById(R.id.app_toolbar_accountButton);
@@ -505,14 +509,31 @@ public class MainActivity extends AppCompatActivity {
             refreshDayExercise();
             dayRecyclerView.setAdapter(dayMuscleRecyclerViewAdapter);
 
-//            dayRecyclerView.setOnTouchListener((v, event) -> {
-//                if(event.getAction() == MotionEvent.ACTION_UP) {
-//                    dayRecyclerViewSetAdapter();
-//                    return true;
-//                }
-//                else
-//                    return false;
-//            });
+            interceptTouchFrameLayout.setOnInterceptTouchEventListener(new InterceptTouchFrameLayout.OnInterceptTouchEventListener() {
+                @Override
+                public boolean onInterceptTouchEvent(InterceptTouchFrameLayout view, MotionEvent ev, boolean disallowIntercept) {
+                    switch (ev.getAction()) {
+                        case 0:
+                            dayRecyclerViewClickHandler = true;
+                            break;
+                        case 1:
+                            if(dayRecyclerViewClickHandler) {
+                                dayRecyclerViewSetAdapter();
+                                dayRecyclerViewClickHandler = false;
+                            }
+                            break;
+                        default:
+                            dayRecyclerViewClickHandler = false;
+                    }
+                    return false;
+                }
+
+                @Override
+                public boolean onTouchEvent(InterceptTouchFrameLayout view, MotionEvent event) {
+                    return false;
+                }
+            });
+
         }
 
         private void refreshHistory() {

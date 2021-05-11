@@ -41,11 +41,19 @@
                 android:textSize="24.0sp"
                 android:textStyle="bold" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/dayRecyclerView"
+            <com.example.workout.model.helper.InterceptTouchFrameLayout
+                android:id="@+id/interceptTouchFrameLayout"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="4.0" />
+                android:layout_weight="4.0">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/dayRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </com.example.workout.model.helper.InterceptTouchFrameLayout>
+
+
 
             <LinearLayout
                 android:id="@+id/activity_main_no_exercises"
