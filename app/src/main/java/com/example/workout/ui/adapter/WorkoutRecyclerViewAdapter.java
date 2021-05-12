@@ -25,7 +25,7 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
     private List<QuantityAndReps> quantityAndRepsList;
     public Context context;
     private DatabaseHandler DB;
-    private MutableLiveData<QuantityAndReps> chosenExercise;
+    private transient MutableLiveData<QuantityAndReps> chosenExercise;
 
     private Boolean duringRest = Boolean.FALSE;
 
@@ -102,7 +102,7 @@ public class WorkoutRecyclerViewAdapter extends RecyclerView.Adapter<WorkoutRecy
         return quantityAndRepsList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         LinearLayout muscleContainer;
         TextView exerciseName, exerciseAmount;

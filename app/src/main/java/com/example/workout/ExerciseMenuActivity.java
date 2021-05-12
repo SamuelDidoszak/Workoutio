@@ -62,6 +62,12 @@ public class ExerciseMenuActivity extends AppCompatActivity{
         });
     }
 
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCELED,
+                new Intent().putExtra("changesInExercises", exerciseMenuFragment.getChangesInExercises()));
+        super.onBackPressed();
+    }
 }
 
 

@@ -19,13 +19,14 @@ import com.example.workout.model.Note;
 import com.example.workout.model.QuantityAndReps;
 import com.example.workout.util.Constants;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class DatabaseHandler extends SQLiteOpenHelper {
+public class DatabaseHandler extends SQLiteOpenHelper implements Serializable {
 
     Context context;
 

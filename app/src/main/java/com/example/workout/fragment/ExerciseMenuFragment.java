@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecyclerViewTypes, ExerciseMenuDayExerciseTypes {
-    private String TAG = "ExerciseMenuActivity";
+    private String TAG = "ExerciseMenuFragment";
     private TextView dayTextView, myExercisesTextView, exerciseTextView;
     private RecyclerView exerciseRecyclerView;
     private ExerciseMenuExercisesRecyclerViewAdapter myExercisesRecyclerViewAdapter, availableExercisesRecyclerViewAdapter;
@@ -247,6 +247,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                     recyclerViewList[0] = exerciseMenuDayAdapter;
                 }
                 resetDayAdapter[0] = false;
+                setUpObservers();
             }
             else if(changeInDay == 2) {
                 List<DayExercise> dayExerciseList = dayExerciseDivision(true);
@@ -282,6 +283,7 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                 setChangesInExercises(1);
                 resetDayAdapter[0] = true;
                 resetDayAdapter[1] = true;
+                Log.d(TAG, "onActivityResult: changed days");
             }
 
             //  If the exercise is newly added, then the upcoming switch statement is unnecessary
@@ -305,14 +307,14 @@ public class ExerciseMenuFragment extends Fragment implements ExerciseMenuRecycl
                         if(isDayAdapterCustom) {
                             customExerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseDivision(true));
                             recyclerViewList[0] = customExerciseMenuDayAdapter;
-                            resetDayAdapter[0] = false;
                         }
                         else {
                             exerciseMenuDayAdapter = new ExerciseMenuDayAdapter(context, dayExerciseDivision(false));
                             recyclerViewList[0] = exerciseMenuDayAdapter;
-                            resetDayAdapter[0] = false;
                         }
+                        resetDayAdapter[0] = false;
                         exerciseRecyclerView.setAdapter((ExerciseMenuDayAdapter)recyclerViewList[0]);
+                        setUpObservers();
                     }
                     else {
                         exerciseMenuDayAdapter.reSetMuscleListForImagesAtPosition(editPosition);

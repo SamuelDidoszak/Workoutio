@@ -128,17 +128,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        LinearLayoutManager layoutManager;
-        if(isDayRecyclerViewMuscle) {
-            layoutManager = (GridLayoutManagerHorizontalSwipe)dayRecyclerView.getLayoutManager();
-        }
-        else {
-            layoutManager = (LinearLayoutManagerHorizontalSwipe)dayRecyclerView.getLayoutManager();
-        }
-        ((HorizontalSwipe)layoutManager).isSwipeHorizontal().observe(MainActivity.this, new Observer<Boolean>() {
+        gridLayoutManagerHorizontalSwipe.isSwipeHorizontal().observe(MainActivity.this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                ((HorizontalSwipe)layoutManager).isSwipeHorizontal().removeObserver(this);
+                gridLayoutManagerHorizontalSwipe.isSwipeHorizontal().removeObserver(this);
+                Intent intent = new Intent(context, WorkoutActivity.class);
+                intent.putExtra("quantityAndReps", (Serializable) quantityAndRepsList);
+                startActivityForResult(intent, 2);
+            }
+        });
+        linearLayoutManagerHorizontalSwipe.isSwipeHorizontal().observe(MainActivity.this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                linearLayoutManagerHorizontalSwipe.isSwipeHorizontal().removeObserver(this);
                 Intent intent = new Intent(context, WorkoutActivity.class);
                 intent.putExtra("quantityAndReps", (Serializable) quantityAndRepsList);
                 startActivityForResult(intent, 2);
@@ -191,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         else if(requestCode == 2) {
             new SetUp().refreshHistory();
             doneExercisesRecyclerViewAdapter = new DoneExercisesRecyclerViewAdapter(DB.getDonesByDate(null), context);
+            dayRecyclerView.setLayoutManager(linearLayoutManagerHorizontalSwipe);
             dayRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
             workoutIsDone = true;
             isDayRecyclerViewMuscle = false;
@@ -533,7 +536,6 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             });
-
         }
 
         private void refreshHistory() {

@@ -28,7 +28,7 @@ import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
 
 import java.io.Serializable;
 
-public class ChronometerFragment extends Fragment {
+public class ChronometerFragment extends Fragment implements Serializable {
 
     private static final String TAG = "ChronometerFragment";
 

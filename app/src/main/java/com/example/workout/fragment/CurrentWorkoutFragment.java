@@ -30,7 +30,9 @@ import com.example.workout.model.QuantityAndReps;
 import com.example.workout.model.helper.CheckableImageView;
 import com.example.workout.ui.adapter.PickerSliderAdapter;
 
-public class CurrentWorkoutFragment extends Fragment {
+import java.io.Serializable;
+
+public class CurrentWorkoutFragment extends Fragment implements Serializable {
 
     private static final String TAG = "WorkoutFragment";
     private TextView currentWorkoutTextView;

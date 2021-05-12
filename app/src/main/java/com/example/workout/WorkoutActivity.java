@@ -3,6 +3,7 @@ package com.example.workout;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -34,10 +35,11 @@ import com.example.workout.ui.adapter.WorkoutRecyclerViewAdapter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.List;
 
-public class WorkoutActivity extends AppCompatActivity {
+public class WorkoutActivity extends AppCompatActivity implements Serializable {
 
     private static final String TAG = "WorkoutActivity";
 
@@ -97,6 +99,21 @@ public class WorkoutActivity extends AppCompatActivity {
         addButton.setOnClickListener(v -> startActivityForResult(new Intent(this, ExerciseMenuActivity.class), RESULT_FIRST_USER));
     }
 
+    private void writeObject(java.io.ObjectOutputStream out)
+            throws IOException {
+
+    }
+
+    private void readObject(java.io.ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+
+    }
+
+    private void readObjectNoData()
+            throws ObjectStreamException {
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -144,7 +161,8 @@ public class WorkoutActivity extends AppCompatActivity {
                 outputStream.write(QARText.getBytes());
             }
             outputStream.close();
-            quantityAndRepsList.remove(workoutRecyclerViewAdapter.getPreviousExerciseIndex());
+            if(!chronometerFragment.getChronometer().isBackwards())
+                quantityAndRepsList.remove(workoutRecyclerViewAdapter.getPreviousExerciseIndex());
         } catch (IOException e) {
             e.printStackTrace();
         }

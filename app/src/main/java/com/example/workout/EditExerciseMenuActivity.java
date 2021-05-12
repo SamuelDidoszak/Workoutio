@@ -370,9 +370,9 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
             TextView dayNameTextView;
             
             public void changeBackground(Boolean inDayInclusion) {
-                dayNameTextView.setBackgroundColor(getResources().getColor(R.color.hardDark));
+                dayNameTextView.setBackgroundColor(getResources().getColor(R.color.colorSurfaceElevation0dp));
                 if(inDayInclusion) {
-                    dayNameTextView.setBackgroundColor(getResources().getColor(R.color.mediumDark));
+                    dayNameTextView.setBackgroundColor(getResources().getColor(R.color.colorSurfaceElevation12dp));
                 }
             }
 
@@ -428,9 +428,9 @@ public class EditExerciseMenuActivity extends AppCompatActivity {
             }
 
             public void changeBackground(Boolean inMuscleInclusion) {
-                dynamicMuscle.setBackgroundColor(getResources().getColor(R.color.hardDark));
+                dynamicMuscle.setBackgroundColor(getResources().getColor(R.color.colorSurfaceElevation0dp));
                 if(inMuscleInclusion) {
-                    dynamicMuscle.setBackgroundColor(getResources().getColor(R.color.mediumDark));
+                    dynamicMuscle.setBackgroundColor(getResources().getColor(R.color.colorSurfaceElevation12dp));
                 }
             }
 
