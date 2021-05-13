@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
         context = this;
         workoutExercises = new File(context.getFilesDir(), "exercisesToday.txt");
         DB = new DatabaseHandler(this);
-        if(DB.getAllDays().size() == 0) {
+        if(DB.getAllDays().size() != 0) {
             Log.d(TAG, "onCreate: recreatin");
             new DatabaseTesting(context).recreateDatabase();
         }
@@ -193,15 +193,22 @@ public class MainActivity extends AppCompatActivity {
         else if(requestCode == 2) {
             new SetUp().refreshHistory();
             doneExercisesRecyclerViewAdapter = new DoneExercisesRecyclerViewAdapter(DB.getDonesByDate(null), context);
-            dayRecyclerView.setLayoutManager(linearLayoutManagerHorizontalSwipe);
-            dayRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
-            workoutIsDone = true;
-            isDayRecyclerViewMuscle = false;
+            if(doneExercisesRecyclerViewAdapter.getItemCount() != 0) {
+                dayRecyclerView.setLayoutManager(linearLayoutManagerHorizontalSwipe);
+                dayRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
+                isDayRecyclerViewMuscle = false;
+            }
             try {
                 quantityAndRepsList = exercisesForThisDay();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            if (doneExercisesRecyclerViewAdapter != null && quantityAndRepsList.size() != 0) {
+                workoutIsDone = false;
+                startWorkoutContainer.setVisibility(View.VISIBLE);
+            }
+            else
+                workoutIsDone = true;
 
             //  refreshes muscles for a current day
             dayMuscleList = DB.getMusclesByCurrentDay();
@@ -227,8 +234,12 @@ public class MainActivity extends AppCompatActivity {
 //            if(quantityAndRepsList.size() == 0)
 //                populateQuantityAndReps(null);
 //            getExercisesForThisDay();
-            if(workoutIsDone)
+            if(doneExercisesRecyclerViewAdapter != null) {
+                dayRecyclerView.setLayoutManager(linearLayoutManagerHorizontalSwipe);
                 dayRecyclerView.setAdapter(doneExercisesRecyclerViewAdapter);
+                if(!workoutIsDone)
+                    startWorkoutContainer.setVisibility(View.VISIBLE);
+            }
             else {
                 dayRecyclerView.setLayoutManager(linearLayoutManagerHorizontalSwipe);
                 dayRecyclerView.setAdapter(dayExerciseRecyclerViewAdapter);
@@ -287,7 +298,6 @@ public class MainActivity extends AppCompatActivity {
                             -1, Boolean.FALSE, defaultRepCount));
                 }
             }
-
             float meanReps = 0;
             FileOutputStream outputStream = new FileOutputStream(workoutExercises);
             for(QuantityAndReps quantityAndReps : quantityAndRepsList) {
@@ -313,6 +323,7 @@ public class MainActivity extends AppCompatActivity {
             }
             String QARText = new String(bytes);
             int newLine;
+
             for(int i = -1; true; i = newLine) {
                 newLine = QARText.indexOf('\n', i + 1);
                 if(newLine == -1)
@@ -483,17 +494,23 @@ public class MainActivity extends AppCompatActivity {
          */
         void setUpRecyclerViews() {
                 //  Instantiate variables
-            List<Done> todaysDoneList = DB.getDonesByDate(null);
-            if(todaysDoneList.size() != 0) {
-                doneExercisesRecyclerViewAdapter = new DoneExercisesRecyclerViewAdapter(todaysDoneList, context);
-                workoutIsDone = true;
-            }
             quantityAndRepsList = new ArrayList<>();
             try {
                 quantityAndRepsList = exercisesForThisDay();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            List<Done> todaysDoneList = DB.getDonesByDate(null);
+            Log.d(TAG, "bruv: " + quantityAndRepsList.size());
+            for(QuantityAndReps quantityAndReps : quantityAndRepsList) {
+                Log.d(TAG, "setUpRecyclerViews: " + quantityAndReps.getExerciseName());
+            }
+
+            if(todaysDoneList.size() != 0) {
+                doneExercisesRecyclerViewAdapter = new DoneExercisesRecyclerViewAdapter(todaysDoneList, context);
+                workoutIsDone = quantityAndRepsList.size() == 0;
+            }
+
             //  Create RecyclerViews
                     //  HistoryRecyclerView
             historyRecyclerView.setHasFixedSize(true);
@@ -600,7 +617,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         class ButtonHandler {
-
             private View.OnClickListener addButtonOnClickListener = v -> {
                 Intent addIntent = new Intent(context, AddMenuActivity.class);
                 startActivityForResult(addIntent, RESULT_FIRST_USER);

@@ -122,8 +122,6 @@ public class ExerciseMenuExercisesRecyclerViewAdapter extends RecyclerView.Adapt
             editImageButton = itemView.findViewById(R.id.exercise_menu_row_exercise_editImageButton);
             muscleIconContainer = itemView.findViewById(R.id.exercise_menu_row_exercise_muscleIconContainer);
 
-            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(exerciseNameTextView, 12, 18, 6, TypedValue.COMPLEX_UNIT_SP);
-
             clickHandler = new ClickHandler();
         }
 

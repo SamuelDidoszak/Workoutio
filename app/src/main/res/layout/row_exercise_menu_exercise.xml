@@ -40,7 +40,7 @@
                     android:maxLines="1"
                     android:text="exercise"
                     android:textColor="@color/white"
-                    android:textSize="16.0sp" />
+                    android:textSize="18.0sp" />
             </HorizontalScrollView>
 
             <LinearLayout

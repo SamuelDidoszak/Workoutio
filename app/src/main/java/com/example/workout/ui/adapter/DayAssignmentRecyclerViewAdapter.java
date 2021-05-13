@@ -221,8 +221,6 @@ public class DayAssignmentRecyclerViewAdapter extends RecyclerView.Adapter<DayAs
             reorderImageButton = itemView.findViewById(R.id.day_assignment_row_reorderImageButton);
             container = itemView.findViewById(R.id.day_assignment_row_container);
 
-            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(exerciseNameTextView, 12, 18, 6, TypedValue.COMPLEX_UNIT_SP);
-
             clickHandler = new ClickHandler();
         }
 

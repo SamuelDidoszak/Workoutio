@@ -152,7 +152,7 @@ public class WorkoutActivity extends AppCompatActivity implements Serializable {
         try {
             FileOutputStream outputStream = new FileOutputStream(new File(context.getFilesDir(), "exercisesToday.txt"));
 
-            if(!chronometerFragment.getChronometer().isBackwards())
+            if(!chronometerFragment.getChronometer().isBackwards() && quantityAndRepsList.size() != 0)
                 quantityAndRepsList.add(workoutRecyclerViewAdapter.getPreviousExerciseIndex(), workoutRecyclerViewAdapter.getPreviousExercise());
 
             for(QuantityAndReps quantityAndReps : quantityAndRepsList) {
@@ -161,7 +161,7 @@ public class WorkoutActivity extends AppCompatActivity implements Serializable {
                 outputStream.write(QARText.getBytes());
             }
             outputStream.close();
-            if(!chronometerFragment.getChronometer().isBackwards())
+            if(!chronometerFragment.getChronometer().isBackwards() && quantityAndRepsList.size() != 0)
                 quantityAndRepsList.remove(workoutRecyclerViewAdapter.getPreviousExerciseIndex());
         } catch (IOException e) {
             e.printStackTrace();

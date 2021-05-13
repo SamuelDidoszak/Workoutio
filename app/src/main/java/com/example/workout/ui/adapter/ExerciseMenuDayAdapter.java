@@ -201,8 +201,6 @@ public class ExerciseMenuDayAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             muscleIconContainer = itemView.findViewById(R.id.exercise_menu_row_exercise_muscleIconContainer);
             editImageButton = itemView.findViewById(R.id.exercise_menu_row_exercise_editImageButton);
             itemLinearLayout = itemView.findViewById(R.id.exercise_menu_row_exercise_itemLinearLayout);
-
-            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(exerciseNameTextView, 12, 18, 6, TypedValue.COMPLEX_UNIT_SP);
         }
 
         public void setItems(DayExercise dayExercise) {
